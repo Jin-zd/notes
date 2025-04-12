@@ -4,19 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "e7a7d52d5daae077",
+        "id": "6314ad3825049f8b",
         "type": "tabs",
         "children": [
           {
-            "id": "69c725ad14667213",
+            "id": "6cc927d5c709e8a9",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "矩阵论/1 矩阵的几何理论/1.1 线性空间上的线性算子和矩阵.md",
+                "file": "25-Mutimodal Stance Detection/work.md",
                 "mode": "source",
                 "source": false
-              }
+              },
+              "icon": "lucide-file",
+              "title": "work"
             }
           }
         ]
@@ -38,8 +40,11 @@
             "state": {
               "type": "file-explorer",
               "state": {
-                "sortOrder": "alphabetical"
-              }
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
             }
           },
           {
@@ -54,7 +59,9 @@
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical"
-              }
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
             }
           },
           {
@@ -62,14 +69,16 @@
             "type": "leaf",
             "state": {
               "type": "bookmarks",
-              "state": {}
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
             }
           }
         ]
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "5f575ad9ad22644b",
@@ -85,7 +94,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "矩阵论/1 矩阵的几何理论/1.1 线性空间上的线性算子和矩阵.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -93,7 +101,9 @@
                 "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-coming-in",
+              "title": "反向链接"
             }
           },
           {
@@ -102,10 +112,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "矩阵论/1 矩阵的几何理论/1.1 线性空间上的线性算子和矩阵.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-going-out",
+              "title": "出链"
             }
           },
           {
@@ -116,7 +127,9 @@
               "state": {
                 "sortOrder": "frequency",
                 "useHierarchy": true
-              }
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
             }
           },
           {
@@ -128,7 +141,9 @@
                 "sortOrder": "frequency",
                 "showSearch": false,
                 "searchQuery": ""
-              }
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
             }
           },
           {
@@ -137,8 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "矩阵论/1 矩阵的几何理论/1.1 线性空间上的线性算子和矩阵.md"
-              }
+                "file": "25-Mutimodal Stance Detection/work.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "work 的大纲"
             }
           }
         ],
@@ -146,7 +166,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 340.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -159,44 +180,53 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "3e0024d86134c7ad",
+  "active": "6cc927d5c709e8a9",
   "lastOpenFiles": [
-    "矩阵论/1 矩阵的几何理论/未命名.md",
+    "RL/强化学习的数学原理.md",
+    "25-Mutimodal Stance Detection/work.md",
     "矩阵论/1 矩阵的几何理论/1.1 线性空间上的线性算子和矩阵.md",
-    "数学建模/线性规划和整数规划模型.md",
-    "数学建模/线性代数模型.md",
-    "数学建模/插值与拟合.md",
-    "数学建模/偏微分方程.md",
-    "矩阵论/1 矩阵的几何理论/1.2 内积空间上的等积变换.md",
-    "可综合的 System Verilog.md",
-    "第二次作业.md",
-    "马克思主义基本原理.md",
-    "数学建模/博弈论.md",
-    "矩阵论/7 特殊矩阵与特殊积",
-    "矩阵论/6 广义逆矩阵及其应用",
-    "矩阵论/5 矩阵微积分及其应用",
-    "矩阵论/4 赋范线性空间与矩阵范数",
-    "矩阵论/3 矩阵的分解",
-    "矩阵论/2 λ 矩阵和 Jordan 标准型",
-    "数学建模/非线性规划和整数规划模型.md",
-    "矩阵论/1 矩阵的几何理论",
+    "RL",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250407104614.png",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250407104705.png",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172843.png",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172830.png",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172747.png",
+    "Test.md",
+    "25-Mutimodal Stance Detection/pictures/cc495bd511d20517ceebd6ad641b84a.png",
+    "xv6/xv6-2020.md",
+    "25-Mutimodal Stance Detection/test.md",
+    "25-Mutimodal Stance Detection/多模态虚假信息检测论文综述 2024-11.md",
+    "25-Mutimodal Stance Detection/多模态立场检测论文综述 2024-11.md",
+    "hw2/hw2.md",
+    "hw2/hw2.pdf",
+    "hw2/1.png",
+    "hw2",
+    "1 总述.md",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172732.png",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172702.png",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172645.png",
+    "草稿.md",
+    "25-Mutimodal Stance Detection/pictures",
+    "work/未命名.md",
+    "Vue.zip",
+    "work/1.md",
+    "work/Multimodal union.md",
+    "lab/lab4-5.md",
+    "lab/lab6.md",
+    "lab",
+    "xv6/pictures",
+    "xv6/Pasted.md",
+    "xv6",
+    "2020-Compiler-Shenzhen.md",
+    "lab1-3/lab1/print_integer.S",
+    "lab1-3/lab1/gemm_kernel.S",
+    "lab1-3/实验报告.md",
     "template/template.md",
-    "矩阵论/未命名 1.md",
-    "矩阵论/未命名.md",
-    "template",
-    "矩阵论",
-    "阶段性计划.md",
-    "作业二.md",
-    "[【翻译】可综合SystemVerilog教程(1).md",
-    "Linux/4 用户身份与文件权限.md",
-    "git/git基础.md",
-    "git/阶段性计划.md",
-    "process.md",
-    "Pasted image 20240328211524.png",
-    "计划.md",
-    "Linux/2 Vim 编辑器与 Shell 命令脚本.md",
-    "Linux/5 存储结构与管理硬盘.md",
-    "work/面向对象的软件构造导论 作业一.md",
-    "work"
+    "Linux/8 使用 ssh 服务管理远程主机.md",
+    "tmp/马克思主义基本原理.md",
+    "Vue/vue源码.md",
+    "Vue/Vue.md",
+    "Vue/vue3.md",
+    "modeling/博弈论.md"
   ]
 }
