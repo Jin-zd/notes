@@ -367,3 +367,355 @@ DO NOT include any explanation, words, punctuation, or other characters.
 目的：
 1. 看一下经验池是否真的能够总结出什么时候该用模态信息，并且有用。
 2. 实验上可以考虑研究一下在Reflect的过程中CoT的方法是否有效，就比如我只用a或b作为reflect
+
+
+训练过程：
+对于某一个数据，首先获得三个智能体的答案，一个仅传入文本和文本知识，一个仅传入分割后的图像和图像知识，一个将所有信息输入，提示示例如下：
+```
+Classification task: Determine the stance towards "{data['target']}" based on the following information.
+
+Tweet text: "{data['text_information']}"
+Text knowledge: "{data['text_summary']}"
+Image information: [The image is provided separately for your analysis]
+Image knowledge: "{data['visual_summary']}"
+
+Your task is to classify the stance as one of the following:
+{stance_map}
+
+Analysis instructions:
+1. Carefully examine all the provided information.
+2. Identify any explicit or implicit stance towards the target
+3. Select the most appropriate stance classification number
+
+IMPORTANT: Respond ONLY with the single number corresponding to your classification.
+DO NOT include any explanation, words, punctuation, or other characters.
+```
+获得三个智能体的答案后，将由 Evaluator 进行反思，第一步反思结合已有的信息和三个智能体的答案，第一步的反思提示：
+```
+Analysis Task: Evaluate the performance of different modalities in stance detection.
+
+Target: "{data['target']}"
+Tweet text: "{data['text_information']}"
+Text knowledge: "{data['text_summary']}"
+Image information: [The image is provided separately for your analysis]
+Image knowledge: "{data['visual_summary']}"
+
+Correct stance label: {data['label']} ({idx2stance[data['label']]})
+
+Classification results:
+- Text-only modality: {results[0]}, {results[0] == data['label']};
+- Image-only modality: {results[1]}, {results[1] == data['label']};
+- Multi-modal fusion: {results[2]}, {results[2] == data['label']}.
+
+Please analyze the following:
+1. Which specific information in the text or image was most indicative of the correct stance?
+2. What information did I miss or misinterpret that led to incorrect predictions?
+3. How did the information from different modalities complement or contradict each other?
+
+Provide a detailed analysis focusing on the information content and interpretation, not on model architecture.
+```
+随后，结合第一步反思的输出，Evaluator 进行第二步的反思，反思提示：
+```
+Improvement Task: Based on the previous analysis, provide concise recommendations for better utilization of multi-modal information.
+
+Previous analysis:
+{step_one_response}
+
+As an AI system analyzing this case, provide concise reflections on:
+1. How should I better weigh and interpret text vs. image information when they provide different signals?
+2. What specific clues or patterns should I pay more attention to when determining stance?
+3. What reasoning approaches would help me avoid the mistakes made in this case?
+
+IMPORTANT: Focus only on how you as an AI can better interpret and reason with the given information. Do NOT suggest system redesigns, algorithm changes, or data collection strategies. Be extremely concise with 3-5 short bullet points total.
+```
+第二步反思的输出作为 Evaluator 的最终反思输出。
+Evaluator 反思结果会被加入经验池中，对一个被加入经验池的反思，首先会使用 text-embedding-3-small 进行嵌入，然后会在经验池中检索与该经验最相似的经验，如果余弦相似度小于 0.8，直接将该经验的嵌入存入，否则，将新的经验与旧的经验进行融合，将融合后的经验存入经验池。这里的向量嵌入目前使用 Faiss 存储。融合提示：
+```
+Please merge the following two similar experience descriptions into a unified, comprehensive description.
+Please retain all important information, eliminate redundant content, and ensure the merged description is fluent, natural, and complete.
+If there is any image-related information, please integrate it as well.
+
+New experience:
+{experience}
+
+Existing similar experience:
+{similar_experience}
+
+Please output a merged experience description that is more comprehensive and useful than either individual experience alone.
+```
+至此，一个数据的训练过程完成。
+
+评估过程：
+对于一个评估数据，将文本、文本知识、图像知识拼接，获取嵌入后查询经验池，获得最相似的 top_k（设置 3） 个经验，随后结合信息构建提示：
+```
+Classification task: Determine the stance towards "{data['target']}" based on the following information.
+
+Tweet text: "{data['text_information']}"
+Text knowledge: "{data['text_summary']}"
+Image information: [The image is provided separately for your analysis]
+Image knowledge: "{data['visual_summary']}"
+
+Previous experiences:
+{experiences_text}
+
+Your task is to classify the stance as one of the following:
+{stance_map}
+
+Analysis instructions:
+1. Carefully examine all the provided information.
+2. Consider the previous experiences as reference.
+3. Identify any explicit or implicit stance towards the target
+4. Select the most appropriate stance classification number
+
+IMPORTANT: Respond ONLY with the single number corresponding to your classification.
+DO NOT include any explanation, words, punctuation, or other characters.
+```
+Evaluator 根据该提示给出答案。
+
+
+
+Experience示例1:
+```
+Comprehensive Guide for Better Utilization of Multi-Modal Information
+
+When dealing with multi-modal information, such as text and images, it is crucial to adopt a systematic approach to ensure accurate and reliable evaluations. Here’s a comprehensive guide to help you navigate through the complexities of combining text and image data:
+
+#### Weighting Text vs. Image Information
+- **Prioritize Text**: Generally, text is more reliable and direct compared to images, especially when it comes to stance detection. Text offers explicit statements and avoids potential visual misinterpretations. For instance, if the text explicitly mentions "Chloroquine," be cautious of images showing "Hydroxychloroquine" and ensure they align with the text's content.
+- **Consider Image for Supplementary Context**: While text should be prioritized, images can provide supplementary context and supporting details, particularly when they offer relevant background information. However, be wary of images that contradict the text, as they may introduce misleading information. Use image analysis to complement text when it enhances understanding, but avoid over-reliance on images if they are irrelevant. Develop algorithms that filter out information that is contextually irrelevant. This can involve using domain-specific knowledge to identify topics and ensure that only relevant modalities contribute to the stance prediction.
+
+#### Clues and Patterns for Stance Determination
+- **Explicit Statements**: Focus on clear, unambiguous language in the text. Look for explicit mentions of ongoing research, clinical trials, or neutral statements that neither confirm nor deny the efficacy of the subject. Avoid assumptions based on visual elements unless they are directly supported by the text.
+- **Complementary Information**: When text and image headlines contradict each other, prioritize the text content, as it typically offers more detailed and verifiable information. Cross-reference key phrases and facts from both sources to ensure consistency and avoid misinterpretations.
+- **Tone and Language**: Analyze the overall tone and language used in the text to infer the stance. Look for expert opinions and official approvals (e.g., FDA, WHO) as they carry significant weight. Pay attention to numerical data or statistics mentioned in the text that support the claim.
+- **Contextual Understanding**: Consider the broader context in which the text and images are presented. Understand the purpose and intent behind the content to better interpret the information.
+- **Expert Opinions**: Pay attention to expert opinions and endorsements from reputable organizations. These can provide valuable insights and lend credibility to the information.
+- **Visual Cues**: Analyze body language and attire in images for potential indicators of stance, but cross-reference these with textual evidence to avoid misinterpretations.
+- **Temporal Considerations**: Be mindful of the time frame in which the text and images were created. Newer information may supersede older claims, so ensure you are using the most current data.
+
+
+#### Reasoning Approaches to Avoid Mistakes
+- **Cross-Reference for Consistency**: Ensure all claims in the text are supported by evidence or context. Cross-reference information from both text and image to avoid over-reliance on one modality. Maintain a critical stance by questioning assumptions and seeking additional evidence where necessary.
+- **Logical Reasoning**: Use logical reasoning to reconcile conflicting signals by considering the source credibility and the broader context. Apply critical thinking to question implicit stances and seek explicit confirmations. Cross-reference textual claims with visual data to ensure consistency. Seek additional scientific evidence or references to validate causal relationships mentioned in the text.
+- **Balanced Analysis**: Ensure a balanced analysis by considering multiple perspectives and sources before concluding a stance. Be cautious of making assumptions about causality based solely on visual data; always look for supporting textual evidence.
+- **Specific Evidence and References**: Focus on specific evidence and references provided in the text to substantiate claims. Look for direct statements or explicit comparisons that clearly indicate a stance.
+
+#### Cross-Referencing and Consistency
+- **Consistent Analysis**: Cross-reference information across modalities to ensure consistency. Avoid drawing conclusions solely from one modality without sufficient supporting evidence from the other.
+- **Critical Stance**: Maintain a critical stance by questioning assumptions and seeking additional evidence where necessary. Apply logical reasoning to reconcile conflicting signals and ensure a balanced analysis.
+
+#### Hierarchical Reasoning Approach
+- **Begin with Text Analysis**: Start by analyzing the text for explicit stance indicators. Look for clear, unambiguous language and direct statements that provide explicit information.
+- **Consider Image for Supplementary Context**: Once the text has been analyzed, use image analysis to complement the text when it enhances understanding. Focus on indirect or contextual clues that might relate to the stance on the drugs, even if not explicitly stated.
+- **Cross-Reference for Consistency**: Finally, cross-reference the findings from the text and image analysis to ensure consistency and avoid over-reliance on one modality. Use a multi-step reasoning process where initial predictions from each modality are cross-verified, incorporating domain knowledge to better interpret ambiguous signals. Implement a confidence score system to prioritize more reliable sources of information.
+```
+
+
+Experience示例2:
+```
+Comprehensive Recommendations for Better Utilization of Multi-Modal Information:
+1. **Weighting Text Over Image When Explicit Positive Language Exists**:
+   - Prioritize text content if it contains explicit positive language, as it often carries stronger influence over stance determination. For example, if the text states that a policy has "impressive results," the image should not contradict this claim.
+
+2. **Attention to Clues in Text for Stance Determination**:
+   - Focus on keywords like "beneficial," "positive results," and "impressive" in text to quickly identify a favorable stance. For example, if the text mentions "beneficial outcomes," the image should show positive reactions or results.
+
+3. **Contextual Interpretation of Visual Data**:
+   - Ensure visual data includes clear conclusions or statements that directly support or oppose the stance being analyzed. Lack of such clarity may lead to misinterpretations. For example, if the text discusses a negative impact, the image should not show positive outcomes.
+
+4. **Weighting Text and Image Information**:
+   - Prioritize text information as it often contains explicit statements that directly influence stance determination. Use images primarily for contextual verification or to identify potential contradictions, ensuring they provide relevant textual or visual cues. Avoid over-reliance on visual cues alone; prioritize text for detailed explanations and context. For example, if the text mentions a controversial issue, the image should not show a neutral or ambiguous scene.
+
+5. **Identifying Relevance**:
+   - Focus on identifying and interpreting only relevant information from each modality. Irrelevant or unrelated content in images should be disregarded to avoid misleading multi-modal fusion. Use metadata or context clues to distinguish between relevant and irrelevant information. For example, if the text discusses a specific event, the image should show related events or symbols.
+
+6. **Contextualizing Image Content**:
+   - If the image contains unrelated content, ensure it is clearly labeled as such and does not influence the interpretation of the text. Use metadata or context clues to distinguish between relevant and irrelevant information. For example, if the text discusses a specific policy, the image should not show unrelated scenes.
+
+7. **Clues and Patterns to Pay Attention To**:
+   - Look for explicit mentions of stance-related terms (e.g., "favor," "support"). Analyze visual cues like handshakes or gestures that may symbolize cooperation or support. Consider the overall context and tone of the content.
+
+```
+经验示例1主要内容：
+文本与图像信息的权重：一般情况下优先考虑文本，因其更可靠直接，尤其在立场检测方面。但图像可提供补充背景信息，需警惕与文本矛盾的图像，避免过度依赖无关图像，开发算法过滤无关信息。
+立场确定的线索和模式：关注文本中的明确表述，优先文本内容当文本和图像标题矛盾时，分析文本的语气、语言、上下文，关注专家意见和视觉线索，同时考虑时间因素。
+避免错误的推理方法：交叉参考文本和图像以确保一致性，避免过度依赖单一模态，采用多步推理过程，对每个模态的初步预测进行交叉验证，使用置信度评分系统优先考虑更可靠的信息源。
+
+
+经验示例2主要内容：
+信息权重与利用方式：当文本存在明确积极语言时，优先以文本内容主导立场判断，因其对立场确定影响力更强。图像主要用于语境验证，避免过度依赖视觉线索，应以文本获取详细解释与语境。
+相关性判断：从文本和图像模态中精准识别相关信息，摒弃不相关内容，防止误导。利用元数据或语境线索区分，若图像有不相关内容，需明确标注，避免干扰文本解读。
+线索挖掘：关注文本中如 “有益”“支持” 等立场相关的关键词，同时留意图像里像握手等象征合作支持的视觉线索，结合整体语境与语气进行分析。
+
+
+类似经验示例1的经验，存在“开发对应的算法”、“置信度评分”、“寻求专家意见”等不和场景的应对方式；类似经验二的经验，相对较好的捕捉了判断时应该注意的问题。
+目前的普遍存在的问题是经验大多过长，相似表述的经验多一些，可能整体的表述不一样，但是每个表述中的几个小点是一个意思。
+
+
+
+训练过程示例1：
+文本内容：
+```
+Sometimes you see what's perfectly unspoiled..... StayHome lockdowneffect Hydroxychloroquine COVID19  Stay At Home Save Lives
+```
+文本知识：
+```
+stayhome: Social distancing, also known as physical distancing, involves maintaining a physical distance from others and avoiding large gatherings to reduce the spread of contagious diseases like COVID-19. It includes measures like school and workplace closures, isolation, and restrictions on movement to suppress disease transmission and avoid overburdening healthcare systems.
+
+hydroxychloroquine: Hydroxychloroquine, sold as Plaquenil, is used to prevent and treat malaria and manage conditions like rheumatoid arthritis and lupus. Common side effects include vomiting and blurred vision, while severe risks include allergic reactions and irregular heart rate. It has been studied for COVID-19 but found ineffective and potentially harmful.
+
+covid19: Coronavirus disease 2019 (COVID-19) is caused by SARS-CoV-2 and has led to a global pandemic. Symptoms include fever, fatigue, cough, and breathing difficulties, with some people experiencing long-term effects. Transmission occurs through respiratory droplets and contact with contaminated surfaces. Vaccines and supportive care are key preventive and treatment measures.
+```
+图像知识：
+```
+golden poppies: Eschscholzia californica, a native North American plant, blooms in vibrant colors and is used as an ornamental and culinary plant, officially adopted as California's state flower in 1903.
+
+nmisty mountain sky: Nüwa, a Chinese mythological figure, created humanity and repaired the heavens, symbolizing creation and restoration in Chinese culture.
+
+nserene beauty: Daniel DeVito, an American actor and filmmaker, is known for his roles in classic films like \"Taxi\" and \"It's Always Sunny in Philadelphia,\" and has produced notable works such as \"Pulp Fiction.\"
+```
+目标：
+```
+The stance on the use of \"Chloroquine\" and \"Hydroxychloroquine\" for the treatment or prevention from the coronavirus is:
+```
+正确答案：2（Neutral）
+三个模态答案（文本、图像、多模态）：1（Against）、2（Neutral）、1（Against）
+反思：
+```
+### Concise Recommendations for Better Utilization of Multi-Modal Information. 
+**Weighting Text vs. Image Information**:
+- Prioritize text content over images unless the image provides critical context or contradicts the text.
+- Use image analysis to complement text when it enhances understanding, but avoid over-reliance on images if they are irrelevant.
+
+**Clues and Patterns for Stance Determination**:
+- Focus on explicit statements about the topic (e.g., \"hydroxychloroquine,\" \"COVID-19\").
+- Look for contextual clues that support or contradict the stance (e.g., \"StayHome,\" \"StayAtHomeSaveLives\").
+- Consider the overall tone and intent of the message.
+
+**Reasoning Approaches to Avoid Mistakes**: 
+- Ensure that both modalities are analyzed before making a stance decision.\n   - Apply a hierarchical approach where text takes precedence unless the image provides essential context.
+- Avoid labeling stances based solely on irrelevant or ambiguous information.
+```
+这里的反思主要强调了优先利用文本，要将文本和图像结合起来。存在未针对该样本进行总结的问题。
+
+训练过程示例2：
+文本：
+```
+Trump on his assertion of the drug Hydroxychloroquine as being the answer to treat patients with COVID19 backpedaling NotADoctor Trump NotTested liability
+```
+文本知识：
+```
+Hydroxychloroquine: Used to prevent and treat malaria and manage conditions like rheumatoid arthritis, lupus, and porphyria cutanea tarda; effective but associated with potential side effects and risks, including retinopathy and irregular heart rate.
+
+COVID-19: A highly contagious disease caused by SARS-CoV-2, characterized by symptoms ranging from mild to severe, with older individuals at higher risk. Transmission occurs via respiratory droplets and close contact, and prevention includes vaccines, social distancing, and hygiene practices.
+
+Trumpet: A brass instrument commonly used in classical and jazz ensembles, produced by vibrating lips in a mouthpiece, with variations in pitch and construction, including the cornet, which differs in bore shape and valve design.
+```
+图像知识：
+```
+Basketball court: A rectangular playing surface with polished wood floors indoors, typically maple, and 10-foot-high rims on each basket; outdoor courts are made from paving materials like concrete or asphalt.
+```
+答案：1（Against）
+三个模态答案（文本、图像、多模态）：1（Against）、2（Neutral）、1（Against）
+反思：
+```
+### Concise Recommendations for Better Utilization of Multi-Modal Information\. **Weighting Text vs. Image Information**:
+- Prioritize text information over image when it provides clear, relevant signals.
+- Implement a confidence threshold for image relevance; if the image is highly irrelevant, consider disregarding it entirely.
+
+**Clues for Determining Stance**:
+- Focus on key phrases and sentiments expressed in the text.
+- Look for explicit statements or contradictions that align with the stance labels.
+
+**Avoiding Mistakes**:
+- Ensure robust text analysis to capture nuanced stances.
+- Use image relevance filters to prevent misclassification due to irrelevant visuals.
+```
+这个反思仍然也强调了优先考虑文本，同时提到了使用“图像相关性过滤器”这个奇怪的建议。
+
+整个训练数据中有超过100条反思提到了“Prioritize text information over image”。
+
+
+
+根据训练结果，目前存在的问题：
+- 融合后的经验文本长度过长，重复度高了一些（应该是源于融合前的反思相似度就比较高）
+- 生成的反思不够贴近于当前训练的数据，比较空泛，应该是因为在第二步反思时并未传入这个数据的信息，模型第二部反思完全依赖于第一步反思的结果，对样本的针对性降低了。
+- 生成的反思有时候会包含一些无法在对话中做到的方法（设计算法之类的），这里应该可以在提示中指定模型的角色来解决。
+- wiki 搜索结果有错误，某些情况下有词条搜索不到。这里应该是某些情况下网络异常导致搜索返回空字符串，需要添加 wiki 搜索重试机制，重新生成文本和图像知识。
+
+
+测试结果：MCCQ in-target 400 条数据，F1 为 34.62。论文中 900 条数据 Qwen-VL 的 F1 为 50.51。
+测试样本示例1：
+文本：
+```
+Chloroquine vs. Hydroxychloroquine!   Prof. Pauline Byakika Kibwika shares the myths behind the two drugs with regards COVID-19 treatment.  Prof. Byakika is an Associate Professor of Medicine at MakerereU College of Health Sciences
+```
+文本知识：
+```
+Chloroquine: An antiparasitic medication primarily used to treat malaria by increasing haemoglobin levels toxic to the parasite. It's also used for amebiasis, rheumatoid arthritis, and lupus, though its use for COVID-19 is controversial and not recommended by the NIH.
+
+COVID-19: A contagious disease caused by the SARS-CoV-2 coronavirus, characterized by fever, fatigue, cough, and breathing difficulties. Symptoms can range from mild to severe, with older individuals at higher risk. Transmission occurs via respiratory droplets and close contact, and vaccines are available for prevention.
+
+Hydroxychloroquine: An antimalarial medication used to treat malaria and autoimmune diseases like rheumatoid arthritis and lupus. Common side effects include vomiting and blurred vision; severe risks include retinopathy and irregular heart rate. Its use for COVID-19 is controversial due to potential side effects.
+
+Makerere University College of Health Sciences**: A constituent college of Makerere University in Uganda, offering undergraduate and postgraduate courses in biomedical sciences, health sciences, human medicine, and public health.
+
+Prof. Pauline Byakika Kibwika: A Ugandan specialist physician, internist, epidemiologist, academic, and researcher. She was appointed as the vice chancellor of Mbarara University of Science and Technology in August 2024, succeeding as vice president of the Uganda Medical Association from 2017 to 2019.
+```
+图像知识：
+```
+Expert: Expect is a Tcl extension for automating interactions with text-terminal programs, originally developed in 1990 for Unix and now available on multiple platforms.
+
+Covid-19: Coronavirus disease 2019 (COVID-19) is a contagious illness caused by SARS-CoV-2, with symptoms ranging from mild to severe, and transmission primarily through respiratory droplets and contact with contaminated surfaces.
+
+Chloroquine: Chloroquine is an antimalarial drug that increases haeme levels in the blood, killing parasites and treating malaria, amebiasis, rheumatoid arthritis, and lupus. It has potential side effects and is not recommended for COVID-19 treatment.
+```
+预测：0（Favor），正确：2（Neutral）
+
+搜索的经验：
+经验一总结：
+信息权衡：文本优先，因其含核心信息；图像补充，不矛盾，不过度依赖。
+确定立场：关注文本明确陈述、图像视觉元素和上下文，留意情感线索。
+推理方法：做上下文整合和一致性检查，区分显隐线索。
+避免错误：分析上下文，识别语气，核查事实。
+额外建议：选可信来源，抓上下文线索，结合多模态证据。
+信息整合：图像与文本结合，图像不与文本立场矛盾。
+立场确定：文本为立场检测重点，图像补充；关注短语关键词和间接指标。
+避免错误推理：结合多模态数据，用领域知识解读模糊信号，确保立场一致。
+
+经验二总结：
+信息权衡：优先用文本做立场检测，因其更可靠直接；图像可作补充背景，但要防与文本矛盾及过滤无关信息。
+立场线索：关注文本明确表述，结合互补信息，分析语气、上下文、专家意见和视觉线索，留意时间因素。
+推理方法：交叉参考信息保一致，逻辑推理调冲突，平衡分析多视角，依文本具体证据下结论。
+一致性：多模态交叉参考，保持批判，找额外证据。
+推理步骤：先文本找立场指标，再图像补背景，最后交叉参考，用多步推理和置信度评分系统。
+
+经验三总结：
+信息权重：文本信息优先于模糊图像，含明确立场的文本权重更高，依据临床试验结果中立且图像无新信息的情况，优先采信文本证据，独立验证外部因素可信度。
+确定立场线索：找明确观点表述，分析文本上下文，关注语言情感指标和图像线索，警惕误读，留意矛盾，区分主次信息。
+推理防错方法：保证图文立场一致或有上下文，逻辑推理连接模态，多模态融合重实证，评估外部因素，先分析文本情感再用图像验证，结合领域知识，逻辑检查，用概率模型处理矛盾，开发辨真伪算法，分析上下文解矛盾，关注核心信息，交叉验证，分析图像相关性，交叉参考信息，避免误读图像。
+
+三个经验有很多相似的地方，感觉模型在最后判断的时候没能很好利用这些信息。
+其他一些样本也是类似的经验（原本经验池里的经验同质化就比较严重）。
+
+问题：
+- 经验大多是泛泛而谈，不够有针对性
+- 相似度匹配的问题，目前使用文本拼接进行经验搜索
+
+
+
+# 2025-04-15
+![[Pasted image 20250416105003.png]]
+1. 优化目前的提示设计
+	- 三个智能体不仅要返回结果，还需要返回给出这个结果的原因
+	- 第一步反思需要从三个模态的角度得到结果，即分析为什么xxx模态能够判断正确（错误）
+	- 第二步的反思提示中需要加入原始信息，而不仅仅是利用第一步反思得到的结果
+2. 模块重构
+	- 经验池以经验为值，（文本、文本知识、图像、图像知识）为键。
+	- 在三个智能体进行推理之前进行经验池检索，分为文本相似度和图像相似度进行检索，两者取平均获得最终相似度，选取大于阈值的 top_k 个相似经验作为上下文辅助智能体推理；若无大于相似度阈值的经验，直接进行推理。
+	- 经验池的更新中，智能体反思后可以获得一个经验，使用该经验去更新之前检索获得的 top_k 个经验（即进行融合）；如果之前没有获得相似经验，就直接将该经验存入经验池。
+
+仅优化提示设计后的 400 条 MCCQ in-target 测试的 F1 为 28，相较于未更改提示下降了 6 个点左右。
+原因可能在于：
+更改提示设计之前，辅助推理的经验很长，模型可能更本没从中提取什么信息；
+更改提示之后，辅助推理的经验更有针对性、更加简明扼要，模型采用文本信息和经验文本之间的相似度进行搜索获得的经验并不能匹配当前任务（之前不管怎么搜索获得的经验都很长，经验匹不匹配根本没什么意义），导致模型根据经验误判（有时候几条经验中还有冲突的部分）。

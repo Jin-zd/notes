@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "6314ad3825049f8b",
+        "id": "a6cc8ffbff67924d",
         "type": "tabs",
         "children": [
           {
-            "id": "6cc927d5c709e8a9",
+            "id": "99333e9d2fa9282b",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -152,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "25-Mutimodal Stance Detection/work.md",
+                "file": "Linux/11 使用 Samba 或 NFS 实现文件共享.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "work 的大纲"
+              "title": "11 使用 Samba 或 NFS 实现文件共享 的大纲"
             }
           }
         ],
@@ -180,10 +180,21 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "6cc927d5c709e8a9",
+  "active": "3e0024d86134c7ad",
   "lastOpenFiles": [
-    "RL/强化学习的数学原理.md",
+    "Linux/5 存储结构与管理硬盘.md",
+    "Linux/6 使用 RAID 与 LVM 磁盘阵列技术.md",
+    "lab/lab6.md",
+    "lab/lab4-5.md",
+    "HTML&CSS/1 HTML基本语法.md",
+    "HTML&CSS/7 Less简介.md",
+    "HTML&CSS/6 字体和背景.md",
+    "HTML&CSS/9 弹性盒.md",
+    "HTML&CSS/3 盒子模型.md",
+    "git/git基础.md",
     "25-Mutimodal Stance Detection/work.md",
+    "RL/强化学习的数学原理.md",
+    "25-Mutimodal Stance Detection/pictures/Pasted image 20250416105003.png",
     "矩阵论/1 矩阵的几何理论/1.1 线性空间上的线性算子和矩阵.md",
     "RL",
     "25-Mutimodal Stance Detection/pictures/Pasted image 20250407104614.png",
@@ -204,29 +215,18 @@
     "1 总述.md",
     "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172732.png",
     "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172702.png",
-    "25-Mutimodal Stance Detection/pictures/Pasted image 20250317172645.png",
     "草稿.md",
     "25-Mutimodal Stance Detection/pictures",
     "work/未命名.md",
     "Vue.zip",
     "work/1.md",
     "work/Multimodal union.md",
-    "lab/lab4-5.md",
-    "lab/lab6.md",
     "lab",
     "xv6/pictures",
     "xv6/Pasted.md",
     "xv6",
     "2020-Compiler-Shenzhen.md",
     "lab1-3/lab1/print_integer.S",
-    "lab1-3/lab1/gemm_kernel.S",
-    "lab1-3/实验报告.md",
-    "template/template.md",
-    "Linux/8 使用 ssh 服务管理远程主机.md",
-    "tmp/马克思主义基本原理.md",
-    "Vue/vue源码.md",
-    "Vue/Vue.md",
-    "Vue/vue3.md",
-    "modeling/博弈论.md"
+    "lab1-3/lab1/gemm_kernel.S"
   ]
 }
