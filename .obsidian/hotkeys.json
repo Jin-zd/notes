@@ -33,14 +33,6 @@
       "key": "P"
     }
   ],
-  "insert-template": [
-    {
-      "modifiers": [
-        "Mod"
-      ],
-      "key": "A"
-    }
-  ],
   "editor:toggle-inline-math": [
     {
       "modifiers": [
@@ -57,6 +49,14 @@
         "Shift"
       ],
       "key": "A"
+    }
+  ],
+  "insert-template": [
+    {
+      "modifiers": [
+        "Mod"
+      ],
+      "key": "Q"
     }
   ]
 }
