@@ -737,7 +737,27 @@ Chloroquine: Chloroquine is an antimalarial drug that increases haeme levels in 
 |            |  RUS  |  UKR  |  MOC  |  TOC  |  CQ   |
 |    TMPT    | 43.56 | 59.24 | 55.68 | 46.82 | 67.67 |
 |  Original  | 36.92 | 45.93 | 55.60 | 36.61 | 53.87 |
-|   LLaVA    | 36.73 | 44.89 |       |       | 54.27 |
-| 中性的Summary |       |       |       |       |       |
-| 修改测试方式（2a） | 32.71 | 47.69 |       |       | 56.41 |
-|   微调小模型    |       |       |       |       |       |
+|   LLaVA    | 36.73 | 44.89 | 49.03 | 38.64 | 54.27 |
+| 中性的Summary | 34.78 | 45.02 | 55.52 | 38.11 | 52.19 |
+| 修改测试方式（2a） | 32.71 | 47.69 | 52.60 | 32.71 | 56.41 |
+|   微调小模型    | 38.85 | 52.58 | 55.70 | 47.02 | 62.71 |
+
+# 2025-04-28
+1. 在paper的基础上，text 中加入回复的经验进行微调
+2. TMPT+COT/ TMPT+EX
+
+完成Qwen-VL 微调+Ex 的微调，在2个数据集，分别是zero-shot和in-target两种设置上。
+
+Qwen-VL+Ex: mccq in_target 51.21
+Qwen-VL: mccq in_target 55.63
+
+
+# 2025-05-03
+1. 纯文本微调
+2. 图像caption+文本 微调
+3. visual caption、visual summary、text information、text summary、联合experience pool得到的文本经验
+
+|                | MRUC  |       | MTWQ  |       | MCCQ  |
+| -------------- | ----- | ----- | ----- | ----- | ----- |
+| Qwen Only Text | 40.31 | 48.82 | 48.82 | 40.30 | 68.57 |
+| Qwen All       | 39.54 | 52.31 | 55.76 | 40.99 | 60.13 |

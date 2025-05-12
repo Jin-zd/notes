@@ -9,8 +9,7 @@
 -   $r(\boldsymbol{s}_t,\boldsymbol{a}_t)$：**reward function**，用于衡量一个状态与动作的好坏，这里我们使用了同时依赖于状态与动作的奖励函数，也可以定义仅依赖于状态的奖励函数 $r(\boldsymbol{s}_t)$  
 
 这些量之间可以利用以下概率图来表示 (在部分可观测的情况下)：
-
-![](https://pica.zhimg.com/v2-0b5485a6cd89ba4942ca9fc78172f104_1440w.jpg)
+![](1-0.png)
 
 另外需要注意的是以下两点：
 - 状态之间满足马尔可夫性质，而观测之间并不满足马尔可夫性质。观测并不能完全描述状态。
@@ -21,31 +20,31 @@
 
 **Definition 1**. _Markov Chain（马尔可夫链）_
 - $\mathcal{M} = \{\mathcal{S},\mathcal{T}\}$
-- $\mathcal{S}$： 状态空间  
-- $\mathcal{T}$： 转移算子，之所以考虑称为算子是因为令 $\mu_{t,i} = p(s_t = i)$，$\mathcal{T}_{i,j} = p(s_{t + 1} = i \mid s_t = j)$，考虑 $\boldsymbol{\mu}_t$ 是概率向量，则我们可以得到 $\boldsymbol{\mu}_{t + 1} = \mathcal{T} \boldsymbol{\mu}_t$
-![](https://pic1.zhimg.com/v2-dd44324ca579e3ff0e49b418c1e85de8_1440w.jpg)
+- $\mathcal{S}$：状态空间  
+- $\mathcal{T}$：转移算子，之所以考虑称为算子是因为令 $\mu_{t,i} = p(s_t = i)$，$\mathcal{T}_{i,j} = p(s_{t + 1} = i \mid s_t = j)$，考虑 $\boldsymbol{\mu}_t$ 是概率向量，则我们可以得到 $\boldsymbol{\mu}_{t + 1} = \mathcal{T} \boldsymbol{\mu}_t$
+![](2-1.png)
 **Definition 2**. _Markov Decision Process（马尔可夫决策过程）_
 - $\mathcal{M} = \{\mathcal{S},\mathcal{A},\mathcal{T},r\}$  
-- $\mathcal{S}$： 状态空间
-- $\mathcal{A}$： 动作空间  
-- $\mathcal{T}$： 转移算子 (一个三维的张量)，如果记 $\mu_{t,j} = p(s_t = j)$，$\xi_{t,k} = p(a_t = k)$，$\mathcal{T}_{i,j,k} = p(s_{t + 1} = i \mid s_t = j，a_t = k)$，于是就可以写作 $\mu_{t + 1，i} = \sum_{j,k} \mathcal{T}_{i,j,k} \mu_{t，j} \xi_{t，k}$
-- $r$： 奖励函数 $r： \mathcal{S} \times \mathcal{A} \to \mathbb{R}$
-![](https://pic3.zhimg.com/v2-752bfcd6c55bee635b32326ee298c9ae_1440w.jpg)
+- $\mathcal{S}$：状态空间
+- $\mathcal{A}$：动作空间  
+- $\mathcal{T}$：转移算子 (一个三维的张量)，如果记 $\mu_{t,j} = p(s_t = j)$，$\xi_{t,k} = p(a_t = k)$，$\mathcal{T}_{i,j,k} = p(s_{t + 1} = i \mid s_t = j，a_t = k)$，于是就可以写作 $\mu_{t + 1，i} = \sum_{j,k} \mathcal{T}_{i,j,k} \mu_{t，j} \xi_{t，k}$
+- $r$：奖励函数 $r： \mathcal{S} \times \mathcal{A} \to \mathbb{R}$
+![](2-2.png)
 **Definition 3**. _Partially Observed MDP（部分可观测的马尔可夫决策过程）_
 - $\mathcal{M} = \{\mathcal{S},\mathcal{A},\mathcal{O},\mathcal{T},\mathcal{E},r\}$
-- $\mathcal{S}$： 状态空间
-- $\mathcal{A}$： 动作空间
-- $\mathcal{O}$： 观测空间  
-- $\mathcal{T}$： 转移算子 (一个三维的张量)  
-- $\mathcal{E}$： 发射概率 $p(o_t \mid s_t)$
-- $r$： 奖励函数 $r： \mathcal{S} \times \mathcal{A} \to \mathbb{R}$
-![](https://picx.zhimg.com/v2-98250e0dcf4099ecb6cb7c60d83c595d_1440w.jpg)
+- $\mathcal{S}$：状态空间
+- $\mathcal{A}$：动作空间
+- $\mathcal{O}$：观测空间  
+- $\mathcal{T}$：转移算子 (一个三维的张量)  
+- $\mathcal{E}$：发射概率 $p(o_t \mid s_t)$
+- $r$：奖励函数 $r： \mathcal{S} \times \mathcal{A} \to \mathbb{R}$
+![](2-3.png)
 
 # 2 The Goal of Reinforcement Learning
 
 接下来我们考虑 RL 的目标。
 在完全观测的 MDP，我们的目标是找到一个策略 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$，其中 $\theta$ 是神经网络的参数，策略会在给定 $\boldsymbol{s}_t$ 下给出 $\boldsymbol{a}_t$，而环境 $p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t,\boldsymbol{a}_t)$ 会在给定 $\boldsymbol{s}_t$，$\boldsymbol{a}_t$ 下给出状态转移的结果 $\boldsymbol{s}_{t + 1}$。
-![](https://pica.zhimg.com/v2-302124e21dd717255f932e8261526cf8_1440w.jpg)
+![](2-4.png)
 策略写作 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$  旨在明确在时间步 $t$ 时，策略以状态 $s_t$ 为输入，输出动作 $a_t$。这种记法并不意味着策略本身随时间步而变化。相反，我们通常考虑的是平稳策略 (stationary policy)，即在所有时间步都保持不变的策略。
 平稳策略具有马尔可夫性质，这意味着其决策仅依赖于当前状态，而与之前的历史无关。理论上可以证明，在特定假设条件下（例如有限的动作空间 $|\mathcal{A}| < \infty$ 和有限的初始分布支撑集），马尔可夫性和平稳性足以表达最优策略。
 在深度强化学习（Deep RL）中，我们可能缺乏如此严格的理论保证。然而，采用这种与时间无关的策略不仅是强化学习理论的传统做法，而且在实践中也取得了显著的成功。
@@ -124,7 +123,7 @@ $$
 - Part 1：生成样本 (也就是运行策略获取轨迹)  
 - Part 2：拟合一个模型 / 估计奖励等返回值  
 - Part 3：更新策略
-![](https://pic2.zhimg.com/v2-0c633b22fbc71e2fd251b4b4c66d5a0f_1440w.jpg)
+![](2-5.png)
 多数 RL 算法都是基于这一框架的，但是不同的算法在这三个部分上有不同的实现，也有不同的复杂度：
 - Part 1 的复杂度取决于不同的任务类型在获取数据的成本，如在真实世界中运行来获取数据的效率就远低于在模拟器中运行的效率 。
 - 而 Part 2 与 Part 3 的复杂度则取决于我们使用的算法是无模型的（model-free）还是基于模型的（model-based），相对来说基于模型的算法更加复杂。
@@ -183,17 +182,17 @@ Part 2 中，我们需要估计 $p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t,
 ## 5.2 Value function based algorithms
 在 Part 2 中，我们需要估计 $V^\pi(\boldsymbol{s}_t)$ 或 $Q^\pi(\boldsymbol{s}_t,\boldsymbol{a}_t)$。在 Part 3 中，令 $\pi(\boldsymbol{s}) = \arg\max_{\boldsymbol{a}} Q^\pi(\boldsymbol{s},\boldsymbol{a})$。
 
-![](https://pica.zhimg.com/v2-bfc9ab6888a18829ec8dcf099cb12d96_1440w.jpg)
+![](2-6.png)
 算法的例子有：Q学习（Q-learning），深度Q网络（DQN），时序差分学习（Temporal difference learning），拟合值迭代（Fitted value iteration）。
 
 ## 5.3 Direct policy gradient algorithms
 Part 2 中计算 $R_\tau = \sum_{t} r(\boldsymbol{s}_t,\boldsymbol{a}_t)$， Part 3 中依据 $\theta \gets \theta + \nabla_\theta \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[R_\tau\right]$ 更新参数。
-![](https://picx.zhimg.com/v2-2ff1ae4c26be24424de33f5de216e8c1_1440w.jpg)
+![](2-7.png))
 算法的例子有：REINFORCE，自然策略梯度（Natural policy gradient），信赖域策略优化（Trust region policy optimization，TRPO），近端策略优化（Proximal policy optimization，PPO)。
 
 ## 5.4 Actor-critic algorithms
 Part 2 中估计 $V^\pi(\boldsymbol{s}_t)$ 或 $Q^\pi(\boldsymbol{s}_t,\boldsymbol{a}_t)$，Part 3 中依据 $\theta \gets \theta + \nabla_\theta \mathbb{E}\left[Q(\boldsymbol{s}_t,\boldsymbol{a}_t)\right]$ 更新策略。
-![](https://pic3.zhimg.com/v2-ffa3db0e392dd700c2986a8688c3f58a_1440w.jpg)
+![](2-8.png)
 算法的例子有：异步优势演员-评论家算法（Asynchronous advantage actor-critic，A3C），软演员-评论家算法（Soft actor-critic，SAC）。
 
 # 6 Tradeoffs Between Algorithms
@@ -206,7 +205,7 @@ Part 2 中估计 $V^\pi(\boldsymbol{s}_t)$ 或 $Q^\pi(\boldsymbol{s}_t,\boldsymb
 核心问题是，算法是否是 off-policy？
 - off-policy：可以在不生成新样本（使用旧样本）的情况下更新策略。 
 - on-policy：使用的样本必须与最新的策略对应，即只要策略有改变，我们就必须生成新的样本。
-![](https://pic2.zhimg.com/v2-c5b093aee1cf032d0c618bc0553de091_1440w.jpg)
+![](2-9.png)
 
 值得注意的是，我们可能会选择一个采样效率低的算法，这是因为我们的任务获取数据的成本可能很低，例如在模拟器中。更本质的是，采样效率只表明了需要多少数据，但不代表实际的训练时间。
 

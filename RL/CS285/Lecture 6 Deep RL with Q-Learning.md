@@ -51,7 +51,11 @@
 
 这实际上是上面的算法的一个特例, 也就是 $K = 1$.
 
-我们还有其他设计 target network 的方式, 当前的方式的一个奇怪的地方在于, 我们 target network 在一些时间点上会突然发生变化, 在一些时候会保持不变, 但是在一些地方会感觉明显在拟合移动目标. 一个可能的解决方式是使用 **polyak averaging**, 也就是 $\phi' \gets \tau \phi + (1 - \tau) \phi'.\\$ 常见使用的超参数为 $\tau = 0.999$.
+我们还有其他设计 target network 的方式, 当前的方式的一个奇怪的地方在于, 我们 target network 在一些时间点上会突然发生变化, 在一些时候会保持不变, 但是在一些地方会感觉明显在拟合移动目标. 一个可能的解决方式是使用 **polyak averaging**, 也就是 
+$$
+\phi' \gets \tau \phi + (1 - \tau) \phi'
+$$
+常见使用的超参数为 $\tau = 0.999$.
 
 ![](https://pic1.zhimg.com/v2-d3e9ce3bb82f96a261f8b23a14dbc8ce_1440w.jpg)
 
@@ -70,21 +74,56 @@
 
 ## 4.1 Double Q-Learning
 
-我们的 Q-value 准确吗? 从相对值的角度来看, 我们的 Q-value 是准确的, 至少能够区分出哪个 action 更好. 但是从绝对值的角度来看, 我们的 Q-value 是不准确的, 实践发现, 我们预测的 Q-value 通常比真实值要高很多. 这一现象称为 **overestimation in Q-learning**, 考虑 $y_j = r_j + \gamma \max_{\boldsymbol{a}'_j} Q_{\phi'}(\boldsymbol{s}'_j, \boldsymbol{a}'_j).\\$ 核心的问题是, 对于两个随机变量 $X_1, X_2$, 我们有 $\mathbb{E}[\max(X_1, X_2)] \geq \max(\mathbb{E}[X_1], \mathbb{E}[X_2]).\\$ 对于 Q-learning, 因为我们的 $Q_{\phi'}$ 并不 perfect, 故表现的 "noisy", 我们这里取的 max 类似于不等式的左侧, 实际上会高于真实的最大值.
+我们的 Q-value 准确吗? 从相对值的角度来看, 我们的 Q-value 是准确的, 至少能够区分出哪个 action 更好. 但是从绝对值的角度来看, 我们的 Q-value 是不准确的, 实践发现, 我们预测的 Q-value 通常比真实值要高很多. 这一现象称为 **overestimation in Q-learning**, 考虑 
+$$
+y_j = r_j + \gamma \max_{\boldsymbol{a}'_j} Q_{\phi'}(\boldsymbol{s}'_j, \boldsymbol{a}'_j).
+$$ 
+核心的问题是, 对于两个随机变量 $X_1, X_2$, 我们有 
+$$
+\mathbb{E}[\max(X_1, X_2)] \geq \max(\mathbb{E}[X_1], \mathbb{E}[X_2])
+$$
+对于 Q-learning, 因为我们的 $Q_{\phi'}$ 并不 perfect, 故表现的 "noisy", 我们这里取的 max 类似于不等式的左侧, 实际上会高于真实的最大值.
 
 ![](https://pic4.zhimg.com/v2-deb2eeca3cc5004fbabcb5a0c924608f_1440w.jpg)
 
-注意到 $\max_{\boldsymbol{a}'} Q_{\phi'}(\boldsymbol{s}', \boldsymbol{a}') = Q_{\phi'}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi'}(\boldsymbol{s}', \boldsymbol{a}')).\\$ 如果我们能够把选取 $\arg\max_{\boldsymbol{a}'}$ 与获取对应的 value 这两个过程分开, 也就是使用两个"独立"的网络, 由于两个网络参数不同, 它们的 "noise" 也会不同, 就能很大程度上解决这一问题, 这样的方式称为 **[double Q-learning](https://zhida.zhihu.com/search?content_id=253873463&content_type=Article&match_order=1&q=double+Q-learning&zhida_source=entity)**, 具体来说, 考虑以下两个网络: $Q_{\phi_A}(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \gamma Q_{\phi_B}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi_A}(\boldsymbol{s}', \boldsymbol{a}')).\\$ $Q_{\phi_B}(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \gamma Q_{\phi_A}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi_B}(\boldsymbol{s}', \boldsymbol{a}')).\\$ 在实际中, 我们只需要利用已有的两个网络即可, 也就是: $y = r + \gamma Q_{\phi'}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}')).\\$ 这样的做法并非完美, 因为我们的两个网络会周期性相等, 但这已经足以基本解决 overestimation 的问题.
+注意到 
+$$
+\max_{\boldsymbol{a}'} Q_{\phi'}(\boldsymbol{s}', \boldsymbol{a}') = Q_{\phi'}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi'}(\boldsymbol{s}', \boldsymbol{a}'))
+$$
+如果我们能够把选取 $\arg\max_{\boldsymbol{a}'}$ 与获取对应的 value 这两个过程分开, 也就是使用两个"独立"的网络, 由于两个网络参数不同, 它们的 "noise" 也会不同, 就能很大程度上解决这一问题, 这样的方式称为 **[double Q-learning](https://zhida.zhihu.com/search?content_id=253873463&content_type=Article&match_order=1&q=double+Q-learning&zhida_source=entity)**, 具体来说, 考虑以下两个网络: 
+$$
+Q_{\phi_A}(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \gamma Q_{\phi_B}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi_A}(\boldsymbol{s}', \boldsymbol{a}'))
+$$ 
+$$
+Q_{\phi_B}(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \gamma Q_{\phi_A}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi_B}(\boldsymbol{s}', \boldsymbol{a}'))
+$$
+在实际中, 我们只需要利用已有的两个网络即可, 也就是: 
+$$
+y = r + \gamma Q_{\phi'}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}'))
+$$
+这样的做法并非完美, 因为我们的两个网络会周期性相等, 但这已经足以基本解决 overestimation 的问题.
 
 ## 4.2 Multi-step Q-Learning
 
-事实上在更新式 $y_{j,t} = r_{j,t} + \gamma \max_{\boldsymbol{a}_{j, t + 1} } Q_{\phi'}(\boldsymbol{s}_{j, t + 1}, \boldsymbol{a}_{j, t + 1}).\\$ 中, 当我们 $Q$ 值估计很差时, 此时主要的 value signal 都来自于 $r_{j,t}$, 而在 $Q$ 值估计较好时, 我们的 value signal 主要来自于 $Q_{\phi'}(\boldsymbol{s}_{j, t + 1}, \boldsymbol{a}_{j, t + 1})$. Q-learning 事实上会有很大的 bias, 很小的 variance, 这一现象和 actor-critic 算法是相似的, 我们可以借鉴 actor-critic 算法中的 n-step return $y_{j,t} = \sum_{t' = t}^{t + N -1} \gamma^{t - t'} r_{j,t'} + \gamma^N \max_{\boldsymbol{a}_{j, t + N} } Q_{\phi'}(\boldsymbol{s}_{j, t + N}, \boldsymbol{a}_{j, t + N}).\\$ 这样的处理可以实现更低的 bias, 尤其是 Q-value 估计较差时. 而且这样的处理通常会加速学习过程.
+事实上在更新式 
+$$
+y_{j,t} = r_{j,t} + \gamma \max_{\boldsymbol{a}_{j, t + 1} } Q_{\phi'}(\boldsymbol{s}_{j, t + 1}, \boldsymbol{a}_{j, t + 1})
+$$
+中, 当我们 $Q$ 值估计很差时, 此时主要的 value signal 都来自于 $r_{j,t}$, 而在 $Q$ 值估计较好时, 我们的 value signal 主要来自于 $Q_{\phi'}(\boldsymbol{s}_{j, t + 1}, \boldsymbol{a}_{j, t + 1})$. Q-learning 事实上会有很大的 bias, 很小的 variance, 这一现象和 actor-critic 算法是相似的, 我们可以借鉴 actor-critic 算法中的 n-step return 
+$$
+y_{j,t} = \sum_{t' = t}^{t + N -1} \gamma^{t - t'} r_{j,t'} + \gamma^N \max_{\boldsymbol{a}_{j, t + N} } Q_{\phi'}(\boldsymbol{s}_{j, t + N}, \boldsymbol{a}_{j, t + N})
+$$
+这样的处理可以实现更低的 bias, 尤其是 Q-value 估计较差时. 而且这样的处理通常会加速学习过程.
 
 然而, 与 actor-critic 中的 n-step return 和 GAE 一样的是, 这样的做法只适用于 on-policy 的情况下才是有效的, 因为我们的新 policy 可能不会再采取之前的 action, 最终到达 $\boldsymbol{s}_{t + N}$.
 
-**Example 1**. _在_ $N = 1$ _的情形中, 我们 target 对应的原始形式是_ $y_{j,t} = r_{j,t} + \gamma \mathbb{E}_{\boldsymbol{s} \sim p(\boldsymbol{s} \mid \boldsymbol{s}_{j, t}, \boldsymbol{a}_{j, t})} \left[\max_{\boldsymbol{a}} Q_{\phi'}(\boldsymbol{s}, \boldsymbol{a})\right].\\$ _注意我们收集到的数据是_ $(\boldsymbol{s}_{j, t}, \boldsymbol{a}_{j, t}, r_{j,t}, \boldsymbol{s}_{j, t + 1})$_, 其中的_ $\boldsymbol{s}_{j, t + 1}$ _仅仅与环境有关, 故我们得到的依然是一个 unbiased estimate._
+**Example 1**. 在 $N = 1$ 的情形中, 我们 target 对应的原始形式是
+$$
+y_{j,t} = r_{j,t} + \gamma \mathbb{E}_{\boldsymbol{s} \sim p(\boldsymbol{s} \mid \boldsymbol{s}_{j, t}, \boldsymbol{a}_{j, t})} \left[\max_{\boldsymbol{a}} Q_{\phi'}(\boldsymbol{s}, \boldsymbol{a})\right]
+$$
+注意我们收集到的数据是_ $(\boldsymbol{s}_{j, t}, \boldsymbol{a}_{j, t}, r_{j,t}, \boldsymbol{s}_{j, t + 1})$_, 其中的_ $\boldsymbol{s}_{j, t + 1}$ 仅仅与环境有关, 故我们得到的依然是一个 unbiased estimate.
 
-_然而, 在_ $N > 1$ _的情形中, 我们 target 对应的原始形式包含一系列嵌套的期望, 其中也包含_ $\boldsymbol{a}_{t + 1} \sim \pi_{\phi'}(\boldsymbol{a} \mid \boldsymbol{s}_{t + 1})$_, 这一期望针对的是最新 policy. 而我们的数据_ $\boldsymbol{s}_t, \boldsymbol{a}_t, \boldsymbol{s}_{t + 1}, \boldsymbol{a}_{t + 1}, \ldots, \boldsymbol{s}_{t + N}$_,_ $Q(\boldsymbol{s}_t, \boldsymbol{a}_t)$ _对应的是生成轨迹的 policy, 如果我们用这一轨迹估计当前的_ $Q$ _值, 那么这一估计就是 biased 的._
+然而, 在 $N > 1$ 的情形中, 我们 target 对应的原始形式包含一系列嵌套的期望, 其中也包含$\boldsymbol{a}_{t + 1} \sim \pi_{\phi'}(\boldsymbol{a} \mid \boldsymbol{s}_{t + 1})$, 这一期望针对的是最新 policy. 而我们的数据 $\boldsymbol{s}_t, \boldsymbol{a}_t, \boldsymbol{s}_{t + 1}, \boldsymbol{a}_{t + 1}, \ldots, \boldsymbol{s}_{t + N}$, $Q(\boldsymbol{s}_t, \boldsymbol{a}_t)$ 对应的是生成轨迹的 policy, 如果我们用这一轨迹估计当前的 $Q$ 值, 那么这一估计就是 biased 的.
 
 那么如何解决这个问题呢? 主要有以下几种方式:
 -   忽略这一问题, 通常表现也很好  
@@ -101,8 +140,11 @@ _然而, 在_ $N > 1$ _的情形中, 我们 target 对应的原始形式包含�
 
 我们可以使用优化方式来解决这个问题, 例如 SGD.
 
-另一个简单的做法是 stochastic optimization, 也就是 $\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a}) \approx \max\{Q(\boldsymbol{s}, \boldsymbol{a}_1), \ldots, Q(\boldsymbol{s}, \boldsymbol{a}_N)\}\\$ 其中 $\boldsymbol{a}_1, \ldots, \boldsymbol{a}_N$ 是从某个分布中采样的 (例如均匀分布).
-
+另一个简单的做法是 stochastic optimization, 也就是 
+$$
+\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a}) \approx \max\{Q(\boldsymbol{s}, \boldsymbol{a}_1), \ldots, Q(\boldsymbol{s}, \boldsymbol{a}_N)\}
+$$
+其中 $\boldsymbol{a}_1, \ldots, \boldsymbol{a}_N$ 是从某个分布中采样的 (例如均匀分布).
 -   优点: 简单, 容易并行  
 -   缺点: 不准确, 但是一些时候或许无需过于担心不准确的问题.  
 
@@ -112,7 +154,18 @@ _然而, 在_ $N > 1$ _的情形中, 我们 target 对应的原始形式包含�
 
 ## 5.2 Easily maximizable Q-functions
 
-另一个方式是使用容易优化的 function class, 例如使用二次函数 $Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = -\frac{1}{2} (\boldsymbol{a} - \boldsymbol{\mu}_\phi(\boldsymbol{s}))^T P_\phi(\boldsymbol{s}) (\boldsymbol{a} - \boldsymbol{\mu}_\phi(\boldsymbol{s})) + V_\phi(\boldsymbol{s}).\\$ 上述使用二次函数的方式称为 **NAF (Normalized Advantage Functions)**, 此时获取 argmax 与 max 都变得非常简单, $\arg\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a}) = \mu_\phi(\boldsymbol{s}).\\$$\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a}) = V_\phi(\boldsymbol{s}).\\$
+另一个方式是使用容易优化的 function class, 例如使用二次函数 
+$$
+Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = -\frac{1}{2} (\boldsymbol{a} - \boldsymbol{\mu}_\phi(\boldsymbol{s}))^T P_\phi(\boldsymbol{s}) (\boldsymbol{a} - \boldsymbol{\mu}_\phi(\boldsymbol{s})) + V_\phi(\boldsymbol{s})
+$$
+上述使用二次函数的方式称为 **NAF (Normalized Advantage Functions)**, 此时获取 argmax 与 max 都变得非常简单, 
+$$
+\arg\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a}) = \mu_\phi(\boldsymbol{s})
+$$
+
+$$
+\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a}) = V_\phi(\boldsymbol{s})
+$$
 
 -   优点: 无需改变算法, 算法效率也不会受到影响  
     
@@ -122,9 +175,19 @@ _然而, 在_ $N > 1$ _的情形中, 我们 target 对应的原始形式包含�
 
 ## 5.3 Learn an approximate maximizer
 
-在这一方式中, 我们学习一个 approximate maximizer, 即训练另一个网络来获取 argmax, 使得 $\mu_\theta(\boldsymbol{s}) \approx \arg\max_{\boldsymbol{a}} Q_\phi(\boldsymbol{s}, \boldsymbol{a}).\\$
+在这一方式中, 我们学习一个 approximate maximizer, 即训练另一个网络来获取 argmax, 使得 
+$$
+\mu_\theta(\boldsymbol{s}) \approx \arg\max_{\boldsymbol{a}} Q_\phi(\boldsymbol{s}, \boldsymbol{a})
+$$
 
-一个例子是 **[DDPG](https://zhida.zhihu.com/search?content_id=253873463&content_type=Article&match_order=1&q=DDPG&zhida_source=entity) (Deep Deterministic Policy Gradient)** 算法, 由于 $\mu_\theta(\boldsymbol{s})$ 实际上可以理解为一个 deterministic 的 policy, 故其实很像是一个 deterministic actor-critic 算法. 在这个算法中, 我们设计新的 target $y_j = r_j + \gamma Q_{\phi'}(\boldsymbol{s}'_j, \mu_{\theta}(\boldsymbol{s}'_j)).\\$ 我们关心的是如何更新 $\theta$: 不难明确我们的 $\mu_\theta$ 需要最大化 $Q_\phi$, 换言之需要更新 $\theta$ 这一参数使得 $Q_\phi$ 增大, 利用链式法则就有 $\frac{\text{d}Q_{\phi}}{\text{d}\theta} = \frac{\text{d}Q_{\phi}}{\text{d}\boldsymbol{a}} \frac{\text{d}\boldsymbol{a}}{\text{d}\theta}.\\$
+一个例子是 **[DDPG](https://zhida.zhihu.com/search?content_id=253873463&content_type=Article&match_order=1&q=DDPG&zhida_source=entity) (Deep Deterministic Policy Gradient)** 算法, 由于 $\mu_\theta(\boldsymbol{s})$ 实际上可以理解为一个 deterministic 的 policy, 故其实很像是一个 deterministic actor-critic 算法. 在这个算法中, 我们设计新的 target 
+$$
+y_j = r_j + \gamma Q_{\phi'}(\boldsymbol{s}'_j, \mu_{\theta}(\boldsymbol{s}'_j))
+$$
+我们关心的是如何更新 $\theta$: 不难明确我们的 $\mu_\theta$ 需要最大化 $Q_\phi$, 换言之需要更新 $\theta$ 这一参数使得 $Q_\phi$ 增大, 利用链式法则就有 
+$$
+\frac{\text{d}Q_{\phi}}{\text{d}\theta} = \frac{\text{d}Q_{\phi}}{\text{d}\boldsymbol{a}} \frac{\text{d}\boldsymbol{a}}{\text{d}\theta}
+$$
 
 我们可以得到 DDPG 算法如下:
 1.  从环境中采样, $\{(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)\}$, 存入 buffer $\mathcal{B}$,  
@@ -147,7 +210,10 @@ _然而, 在_ $N > 1$ _的情形中, 我们 target 对应的原始形式包含�
 
 **Advanced tips:**
 
-Bellman error gradients $\nabla_\phi \frac{1}{2} \sum_{i = 1}^N \left\|Q_\phi(\boldsymbol{s}_i, \boldsymbol{a}_i) - y_i\right\|^2$ 可能非常大, 因此 clip gradients 或者使用 **Huber loss** 是有必要的. 如下是 Huber loss 的定义: $L(x) = \begin{cases}  \frac{1}{2} x^2, & \text{if } |x| \leq \delta,\\  \delta|x| - \frac{\delta^2}{2}, & \text{otherwise}.  \end{cases}  \\$
+Bellman error gradients $\nabla_\phi \frac{1}{2} \sum_{i = 1}^N \left\|Q_\phi(\boldsymbol{s}_i, \boldsymbol{a}_i) - y_i\right\|^2$ 可能非常大, 因此 clip gradients 或者使用 **Huber loss** 是有必要的. 如下是 Huber loss 的定义: 
+$$
+L(x) = \begin{cases}  \frac{1}{2} x^2, & \text{if } |x| \leq \delta,\\  \delta|x| - \frac{\delta^2}{2}, & \text{otherwise}.  \end{cases}
+$$
 -   通常 Double Q-learning 会非常有帮助, 这一技巧容易实现而且没有缺点  
 -   N-step returns 也非常有帮助, 但是也可能引入更高的 variance.  
 -   在训练不同阶段进行 exploration 以及 learning rate 调整, 尝试 Adam 等 optimizer 通常也非常有帮助.  

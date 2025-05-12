@@ -48,7 +48,7 @@ $$
 A^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) \approx r(\boldsymbol{s}_t, \boldsymbol{a}_t) + V^\pi(\boldsymbol{s}_{t + 1}) - V^\pi(\boldsymbol{s}_t)
 $$
 但我们还需要知道 $V^\pi(\boldsymbol{s})$，目前我们使用一个参数为 $\phi$ 神经网络 $\hat{V}^\pi(\boldsymbol{s})$ 来拟合 $V^\pi(\boldsymbol{s})$。利用数据拟合这些价值函数的过程称为**策略评估（policy evaluation）**。回到原先的 RL 的通用框架，我们在 Part 2 需要拟合这些价值函数。
-![](https://pic3.zhimg.com/v2-c9f544529b518fe064c98a170e105516_1440w.jpg)
+![](4-1.png)
 我们可以使用蒙特卡洛的方法进行策略评估，也就是： 
 $$
 V^\pi(\boldsymbol{s}_t) \approx \frac{1}{N} \sum_{i = 1}^N \sum_{t' = t}^T r(\boldsymbol{s}_{i,t'}, \boldsymbol{a}_{i,t'})
@@ -73,7 +73,7 @@ $$
 $$
 \left\{\left(\boldsymbol{s}_{i,t}, r(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t}) + \hat{V}^\pi(\boldsymbol{s}_{i,t + 1})\right)\right\}
 $$
-![](https://pic1.zhimg.com/v2-6942bdf9344db4065ed739b363b22e8a_1440w.jpg)
+![](4-2.png)
 
 # 3 Actor-Critic Algorithm
 
@@ -87,7 +87,7 @@ $$
 
 # 4 Discount Factor
 在之前的讨论中，我们只考虑了有限时间跨度的情况，如果 $T = \infty$，那么 $\hat{V}_\theta^\pi$ 可能会变得任意地大。一个简单的技巧是引入折旧因子，$\gamma \in [0, 1]$，当前奖励的权重更高，未来的奖励以几何级数递减。$\gamma$ 会改变马尔可夫决策过程的性质，类似于我们添加了一个死亡状态，每一步都有 $1 - \gamma$ 的概率进入这个死亡状态（由于我们无法离开），此后所有的奖励都是 $0$。
-![](https://picx.zhimg.com/v2-e2dc13b193f515942556924b171a3fa9_1440w.jpg)
+![](4-3.png)
 
 我们考虑引入折旧因子后 $V$ 函数的目标有什么形式上的变化，在自举目标中我们有 
 $$
@@ -122,7 +122,7 @@ $$
 这里我们简短地讨论一下演员-评论家算法中的一些设计决策。我们考虑如何利用网络表示 $V^\pi(\boldsymbol{s})$ 与 $\pi_\theta(\boldsymbol{a} \mid \boldsymbol{s})$：
 - 使用两个网络，好处是简单且稳定，但是没有共享信息。 
 - 共用一个网络，但是可能需要有更多的超参数调节等技巧。
-![](https://pic2.zhimg.com/v2-1e7862e1d31c848785ea33a38bd2ef1b_1440w.jpg)
+![](4-4.png)
 
 # 5 Online Actor-Critic Algorithm
 
@@ -137,7 +137,7 @@ $$
 注意区分 offline/ online 与 off-policy/ on-policy。offline/ online 是指在学习过程中是否与环境不断交互，而 off-policy/ on-policy 是指我们的数据是否基于当前的策略。然而这对 deep RL 来说是有许多问题的，因为仅仅使用一个样本进行更新是不稳定的，有很大的方差。我们考虑以下两个方式来解决这个问题：
 - **同步并行的演员-评论家算法（synchronous parallel）**：我们有多个同步的工作者，每个工作者每一步都会进行一个动作，这样我们的批量大小就等于工作者的数量。一个问题在于不同 工作者结束的时间可能不同，因此会有一定的同步开销。
 - **异步的演员-评论家算法（asynchronous）**：我们同样有多个工作者，但它们未必同步，每一次当我们收集到批量大小个样本时，我们就进行一次更新。但是这一方式的问题是，一个批量中可能混有不同参数的样本（考虑一次更新时可能某个工作者正在采集数据），这在数学上是不等价的，但由于单次更新参数变化有限，因此通常问题不会太大。（这就是 **A3C (Asynchronous Advantage Actor-Critic）** 算法的核心思想）
-![](https://picx.zhimg.com/v2-5d0be52eefeb89ba9235a6138a346097_1440w.jpg)
+![](4-5.png)
 
 ## 5.2 Off-Policy Actor-Critic Algorithm (Problematic)
 
@@ -235,8 +235,7 @@ $$
 \hat{A}^\pi_{n}(\boldsymbol{s}_t, \boldsymbol{a}_t) = \sum_{t' = t}^{t + n} \gamma^{t' - t} r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) + \gamma^n \hat{V}^\pi(\boldsymbol{s}_{t + n}) - \hat{V}^\pi(\boldsymbol{s}_t)
 $$
 通常 $n > 1$ 效果更好。$n$ 越大则偏差越小，但是方差会增大。
-
-![](https://pic3.zhimg.com/v2-88efc2fe0ed7e4dbaa690209a9be845a_1440w.jpg)
+![](4-6.png)
 
 ## 6.4 Generalized advantage estimation
 我们为什么一定要选择一个 $n$ 呢？我们其实可以加权所有的 $n$ 的情况，也就是构造一个 **广义优势估计（Generalized Advantage Estimation，GAE）**：
@@ -252,7 +251,7 @@ $$
 无论是多步回报还是广义优势估计，都只适用于 on-policy 的情况，因为 off-policy 时，计算 
 $$
 \sum_{t' = t}^{T} \gamma^{t' - t} r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'})
-$$显然不在对应当前 policy 的优势。
+$$显然不在对应当前策略的优势。
 
 # 7 Summary
 在本节中, 我们:

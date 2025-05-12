@@ -95,7 +95,7 @@ $$
 \nabla_\theta J(\theta) = \frac{1}{N} \sum_{i = 1}^{N} \nabla_\theta \log p_\theta(\tau) r(\tau)
 $$
 这一形式其实蕴含了一个很大的问题，也就是方差。不妨考虑如下情况：如果奖励都是很大的值，那么梯度就会很大，极易受采样结果的影响，造成非常大的方差。我们接下来介绍的很多改进都是为了解决这个问题。
-![](https://pica.zhimg.com/v2-bd01f61cbf420cbb4bd7713e1f64a122_1440w.jpg)
+![](3-1.png)
 # 3 Reducing Variance
 ## 3.1 Causality
 我们可以基于因果性（causality）这种普适的性质来减小方差。
@@ -275,7 +275,7 @@ $$
 \frac{\partial J(\theta)}{\partial \sigma} \sim \sigma^{-3}, \frac{\partial J(\theta)}{\partial k} \sim \sigma^{-2}
 $$
 当 $\sigma$ 接近 $0$ 时，梯度沿着 $\sigma$ 方向的分量远大于沿着 $k$ 的分量，因此收敛到最优解的速度会非常慢。这可以类比到优化问题中的[[Concepts#8 条件数（Condition Number）|条件数（Condition Number）]]，也就是这个优化问题是条件数非常大的。
-![](https://pic2.zhimg.com/v2-db24422e19c8dbe9c0c57299e7eb7ed1_1440w.jpg)
+![](3-2.png)
 
 实质上，这一问题的核心在于，我们的梯度下降是在参数空间中进行的，而参数空间中不同参数的相同变化对策略的影响是不同的。在前面的例子中，$\sigma$ 接近 $0$ 时，梯度的绝大多数分量都在 $\sigma$ 方向， 也就是说 $\sigma$ 的变化对策略的影响远大于 $k$ 的变化的影响。
 
@@ -322,7 +322,7 @@ $$
 我们用样本的均值来估计这个期望就可以得到 $F(\theta)$ 的估计。
 
 使用自然策略梯度的效果：
-![](https://picx.zhimg.com/v2-6900826967f76aac58d7fdd5aa87d86d_1440w.jpg)
+![](3-3.png)
 
 注意：
 - 我们基于策略的分布来定义了一个新的距离度量，在这一度量的近似约束下进行优化。

@@ -7,8 +7,7 @@
 -   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$：**policy (fully observed)**
 -   $t$：**time step** 
 这些量之间可以利用以下概率图来表示 (在部分可观测的情况下)：
-
-![](https://picx.zhimg.com/v2-9770e66d350346f6cc252a2a648c74f3_1440w.jpg)
+![](1-0.png)
 
 通常我们认为各个状态之间满足马尔可夫性质，接下来我们介绍的一部分算法将会依赖于这一性质，而在另一部分算法中则并不依赖，因此在一些时候我们会互换两种记号。
 
@@ -19,11 +18,11 @@
 从人类驾驶的数据中获取每一时间步的 $\boldsymbol{o}_t，\boldsymbol{a}_t$，并将这些数据作为训练数据，在其上使用监督学习学习 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$，这样的一种方式也被称为**行为克隆（behavior cloning）**。
 
 这样的算法能够起作用吗? 不妨仅考虑一个轨迹，我们的模型总会有一些误差，一旦出现误差则意味着到达了一个不熟悉的状态，这样的误差会被积累，直到我们到达极不熟悉的状态，这样的状态下我们的模型可能会完全失效。
-![](https://pic2.zhimg.com/v2-63a4aaeb8d71a813e5086bcfd7fb6e33_1440w.jpg)
+![](1-1.png)
 
 在通常的监督学习任务中，我们似乎不会遇到这种问题，这是因为监督学习中的数据[[Concepts#1 独立同分布（i.i.d.）| 独立同分布]]的，然而在当前的问题中，我们的数据是一个序列，前一个决策的微小不同都会影响后续的观测.
 然而也有一些方法解决部分问题，例如引入一些 "假数据"：在车辆的左前和右前方分别放置两个摄像头，分别标记 $\boldsymbol{a}_t$ 为右转和左转，这样当我们的模型偏离时，可以利用这些数据来矫正。然而这样的方法是针对于特定的问题，并不是一个通用的方法。
-![](https://picx.zhimg.com/v2-a880ee47080caab2bbd48cca4ac3bf27_1440w.jpg)
+![](1-2.png)
 在我们了解相关例子后，我们接下来从以下角度继续介绍：
 - 通过行为克隆实现的模仿学习并不一定能保证有效：这与监督学习的情况不同，原因在于独立同分布条件不再满足，我们接下来从理论角度解释这一点。
 - 我们可以通过一些具体方法来解决这一问题，但是这些方法可能并不是通用的：
@@ -115,10 +114,9 @@ $$
 
 **Non-Markovian behavior** 人类的行为可能是非马尔科夫的，当前决策通常不是仅仅基于当前的观测，而是可能有很长的”上下文“。
 解决这一问题的方式是使用一些序列式的模型，也可以同时将连续多个观测作为输入。这样的方式引入了更多的信息，但可能产生一些问题 (**causal confusion**)，例如会导致模型误解相关性与因果关系。在引入多个观测前，事件发生的因果关系是清晰的，而多个时间的事件同时展现则可能带来混淆，例如模型可能认为车辆减速是因为踩刹车的原因，而不是因为前方有车。
-
-![](https://picx.zhimg.com/v2-da155b386a34d8f1efc1e932295c657b_1440w.jpg)
+![](1-3.png)
 **Multimodal behavior** 面对同一状态/观测，人类的行为可能是多样的，例如前方有一棵树，那么人类可能选择左转或右转，而如果我们使用了高斯分布来拟合这一行为，那么我们可能会得到一个平均值，也就是直行。
-![](https://pic3.zhimg.com/v2-1a7d33e926c47787669735aef968dfb0_1440w.jpg)
+![](1-4.png)
 
 这里的解决方法主要有两个，一个是**使用更加有表示能力的连续分布**（例如 mixture of Gaussians，latent variable models，diffusion models），另一种则是**进行离散化**。
 
@@ -132,7 +130,7 @@ $$
 - 在训练时，我们先将观测编码输入序列式模型目标为 $a_{t,0}$，接下来输入真实的 $a_{t,0}$ 并以 $a_{t,1}$ 为目标，以此类推。在测试时，我们不输入真实动作，而是使用模型生成的该维度。
 - 这为什么有效？在第 $1,2,3$ 步，我们依次尝试学习分布：$p(a_{t,0} \mid \boldsymbol{s}_t)$，$p(a_{t,1} \mid a_{t,0},\boldsymbol{s}_t)$，$p(a_{t,2} \mid a_{t,1}，a_{t,0},\boldsymbol{s}_t)$，以此类推. 如果这些分布都能有效学习到，那么我们就学习到了$$
 p(\boldsymbol{a}_t \mid \boldsymbol{s}_t) = p(a_{t,0},a_{t,1},a_{t,2} \mid \boldsymbol{s}_t) = p(a_{t,0} \mid \boldsymbol{s}_t) p(a_{t,1} \mid a_{t,0},\boldsymbol{s}_t) p(a_{t,2} \mid a_{t,1},a_{t,0},\boldsymbol{s}_t)
-$$![](https://pica.zhimg.com/v2-cde098b2a894b926dac8715cc26aae2a_1440w.jpg)
+$$![](1-5.png)
 对于上述涉及到的技巧，我们用以下几个例子来展示：
 - **Case study 3：imitation with diffusion models** 每一次利用扩散策略生成一个较小的轨迹。详见：Chi et al. Diffusion Policy：Visuomotor Policy Learning via Action Diffusion. 2023
 - **Case study 4：imitation with latent variable** 训练时使用前面描述的条件变分自编码器，测试时使随机采样出 $z$ 来决定模式。详见：Zhao et al. Learning Fine-Grained Bimanual Manipulation with Low-Cost Hardware. 2023
@@ -151,9 +149,9 @@ $$
 
 **Example：Learning Latent Plans from Play**
 
-![](https://pic2.zhimg.com/v2-5d1a83f54a61090ee95460a6a335a271_1440w.jpg)
+![](1-6.png)
 
-![](https://pic1.zhimg.com/v2-feeb2600cba3e9247c41ae76bbf31b4e_1440w.jpg)
+![](1-7.png)
 
 这一篇工作中的主要流程如下：
 1.  收集数据：没有给出特定的目标，而是完成随机的操作，这样我们可以覆盖更多的情况，可以很好地避免超出分布的问题.  
@@ -162,12 +160,12 @@ $$
 
 
 我们还可以考虑如下的方式：从随机策略出发，收集随机目标的数据，然后将这些数据作为对应任务的 表示，并用这些数据改进策略，不断地迭代。这样的一种方式可能已经超越了单纯的模仿学习。
-![](https://pic4.zhimg.com/v2-0f2895848dd62134973948113dc0fe97_1440w.jpg)
+![](1-8.png)
 
 详见：Learning to Reach Goals via Iterated Supervised Learning
 
 Goal-conditioned BC 可以应用在大规模的数据上。可以使用多种机器人上的数据，甚至能够在未见过的机器上完成 (Navigation Task)。
-![](https://pic2.zhimg.com/v2-0025b3df97cbc6ee2d9ee5fd947cde85_1440w.jpg)
+![](1-9.png)
 详见：GNM：A General Navigation Model to Drive Any Robot
 
 相关的工作还有 Hindsight Experience Replay，2017 但这里使用的是 offline RL，我们将会在之后涉及。
