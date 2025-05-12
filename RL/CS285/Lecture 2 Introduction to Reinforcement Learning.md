@@ -1,12 +1,12 @@
 # 0 Terminology & Notation
 
--   $\boldsymbol{s}_t$： **state**  
--   $\boldsymbol{a}_t$： **action**  
--   $\boldsymbol{o}_t$： **observation**  
--   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$： **policy (fully observed)**.  
--   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$： **policy**  
--   $t$： **time step**  
--   $r(\boldsymbol{s}_t,\boldsymbol{a}_t)$： **reward function**，用于衡量一个状态与动作的好坏，这里我们使用了同时依赖于状态与动作的奖励函数，也可以定义仅依赖于状态的奖励函数 $r(\boldsymbol{s}_t)$  
+-   $\boldsymbol{s}_t$：**state**  
+-   $\boldsymbol{a}_t$：**action**  
+-   $\boldsymbol{o}_t$：**observation**  
+-   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$：**policy (fully observed)**.  
+-   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$：**policy**  
+-   $t$：**time step**  
+-   $r(\boldsymbol{s}_t,\boldsymbol{a}_t)$：**reward function**，用于衡量一个状态与动作的好坏，这里我们使用了同时依赖于状态与动作的奖励函数，也可以定义仅依赖于状态的奖励函数 $r(\boldsymbol{s}_t)$  
 
 这些量之间可以利用以下概率图来表示 (在部分可观测的情况下)：
 
@@ -60,9 +60,9 @@ $$
 $$
 再导出无限时间跨度（infinite horizon）的情况，此时如果采用上面的方法，那么可能会出现一些问题，如奖励是无界的，常见的方法是：
 - 用平均奖励，即 $\frac{1}{T} \sum_{t = 1}^{T} r(\boldsymbol{s}_t,\boldsymbol{a}_t)$
-- 使用折旧率（discount favor），即 $\sum_{t = 1}^{\infty} \gamma^t r(\boldsymbol{s}_t,\boldsymbol{a}_t)$，其中 $0 < \gamma < 1$
+- 使用折旧因子（discount favor），即 $\sum_{t = 1}^{\infty} \gamma^t r(\boldsymbol{s}_t,\boldsymbol{a}_t)$，其中 $0 < \gamma < 1$
 
-其中折旧率我们在之后介绍，这里我们先考虑平均奖励的情况。
+其中折旧因子我们在之后介绍，这里我们先考虑平均奖励的情况。
 做如下的转化：将 $\{(\boldsymbol{s}_t,\boldsymbol{a}_t)\}$ 视作是在增强空间（augmented space）上的马尔可夫链，满足转移概率为
 $$
 p_\theta((\boldsymbol{s}_{t + 1},\boldsymbol{a}_{t + 1}) \mid (\boldsymbol{s}_t,\boldsymbol{a}_t)) = p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t,\boldsymbol{a}_t) \pi_\theta(\boldsymbol{a}_{t + 1} \mid \boldsymbol{s}_{t + 1})

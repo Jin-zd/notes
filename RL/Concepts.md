@@ -74,3 +74,62 @@ $$\pi P = \pi$$
     * 并非所有马尔可夫链都存在平稳分布。
     * 即使存在，平稳分布也可能不唯一。
     * 对于有限状态的不可约、正常返马尔可夫链，存在唯一的平稳分布。
+
+## 6 KKT (Karush-Kuhn-Tucker) 条件
+### 6.1 定义
+考虑优化问题：
+$$\begin{aligned}
+\min_{x} \quad & f(x) \\
+\text{s.t.} \quad & g_i(x) \le 0, \quad i = 1, \dots, m \\
+& h_j(x) = 0, \quad j = 1, \dots, p
+\end{aligned}$$
+假设： $x^*$ 是局部最优解，且满足约束规范（例如 Slater 条件，LICQ）。
+KKT 条件：存在乘子 $\mu_i^* \ge 0$ ($i = 1, \dots, m$) 和 $\lambda_j^*$ ($j = 1, \dots, p$)，使得以下条件成立：
+1.  梯度条件 (Stationarity)：$$\nabla f(x^*) + \sum_{i=1}^{m} \mu_i^* \nabla g_i(x^*) + \sum_{j=1}^{p} \lambda_j^* \nabla h_j(x^*) = 0$$
+2.  互补松弛条件 (Complementary Slackness)：$$\mu_i^* g_i(x^*) = 0, \quad i = 1, \dots, m$$如果 $g_i(x^*) < 0$ （非起作用约束），则 $\mu_i^* = 0$，如果 $\mu_i^* > 0$, 则 $g_i(x^*) = 0$ （起作用约束）。
+3.  原始可行性 (Primal Feasibility)：$$g_i(x^*) \le 0, \quad i = 1, \dots, m$$$$h_j(x^*) = 0, \quad j = 1, \dots, p$$
+4.  对偶可行性 (Dual Feasibility)：$$\mu_i^* \ge 0, \quad i = 1, \dots, m$$$\lambda_j^*$ 的符号没有限制。
+### 6.2 重要性
+* 最优性的必要条件 (在满足约束规范下)。
+* 凸优化问题在满足 Slater 条件下，KKT 条件也是充分条件。
+* 是许多约束优化算法的基础。
+* 满足 KKT 条件的点不一定是全局最优解（可能是局部最优解或鞍点）。
+* KKT 条件的成立依赖于约束规范。
+
+## 7 Sion 最小最大定理（Sion's Minimax Theorem）
+设 $X$ 是一个紧致的凸集，而 $Y$ 是一个凸集（不必紧致）。令函数 $f: X \times Y \rightarrow \mathbb{R}$ 满足以下条件：
+1.  对于每个 $y \in Y$，函数 $f(\cdot, y): X \rightarrow \mathbb{R}$ 在 $X$ 上是连续的。
+2.  对于每个 $x \in X$，函数 $f(x, \cdot): Y \rightarrow \mathbb{R}$ 在 $Y$ 上是拟凹的 (quasi-concave)。
+则有：
+$$\min_{y \in Y} \max_{x \in X} f(x, y) = \max_{x \in X} \min_{y \in Y} f(x, y)$$
+* 紧致凸集 (Compact Convex Set)： 一个集合既是紧致的（闭且有界），又是凸的（集合中任意两点的连线上的所有点也属于该集合）。
+* 凸集 (Convex Set)：集合中任意两点的连线上的所有点也属于该集合。
+* 连续函数 (Continuous Function)：直观上，函数值的微小变化对应于自变量的微小变化。
+* 拟凹函数 (Quasi-concave Function)：对于任意实数 $\alpha$，集合 $\{y \in Y \mid f(x, y) \ge \alpha \}$ 是凸集。注意，这比凹函数的要求弱。
+
+## 8 条件数（Condition Number）
+### 8.1 定义
+对于一个可微函数 $f: \mathbb{R}^n \rightarrow \mathbb{R}$，在点 $x^*$ 处的 Hessian 矩阵为 $\nabla^2 f(x^*)$。如果 $\nabla^2 f(x^*)$ 是可逆的，则在 $x^*$ 处的条件数 $\kappa$ 定义为：
+$$\kappa = \frac{\lambda_{\max}(\nabla^2 f(x^*))}{\lambda_{\min}(\nabla^2 f(x^*))}$$
+其中，$\lambda_{\max}(\nabla^2 f(x^*))$ 和 $\lambda_{\min}(\nabla^2 f(x^*))$ 分别是 Hessian 矩阵的最大和最小特征值。
+### 8.2 几何意义
+条件数衡量了目标函数在最速下降方向和曲率最大方向上的伸缩比例。
+* 条件数较小 ($\kappa \approx 1$)：Hessian 矩阵的特征值相近，目标函数的等高线近似于圆形。在这种情况下，梯度下降等优化算法通常收敛较快且稳定。
+* 条件数较大 ($\kappa \gg 1$)：Hessian 矩阵的特征值差异很大，目标函数的等高线呈现狭长的椭圆状。在这种情况下，梯度下降等算法可能会在狭长方向上震荡，收敛速度显著减慢。
+对优化算法的影响：
+* 收敛速度： 高条件数通常会导致优化算法收敛缓慢，尤其是一阶方法（如梯度下降）。这是因为梯度方向可能与指向最优解的方向相差很大。
+* 数值稳定性：高条件数也可能导致数值不稳定，因为算法对参数的微小变化非常敏感。
+* 预处理：为了改善高条件数问题，常常采用预处理技术（如尺度变换、牛顿法的近似等），旨在改变问题的几何形状，降低条件数，从而加速收敛。
+
+## 9 KL 散度 (Kullback-Leibler Divergence)
+### 9.1 定义
+KL 散度，通常记作 $D_{KL}(P||Q)$，用于衡量两个概率分布 $P$ 和 $Q$ 之间的差异。对于离散概率分布 $P(x)$ 和 $Q(x)$，其定义为：
+$$D_{KL}(P||Q) = \sum_{x} P(x) \log \left( \frac{P(x)}{Q(x)} \right)$$
+对于连续概率分布 $p(x)$ 和 $q(x)$，其定义为：
+$$D_{KL}(P||Q) = \int_{-\infty}^{\infty} p(x) \log \left( \frac{p(x)}{q(x)} \right) dx$$
+### 9.2 性质
+* 非负性：$D_{KL}(P||Q) \ge 0$，当且仅当 $P = Q$ 时等号成立。
+* 不对称性：一般情况下，$D_{KL}(P||Q) \neq D_{KL}(Q||P)$。这意味着 $P$ 相对于 $Q$ 的差异与 $Q$ 相对于 $P$ 的差异通常是不同的。因此，KL 散度不是一个真正的距离度量。
+* 期望：KL 散度可以看作是使用分布 $Q$ 近似分布 $P$ 时，所损失的平均额外信息量（以比特或纳特为单位）。
+* 当 $P(x) > 0$ 且 $Q(x) = 0$ 时，$\log \left( \frac{P(x)}{Q(x)} \right) = \infty$，导致 $D_{KL}(P||Q) = \infty$。这意味着如果真实分布中可能出现的事件在近似分布中概率为零，则 KL 散度为无穷大。
+* 当 $P(x) = 0$ 时，按照惯例认为 $0 \log \left( \frac{0}{Q(x)} \right) = 0$。

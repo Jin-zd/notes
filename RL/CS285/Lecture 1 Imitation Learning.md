@@ -176,16 +176,16 @@ Goal-conditioned BC 可以应用在大规模的数据上。可以使用多种机
 我们前面问题的核心是分布偏移，也就是 $p_{data}(\boldsymbol{o}_t) \neq p_{\pi_\theta}(\boldsymbol{o}_t)$。我们能否让 $p_{data}(\boldsymbol{o}_t)$ 更接近 $p_{\pi_\theta}(\boldsymbol{o}_t)$ 呢？
 
 目标：收集训练数据，使得 $p_{data}(\boldsymbol{o}_t) \approx p_{\pi_\theta}(\boldsymbol{o}_t)$
-1.  训练 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$ 在人工数据集 $\mathcal{D}$ 上  
-2.  运行 $\pi_\theta$ 获取数据集 $\mathcal{D}_\pi$  
-3.  让人类标注 $\mathcal{D}_\pi$ 得到正确的动作 
-4.  将 $\mathcal{D} \cup \mathcal{D}_\pi$ 作为新的数据集，重复 1-4  
+1.  训练 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$ 在人工数据集 $\mathcal{D}$ 上；
+2.  运行 $\pi_\theta$ 获取数据集 $\mathcal{D}_\pi$；
+3.  让人类标注 $\mathcal{D}_\pi$ 得到正确的动作；
+4.  将 $\mathcal{D} \cup \mathcal{D}_\pi$ 作为新的数据集，重复 1-4。
 
 可以证明最后两个分布将会收敛到一致。
 然而这个方法的问题主要就在第 3 步，因为人类标注数据的方式可能与人类自然完成任务的方式不同，导致标注的数据很难达到很高质量。
 
 # 4 Summary
-模仿学习的问题是什么?
+模仿学习的问题是什么？
 - 人需要提供大量的数据。
 - 人并不擅长提供一些特定的动作，例如复杂的机械臂动作。
 - 人可以从自己学习，机器能够实现这一点吗？

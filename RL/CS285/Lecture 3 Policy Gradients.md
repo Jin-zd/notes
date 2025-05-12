@@ -2,7 +2,7 @@
 策略梯度（Policy Gradient）算法是一种直接对策略进行优化的方法，也就是直接对策略的参数 $\theta$ 进行优化。
 策略梯度是一种无模型方法（model-free methods），在这种方法中，我们通常不假设知道 $p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)$ 以及 $p(\boldsymbol{s}_1)$，也不尝试学习关于环境的模型，而是通过环境的交互（sampling）来获取关于环境的信息。
 
-记目标函数为 
+记目标函数为
 $$
 J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\sum_{t} r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right]
 $$
@@ -72,7 +72,12 @@ $$
 ## 2.2 Partial observability
 考虑部分可观测的情况，我们不妨依然考虑 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$，即当前的动作依赖于当前的观测。不妨记整条轨迹为 $\tau_{\boldsymbol{o}}$，那么利用链式法则，我们可以得到
 $$
-\begin{aligned}  \log p(\tau_{\boldsymbol{o}}) &= \log p(\boldsymbol{o}_1) + \log p(\boldsymbol{a}_1 \mid \boldsymbol{o}_1) + \log p(\boldsymbol{o}_2 \mid \boldsymbol{o}_1, \boldsymbol{a}_1) + \log p(\boldsymbol{a}_2 \mid \boldsymbol{o}_{1:2}, \boldsymbol{a}_1) + \cdots\\  &= \log p(\boldsymbol{o}_1) + \sum_{t} \log p(\boldsymbol{a}_t \mid \boldsymbol{o}_{1:t}, \boldsymbol{a}_{1:t - 1}) + \sum_{t} \log p(\boldsymbol{o}_{t + 1} \mid \boldsymbol{o}_{1:t}, \boldsymbol{a}_{1:t})\\  &= \log p(\boldsymbol{o}_1) + \sum_{t} \log \pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t) + \sum_{t} \log p(\boldsymbol{o}_{t + 1} \mid \boldsymbol{o}_{1:t}, \boldsymbol{a}_{1:t}), \end{aligned}
+\begin{aligned}  
+\log p(\tau_{\boldsymbol{o}}) 
+&= \log p(\boldsymbol{o}_1) + \log p(\boldsymbol{a}_1 \mid \boldsymbol{o}_1) + \log p(\boldsymbol{o}_2 \mid \boldsymbol{o}_1, \boldsymbol{a}_1) + \log p(\boldsymbol{a}_2 \mid \boldsymbol{o}_{1:2}, \boldsymbol{a}_1) + \cdots\\  
+&= \log p(\boldsymbol{o}_1) + \sum_{t} \log p(\boldsymbol{a}_t \mid \boldsymbol{o}_{1:t}, \boldsymbol{a}_{1:t - 1}) + \sum_{t} \log p(\boldsymbol{o}_{t + 1} \mid \boldsymbol{o}_{1:t}, \boldsymbol{a}_{1:t})\\  
+&= \log p(\boldsymbol{o}_1) + \sum_{t} \log \pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t) + \sum_{t} \log p(\boldsymbol{o}_{t + 1} \mid \boldsymbol{o}_{1:t}, \boldsymbol{a}_{1:t})
+\end{aligned}
 $$
 由于无论环境转移是否依赖于过去的观测，即无论观测是否满足马尔可夫性质，我们都可以得到
 $$
@@ -93,19 +98,19 @@ $$
 ![](https://pica.zhimg.com/v2-bd01f61cbf420cbb4bd7713e1f64a122_1440w.jpg)
 # 3 Reducing Variance
 ## 3.1 Causality
-我们可以基于causality这种普适的性质来减小方差。
+我们可以基于因果性（causality）这种普适的性质来减小方差。
 
-**Definition 1**. _Causality_
-$t'$ 时刻的 policy 不应该影响 $t$ 时刻的奖励，如果 $t < t'$。
+**Definition 1**. _Causality（因果性）_
+$t'$ 时刻的策略不应该影响 $t$ 时刻的奖励，如果 $t < t'$。
 
-与马尔可夫性质不同之处在于，只要我们时间流向是单向的，那么就可以保证 causality。
-利用 causality 可以将我们的策略梯度进行如下改写:
+与马尔可夫性质不同之处在于，只要我们时间流向是单向的，那么就可以保证因果性。
+利用因果性可以将我们的策略梯度进行如下改写：
 $$
 \begin{aligned}  \nabla_\theta J(\theta) &\approx \frac{1}{N} \sum_{i = 1}^{N} \nabla_\theta \left(\sum_{t = 1}^T \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t})\right) \left(\sum_{t = 1}^T r(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t})\right)\\  &= \frac{1}{N} \sum_{i = 1}^{N} \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \left(\sum_{t' = 1}^T r(\boldsymbol{s}_{i,t'}, \boldsymbol{a}_{i,t'})\right)\\  &= \frac{1}{N} \sum_{i = 1}^{N} \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \left(\sum_{t' = t}^T r(\boldsymbol{s}_{i,t'}, \boldsymbol{a}_{i,t'})\right).\\ \end{aligned}
 $$
-由于此时我们估计的值整体减小了，故这一操作可以减小方差。在应用 causality 后，我们用 $\hat{Q}_{i, t} = \sum_{t' = t}^T r(\boldsymbol{s}_{i,t'}, \boldsymbol{a}_{i,t'})$ 表示未来的奖励。
+由于此时我们估计的值整体减小了，故这一操作可以减小方差。在应用因果性后，我们用 $\hat{Q}_{i, t} = \sum_{t' = t}^T r(\boldsymbol{s}_{i,t'}, \boldsymbol{a}_{i,t'})$ 表示未来的奖励。
 
-如果要从数学上证明 causality 转化的正确性，注意到
+如果要从数学上证明因果性转化的正确性，注意到：
 $$
 \begin{aligned}  
 &\mathbb{E}_{\tau\sim p_\theta(\tau)} \left[\nabla_\theta \log\pi_\theta(\boldsymbol{a}_t|\boldsymbol{s}_t) \cdot \left(\sum_{0 < j < t}r(\boldsymbol{s}_j,\boldsymbol{a}_j)\right)\right]\\  
@@ -116,8 +121,8 @@ $$
 $$
 其中最后的等号利用了 $\mathbb{E}_{\boldsymbol{a}_t \sim \pi_\theta(\boldsymbol{a}_t|\boldsymbol{s}_t)}\left[\nabla_\theta\log\pi_\theta(\boldsymbol{a}_t|\boldsymbol{s}_t)\right] = \nabla_\theta \int \pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)\text{d}\boldsymbol{a}_t = \nabla_\theta 1 = 0$。
 
-## 3.2 Baselines
-另一个常见的方法是引入 baseline，直觉上引入 $b = \frac{1}{N} \sum_{i = 1}^{N} r(\tau)$，这样我们就可以让奖励的期望接近 $0$，故每次更新时只有优于平均的奖励才会增大概率，从而减小了方差。在引入 baseline 后，得到的梯度为
+## 3.2 Baseline
+另一个常见的方法是引入基线（baseline），直觉上引入 $b = \frac{1}{N} \sum_{i = 1}^{N} r(\tau)$，这样我们就可以让奖励的期望接近 $0$，故每次更新时只有优于平均的奖励才会增大概率，从而减小了方差。在引入基线后，得到的梯度为
 $$
 \nabla_\theta J(\theta) \approx \frac{1}{N} \sum_{i = 1}^{N} \nabla_\theta \log p_\theta(\tau) \left(r(\tau) - b\right)
 $$
@@ -125,7 +130,7 @@ $$
 $$
 \begin{aligned}  \mathbb{E}\left[\nabla_\theta \log p_\theta(\tau) b\right] &= \int p_\theta(\tau) \nabla_\theta \log p_\theta(\tau) b \text{d}\tau\\  &= b \int \nabla_\theta p_\theta(\tau) \text{d}\tau\\  &= b \nabla_\theta \int p_\theta(\tau) \text{d}\tau\\  &= b \nabla_\theta 1 = 0. \end{aligned}
 $$
-事实上平均奖励并不是最好的 baseline，但是已经足够好了。接下来我们分析一下什么是最好的 baseline。有：
+事实上平均奖励并不是最好的基线，但是已经足够好了。接下来我们分析一下什么是最好的基线。有：
 $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\nabla_\theta \log p_\theta(\tau) \left(r(\tau) - b\right)\right]
 $$
@@ -141,7 +146,7 @@ $$
 $$
 b = \frac{\mathbb{E}\left[g(\tau)^2 r(\tau)\right]}{\mathbb{E}\left[g(\tau)^2\right]}
 $$
-此时的 baseline 是一个奖励的加权平均，其中权值还依赖于策略的梯度。我们通常不使用这个最优 baseline，而是使用平均奖励。
+此时的基线是一个奖励的加权平均，其中权值还依赖于策略的梯度。我们通常不使用这个最优基线，而是使用平均奖励。
 
 # 4 Off-policy Policy Gradient
 我们的策略梯度算法是 **on-policy** 的，因为我们的梯度
@@ -176,17 +181,15 @@ $$
 &= \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\sum_{t = 1}^{T} \nabla_{\theta'} \log \pi_{\theta'}(\boldsymbol{a}_t \mid \boldsymbol{s}_t) \left(\prod_{t' = 1}^{t} \frac{\pi_{\theta'}(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}{\pi_\theta(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}\right) \left(\sum_{t' = t}^T r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) \left(\prod_{t'' = t}^{t'} \frac{\pi_{\theta'}(\boldsymbol{a}_{t''} \mid \boldsymbol{s}_{t''})}{\pi_\theta(\boldsymbol{a}_{t''} \mid \boldsymbol{s}_{t''})}\right)\right)\right]
 \end{aligned}
 $$
-这里后一个等号基于 causality，即未来的重要性采样比率不应该影响过去的奖励。
+这里后一个等号基于因果性，即未来的重要性采样比率不应该影响过去的奖励。
 
-如果我们忽略掉后一个重要性采样比率，那么我们就得到了 **策略迭代算法（Policy Iteration Algorithm）** 的形式（先用当前采样得到的样本估计累积奖励，相当于策略评估，然后基于这个累积奖励加上当前动作对应的梯度调整策略参数，相当于策略改进）：
+如果我们忽略掉后一个重要性采样比率，那么我们就得到了**策略迭代算法（Policy Iteration Algorithm）** 的形式（先用当前采样得到的样本估计累积奖励，相当于策略评估，然后基于这个累积奖励加上当前动作对应的梯度调整策略参数，相当于策略改进）：
 $$
 \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\sum_{t = 1}^{T} \nabla_{\theta'} \log \pi_{\theta'}(\boldsymbol{a}_t \mid \boldsymbol{s}_t) \left(\prod_{t' = 1}^{t} \frac{\pi_{\theta'}(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}{\pi_\theta(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}\right) \left(\sum_{t' = t}^T r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) \right)\right]
 $$
 可以证明，虽然这个式子不再是梯度，但是依然可以改善策略。
 
-## 4.1 A first-order approximation for IS
-
-这里的问题是， $\left(\prod_{t' = 1}^{t} \frac{\pi_{\theta'}(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}{\pi_\theta(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}\right)$ 一项是 exponential in $T$ 的，可能造成很大的方差。我们考虑把原先 $\boldsymbol{s}, \boldsymbol{a}$ 视作一个增强状态的方式进行重写：在 on-policy 中，我们有
+这里的问题是， $\left(\prod_{t' = 1}^{t} \frac{\pi_{\theta'}(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}{\pi_\theta(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}\right)$ 一项是关于 $T$ 呈指数形式的，可能造成很大的方差。我们考虑把原先 $\boldsymbol{s}$，$\boldsymbol{a}$ 视作一个增强状态的方式进行重写：在 on-policy 中，我们有
 $$
 \nabla_{\theta'} J(\theta') \approx \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \hat{Q}_{i,t}
 $$
@@ -198,129 +201,103 @@ $$
 $$
 \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \frac{\pi_{\theta'}(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}{\pi_\theta(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})} \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \hat{Q}_{i,t}
 $$
-得到了一个可以计算的形式，相较于原先 exponential in $T$ 的形式，我们这里相当于只保留了对应时间 $t$ 的重要性采样比率。在 **Advanced Policy Gradient** 一节中我们会知道为什么这是合理的。
+得到了一个可以计算的形式，相较于原先关于 $T$ 呈指数形式，我们这里相当于只保留了对应时间 $t$ 的重要性采样比率。  
 
-# 5 Policy Gradient Summary
+# 5 Introduction to Advanced Policy Gradients
+本小节中，我们初步介绍一些策略梯度的进阶算法及其相关概念，为后续一节 **Advanced Policy Gradient** 做准备。
+## 5.1 Policy gradient with constraints
+首先考虑常规梯度下降 $\theta \gets \theta + \alpha \nabla_\theta J(\theta)$ 的问题。这里的 $\alpha$ 是我们的学习率，不难发现，如果我们的学习率很小，则我们需要很长时间收敛，或者可能陷入局部极值；如果学习率很大，则有可能因为更新幅度过大而错过最优解。
 
-在本节中, 我们:
--   介绍了 policy gradient 的基本概念, 给出了 policy gradient 的形式及推导过程.  
--   分析了 partial observability 的情况, 提出了 policy gradient 中 variance 过大的问题.  
--   介绍了减小 variance 的方法, 包括 causality 和 baseline.  
--   介绍了 off-policy 的 policy gradient.  
-    
-
-# 6 Introduction to Advanced Policy Gradients
-
-本小节中, 我们初步介绍一些 policy gradient 的进阶算法及其相关概念, 为后续一节 **Advanced Policy Gradient** 做准备.
-
-## 6.1 Policy gradient with constraints
-
-首先考虑常规梯度下降 $\theta \gets \theta + \alpha \nabla_\theta J(\theta)$ 的问题. 这里的 $\alpha$ 是我们的学习率, 不难发现, 如果我们的学习率很小, 则我们需要很长时间收敛, 或者可能陷入局部极值, 如果学习率很大, 则有可能因为更新幅度过大而错过最优解.
-
-一个直观的解决方案是, 我们对更新的幅度进行一个限制, 考虑
-
+一个直观的解决方案是, 我们对更新的幅度进行一个限制，考虑
 $$
-\theta' \gets \arg\max_{\theta'} (\theta' - \theta)^T \nabla_\theta J(\theta) \text{ s.t. } \|\theta' - \theta\|^2 \leq \epsilon
+\theta' \gets \arg\max_{\theta'} (\theta' - \theta)^T \nabla_\theta J(\theta) \quad \text{ s.t. } \|\theta' - \theta\|^2 \leq \epsilon
 $$
-我们在参数空间中划分了一个球, 各个参数在参数空间中的步长是相等的.
+我们在参数空间中划分了一个球，各个参数在参数空间中的步长是相等的。
 
-上述约束问题可以通过拉格朗日乘子法解得, 我们构造一个拉格朗日函数
-
+上述约束问题可以通过拉格朗日乘子法解得，我们构造一个拉格朗日函数：
 $$
 \mathcal{L}(\theta', \lambda) = (\theta' - \theta)^T \nabla_\theta J(\theta) - \lambda (\|\theta' - \theta\|^2 - \epsilon)
 $$
-我们直接应用 KKT (Karush-Kuhn-Tucker) 条件, 可以得到问题的解为
-
+我们直接应用[[Concepts#6 KKT (Karush-Kuhn-Tucker) 条件|KKT (Karush-Kuhn-Tucker) 条件]]，可以得到问题的解为
 $$
 \theta' = \theta + \frac{\sqrt{\epsilon}}{\|\nabla_\theta J(\theta)\|} \nabla_\theta J(\theta)
 $$
-换言之这里使用的是动态学习率 $\alpha = \sqrt{\epsilon} / \|\nabla_\theta J(\theta)\|$.
+换言之这里使用的是动态学习率 $\alpha = \sqrt{\epsilon} / \|\nabla_\theta J(\theta)\|$。
 
-作为一个解决约束优化问题的例子, 也为了直观展现 KKT condition 的含义, 我们给出如下利用拉格朗日对偶的过程 (如果你很熟悉这个过程直接跳过即可):
+作为一个解决约束优化问题的例子，也为了直观展现 KKT 情况的含义，我们给出如下利用拉格朗日对偶的过程：
 
-_Proof._ **Step 1: 将原问题转化为带约束的 minimax 问题** 不难发现原问题 $(P)$: $\max_{\theta'} (\theta' - \theta)^T \nabla_\theta J(\theta) \text{ s.t. } \|\theta' - \theta\|^2 \leq \epsilon$ 等价于
-
+_Proof._ 
+**Step 1: 将原问题转化为带约束的极大极小问题** 
+不难发现原问题 $(P)$：
+$$
+\max_{\theta'} (\theta' - \theta)^T \nabla_\theta J(\theta) \quad \text{ s.t. } \|\theta' - \theta\|^2 \leq \epsilon
+$$
+等价于
 $$
 \max_{\theta'} \min_{\lambda, \lambda \geq 0} \mathcal{L}(\theta', \lambda)
 $$
 
-**Step 2: 使用 Sion's Minimax Theorem** 由于 $\mathcal{L}(\theta', \lambda)$ 对 $\theta'$ 是凹函数, 对 $\lambda$ 是凸函数 (线性也是凸函数), 利用 Sion's Minimax Theorem 我们有
-
+**Step 2: 使用 [[Concepts#7 Sion 最小最大定理（Sion's Minimax Theorem）|Sion 最小最大定理（Sion's Minimax Theorem）]]**
+由于 $\mathcal{L}(\theta', \lambda)$ 对 $\theta'$ 是凹函数，对 $\lambda$ 是凸函数（线性也是凸函数），利用 Sion 最小最大定理有
 $$
 \max_{\theta'} \min_{\lambda, \lambda \geq 0} \mathcal{L}(\theta', \lambda) = \min_{\lambda, \lambda \geq 0} \max_{\theta'} \mathcal{L}(\theta', \lambda)
 $$
-且这两个问题的解是等价的.
+且这两个问题的解是等价的。
 
-**Step 3: 求解内层极值得到对偶问题** 再考虑带参数的最值问题 $\max_{\theta'} \mathcal{L}(\theta', \lambda)$, 这里对 $\theta'$ 求偏导并令其为 $0$ 可得
-
+**Step 3: 求解内层极值得到对偶问题** 
+再考虑带参数的最值问题 $\max_{\theta'} \mathcal{L}(\theta', \lambda)$，这里对 $\theta'$ 求偏导并令其为 $0$ 可得
 $$
 \nabla_\theta J(\theta) - 2\lambda(\theta' - \theta) = 0 \Rightarrow \theta' = \theta + \frac{1}{2\lambda} \nabla_\theta J(\theta)
 $$
-于是得到了对偶问题 $(D)$,
-
+于是得到了对偶问题 $(D)$：
 $$
 \min_{\lambda, \lambda \geq 0} \mathcal{L}\left(\theta + \frac{1}{2\lambda} \nabla_\theta J(\theta), \lambda\right)
 $$
 
-**Step 4: 求解对偶问题** 代入可得这个对偶问题的解为 $\lambda = \|\nabla_\theta J(\theta)\| / 2\sqrt{\epsilon}$, 代入得到
-
+**Step 4: 求解对偶问题** 
+代入可得这个对偶问题的解为 $\lambda = \|\nabla_\theta J(\theta)\| / 2\sqrt{\epsilon}$，代入得到
 $$
 \theta' = \theta + \frac{\sqrt{\epsilon}}{\|\nabla_\theta J(\theta)\|} \nabla_\theta J(\theta)
 $$
 
-## 6.2 Natural Policy Gradient
-
-上述的方法是在参数空间中进行的, 隐含着一些问题, 不妨考虑如下的例子:
-
-考虑一维的状态空间和动作空间, 令 $r(\boldsymbol{s}_t, \boldsymbol{a}_t) = -\boldsymbol{s}_t^2 - \boldsymbol{a}_t^2$. 并且考虑高斯策略, 即
-
+## 5.2 Natural Policy Gradient
+上述的方法是在参数空间中进行的，隐含着一些问题，不妨考虑如下的例子：
+考虑一维的状态空间和动作空间，令 $r(\boldsymbol{s}_t, \boldsymbol{a}_t) = -\boldsymbol{s}_t^2 - \boldsymbol{a}_t^2$，并且考虑高斯策略，即
 $$
 \pi_{\theta}(\boldsymbol{a}_t \mid \boldsymbol{s}_t) \sim \mathcal{N}(k \boldsymbol{s}, \sigma)
 $$
-
-![](https://pic2.zhimg.com/v2-db24422e19c8dbe9c0c57299e7eb7ed1_1440w.jpg)
-
 故可以得到
-
 $$
 \log \pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t) = -\frac{1}{2\sigma^2} (\boldsymbol{a}_t - k \boldsymbol{s}_t)^2 + const
 $$
 我们考虑参数 $\theta = (k, \sigma)$, 不难发现,
-
 $$
 \frac{\partial J(\theta)}{\partial \sigma} \sim \sigma^{-3}, \frac{\partial J(\theta)}{\partial k} \sim \sigma^{-2}
 $$
-当 $\sigma$ 接近 $0$ 时, 梯度沿着 $\sigma$ 方向的分量远大于沿着 $k$ 的分量, 因此收敛到最优解的速度会非常慢. 这可以类比到优化问题中的 condition number, 也就是这个优化问题是 poor conditioned (条件数非常大).
+当 $\sigma$ 接近 $0$ 时，梯度沿着 $\sigma$ 方向的分量远大于沿着 $k$ 的分量，因此收敛到最优解的速度会非常慢。这可以类比到优化问题中的[[Concepts#8 条件数（Condition Number）|条件数（Condition Number）]]，也就是这个优化问题是条件数非常大的。
+![](https://pic2.zhimg.com/v2-db24422e19c8dbe9c0c57299e7eb7ed1_1440w.jpg)
 
-![](https://pic4.zhimg.com/v2-6259597dccd6407b9697dd58f67d830f_1440w.jpg)
+实质上，这一问题的核心在于，我们的梯度下降是在参数空间中进行的，而参数空间中不同参数的相同变化对策略的影响是不同的。在前面的例子中，$\sigma$ 接近 $0$ 时，梯度的绝大多数分量都在 $\sigma$ 方向， 也就是说 $\sigma$ 的变化对策略的影响远大于 $k$ 的变化的影响。
 
-使用常规 policy gradient 的问题
+我们希望每个参数的步长在对策略的意义下相等，而不是在参数空间中相等。也就是我们不是先在参数空间画出一个范围，而是先依据策略（概率分布）的空间中画出一个范围，然后再在这个范围内优化 $\theta'$。这里我们需要一种新的距离度量，这种距离度量不应受到参数化的影响，一个很好的选择是[[Concepts#9 KL 散度 (Kullback-Leibler Divergence)|KL 散度 (Kullback-Leibler Divergence)]]。
 
-![](https://pic4.zhimg.com/v2-9d5c4617f85d5f6694522cab9bd23817_1440w.jpg)
-
-类比优化问题
-
-实质上, 这一问题的核心在于, 我们的梯度下降是在参数空间中进行的, 而参数空间中不同参数的相同变化对 policy 的影响是不同的. 在前面的例子中, $\sigma$ 接近 $0$ 时, 梯度的绝大多数分量都在 $\sigma$ 方向, 也就是说 $\sigma$ 的变化对 policy 的影响远大于 $k$ 的变化的影响.
-
-我们希望每个参数的步长在对 policy 的意义下相等, 而不是在参数空间中相等. 也就是我们不是先在参数空间画出一个范围, 而是先依据 policy (概率分布) 的空间中画出一个范围, 然后再在这个范围内优化 $\theta'$. 这里我们需要一种新的距离度量, 这种距离度量不应受到参数化的影响, 一个很好的选择是 KL divergence.
-
-我们这里可以得到一个新的约束优化问题
+我们这里可以得到一个新的约束优化问题：
 $$
-\theta' \gets \arg\max_{\theta'} (\theta' - \theta)^T \nabla_\theta J(\theta) \text{ s.t. }D_{KL}(\pi_{\theta'} \parallel \pi_\theta) \leq \epsilon
+\theta' \gets \arg\max_{\theta'} (\theta' - \theta)^T \nabla_\theta J(\theta) \quad \text{ s.t. }D_{KL}(\pi_{\theta'} \parallel \pi_\theta) \leq \epsilon
 $$
-然而, 直接求解这个问题是非常困难的: 虽然 $D_{KL}$ 是一个凸函数, 但是这是对于分布 $\pi_{\theta'}$ 而言而非 $\theta'$ 而言, 这使得我们难以像处理前面的约束问题那样直接求解. 这里我们可以考虑一个近似的方法, 利用 Taylor 展开, 我们有
+然而，直接求解这个问题是非常困难的：虽然 $D_{KL}$ 是一个凸函数，但是这是对于分布 $\pi_{\theta'}$ 而言而非 $\theta'$ 而言，这使得我们难以像处理前面的约束问题那样直接求解。这里我们可以考虑一个近似的方法，利用泰勒展开，我们有
 $$
 D_{KL}(\pi_{\theta'} \parallel \pi_\theta) \approx \frac{1}{2} (\theta' - \theta)^T F(\theta) (\theta' - \theta)
 $$
-这里 $F(\theta)$ 为 Fisher 信息矩阵, 此时我们近似地得到如下的约束优化问题
+这里 $F(\theta)$ 为 Fisher 信息矩阵，此时我们近似地得到如下的约束优化问题：
 $$
-\theta' \gets \arg\max (\theta' - \theta)^T \nabla_\theta J(\theta) \text{ s.t. } \|\theta' - \theta\|_{F(\theta)}^2 \leq \epsilon
+\theta' \gets \arg\max (\theta' - \theta)^T \nabla_\theta J(\theta) \quad \text{ s.t. } \|\theta' - \theta\|_{F(\theta)}^2 \leq \epsilon
 $$
-我们可以通过拉格朗日乘子法求解, 定义
+我们可以通过拉格朗日乘子法求解，定义
 $$
 \mathcal{L}(\theta', \lambda) = (\theta' - \theta)^T \nabla_\theta J(\theta) - \lambda \left(\frac{1}{2}(\theta' - \theta)^T F(\theta) (\theta' - \theta) - \epsilon\right)
 $$
-基于 KKT condition, 考虑
+基于 KKT 条件，考虑
 $$
 \begin{cases}  \frac{\partial \mathcal{L}}{\partial \theta'} = \nabla_\theta J(\theta) - \lambda F(\theta) (\theta' - \theta) = 0\\  \frac{\partial \mathcal{L}}{\partial \lambda} = \frac{1}{2}(\theta' - \theta)^T F(\theta) (\theta' - \theta) - \epsilon = 0 \end{cases}
 $$
@@ -332,26 +309,23 @@ $$
 $$
 \alpha = \sqrt{\frac{2\epsilon}{(\nabla_\theta J(\theta))^T F^{-1}(\theta) \nabla_\theta J(\theta)}}
 $$
-于是我们可以给出 **natural gradient** 算法的基本流程:
-1.  利用 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 采样一系列轨迹 $\mathcal{D}$  
-2.  估计 advantage function $\hat{A}(\boldsymbol{s}_t, \boldsymbol{a}_t)$  
-3.  计算 policy gradient $\nabla_\theta J(\theta) = \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \hat{A}(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t})$  
-4.  利用估计 $F(\theta) \approx \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t})^T$ 计算 Fisher 信息矩阵 $F(\theta)$.  
-5.  利用 $\theta' = \theta + \alpha F^{-1}(\theta) \nabla_\theta J(\theta)$ 更新参数, 其中 $\alpha$ 是动态计算的学习率.  
-
-上述算法中我们尚未覆盖的是 $F(\theta)$ 的计算方式, 这里基于的是
+于是我们可以给出**自然策略梯度（Natural policy gradient）** 算法的基本流程:
+1.  利用 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 采样一系列轨迹 $\mathcal{D}$。  
+2.  估计优势函数 $\hat{A}(\boldsymbol{s}_t, \boldsymbol{a}_t)$。  
+3.  计算策略梯度 $\nabla_\theta J(\theta) = \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \hat{A}(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t})$。
+4.  利用估计 $F(\theta) \approx \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t})^T$ 计算 Fisher 信息矩阵 $F(\theta)$。
+5.  利用 $\theta' = \theta + \alpha F^{-1}(\theta) \nabla_\theta J(\theta)$ 更新参数，其中 $\alpha$ 是动态计算的学习率。
+上述算法中我们尚未覆盖的是 $F(\theta)$ 的计算方式，这里基于的是
 $$
 F(\theta) = \mathbb{E}_{\pi_\theta(\boldsymbol{a} \mid \boldsymbol{s})} \left[\nabla_\theta \log \pi_\theta(\boldsymbol{a} \mid \boldsymbol{s}) \nabla_\theta \log \pi_\theta(\boldsymbol{a} \mid \boldsymbol{s})^T\right]
 $$
-我们用样本的均值来估计这个期望就可以得到 $F(\theta)$ 的估计.
+我们用样本的均值来估计这个期望就可以得到 $F(\theta)$ 的估计。
 
+使用自然策略梯度的效果：
 ![](https://picx.zhimg.com/v2-6900826967f76aac58d7fdd5aa87d86d_1440w.jpg)
 
-使用 Natural policy gradient 的效果
-**Remark:**
--   我们基于 policy 的分布来定义了一个新的距离度量, 在这一度量的近似约束下进行优化.  
--   我们引入了动态的学习率.  
--   我们的 Fisher 信息矩阵使用了二阶近似, 含有一些误差, 也可能导致我们的约束条件不被满足, 因此并不能保证我们的更新是最优的.  
--   动态学习率的计算是基于 Fisher 信息矩阵的逆矩阵, 这个计算复杂度是 $O(n^3)$ 的, 相对昂贵.  
-
-在 **Advanced Policy Gradient** 一节中, 我们将会介绍一些更加高级的 policy gradient 算法, 进一步改进 natural gradient 的算法.  
+注意：
+- 我们基于策略的分布来定义了一个新的距离度量，在这一度量的近似约束下进行优化。
+- 我们引入了动态的学习率。
+- 我们的 Fisher 信息矩阵使用了二阶近似，含有一些误差，也可能导致我们的约束条件不被满足，因此并不能保证我们的更新是最优的。
+- 动态学习率的计算是基于 Fisher 信息矩阵的逆矩阵，这个计算复杂度是 $O(n^3)$ 的，相对昂贵。
