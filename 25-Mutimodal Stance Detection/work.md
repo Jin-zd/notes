@@ -757,7 +757,11 @@ Qwen-VL: mccq in_target 55.63
 2. 图像caption+文本 微调
 3. visual caption、visual summary、text information、text summary、联合experience pool得到的文本经验
 
-|                | MRUC  |       | MTWQ  |       | MCCQ  |
-| -------------- | ----- | ----- | ----- | ----- | ----- |
-| Qwen Only Text | 40.31 | 48.82 | 48.82 | 40.30 | 68.57 |
-| Qwen All       | 39.54 | 52.31 | 55.76 | 40.99 | 60.13 |
+|                     | MRUC  |       | MTWQ  |       | MCCQ  |
+| ------------------- | ----- | ----- | ----- | ----- | ----- |
+| Qwen Only Text      | 40.31 | 48.82 | 48.82 | 40.30 | 68.57 |
+| Qwen All            | 39.54 | 52.31 | 55.76 | 40.99 | 60.13 |
+| QwenVL 7B train     | 36.92 | 45.93 | 55.60 | 36.61 | 53.87 |
+| QwenVL 7B no train  | 34.00 | 41.56 | 55.46 | 37.38 | 50.88 |
+| QwenVL 32B train    |       |       |       |       | 62.76 |
+| QwenVL 32B no train |       |       |       |       | 55.93 |
