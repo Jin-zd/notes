@@ -3,22 +3,22 @@
 $$
 \nabla_\theta J(\theta) \approx \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \hat{Q}_{i,t}
 $$
-这里的 $\hat{Q}_{i,t}$ 是我们对从 $\boldsymbol{s}_{i,t}$ 开始采用 $\boldsymbol{a}_{i,t}$ 的奖励的估计。这里的估计方式是蒙特卡洛的方法：通过将单个轨迹后续所有奖励累加得到的。由于只有单个而且很长的轨迹，这种估计方式方差很大。而且我们不能使用多个轨迹，因为收集多个轨迹需要与多次环境交互，而我们通常无法在非起始状态下开始交互。
+这里的 $\hat{Q}_{i,t}$ 是我们对从 $\boldsymbol{s}_{i,t}$ 开始采用 $\boldsymbol{a}_{i,t}$ 的奖励的估计。这里的估计方式是[[Concepts#10 蒙特卡洛方法 (Monte Carlo Method)|蒙特卡洛方法 (Monte Carlo Method)]]：通过将单个轨迹后续所有奖励累加得到的。由于只有单个而且很长的轨迹，这种估计方式方差很大。而且我们不能使用多个轨迹，因为收集多个轨迹需要与多次环境交互，而我们通常无法在非起始状态下开始交互。
 
 这里采用蒙特卡洛方法估计的未来奖励是对如下的 $Q$ 函数的估计：
-
 **Definition 1**. _Q function（Q 函数）_
 $$
 Q^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) = \sum_{t' = t}^T \mathbb{E}_{\tau \sim \pi_\theta} \left[r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) \mid \boldsymbol{s}_t, \boldsymbol{a}_t\right]
 $$
-回顾我们在策略梯度中还可以使用基线，也就是 $b_t = \frac{1}{N} \sum_{i = 1}^N r(\tau)$，这里的基线是利用整条轨迹估计的，可以理解为是对 $V^\pi(\boldsymbol{s}_1)$ 的一个无偏估计，我们借鉴这一思想，定义一个依赖于状态的基线：
+回顾我们在策略梯度中还可以使用基线，也就是 $b_t = \frac{1}{N} \sum_{i = 1}^N r(\tau)$，这里的基线是利用整条轨迹估计的，可以理解为是对 $V^\pi(\boldsymbol{s}_1)$ 的一个无偏估计。
 
+我们借鉴这一思想，定义一个依赖于状态的基线：
 **Definition 2**. _value function（价值函数）_
 $$
 V^\pi(\boldsymbol{s}_t) = \mathbb{E}_{\boldsymbol{a}_t \sim \pi_\theta} \left[Q^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t)\right]
 $$
-我们从未来的奖励中减去这个基线，也就可以得到如下定义的优势函数：
 
+我们从未来的奖励中减去这个基线，也就可以得到如下定义的优势函数：
 **Definition 3**. _advantage function（优势函数）_
 $$
 A^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) = Q^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) - V^\pi(\boldsymbol{s}_t)
@@ -77,7 +77,7 @@ $$
 
 # 3 Actor-Critic Algorithm
 
-在上述讨论中, 我们有一个策略，被称为**演员（actor）**，用于生成动作，一个价值函数，被称为**评论家（critic）**，用于评估状态的价值。这种结合策略梯度和价值函数的方法被称为**演员-评论家算法（Actor-Critic Algorithms）**。我们可以得到一个简单的演员-评论家算法，批量演员-评论家算法：
+在上述讨论中, 我们有一个策略，被称为**演员（actor）**，用于生成动作，一个价值函数，被称为**评论家（critic）**，用于评估状态的价值。这种结合策略梯度和价值函数的方法被称为**演员-评论家算法（Actor-Critic Algorithms）**。我们可以得到一个简单的演员-评论家算法，即批量演员-评论家算法：
 1. 从策略 $\pi_\theta$ 采样一系列轨迹；
 2. 拟合 $\hat{V}^\pi(\boldsymbol{s})$；
 3. 计算优势函数 $\hat{A}^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) \approx r(\boldsymbol{s}_t, \boldsymbol{a}_t) + \hat{V}^\pi(\boldsymbol{s}_{t + 1}) - \hat{V}^\pi(\boldsymbol{s}_t)$；
@@ -136,14 +136,14 @@ $$
 
 注意区分 offline/ online 与 off-policy/ on-policy。offline/ online 是指在学习过程中是否与环境不断交互，而 off-policy/ on-policy 是指我们的数据是否基于当前的策略。然而这对 deep RL 来说是有许多问题的，因为仅仅使用一个样本进行更新是不稳定的，有很大的方差。我们考虑以下两个方式来解决这个问题：
 - **同步并行的演员-评论家算法（synchronous parallel）**：我们有多个同步的工作线程，每个工作线程每一步都会进行一个动作，这样我们的批量大小就等于工作线程的数量。一个问题在于不同 工作线程结束的时间可能不同，因此会有一定的同步开销。
-- **异步的演员-评论家算法（asynchronous）**：我们同样有多个工作线程，但它们未必同步，每一次当我们收集到批量大小个样本时，我们就进行一次更新。但是这一方式的问题是，一个批量中可能混有不同参数的样本（考虑一次更新时可能某个工作线程正在采集数据），这在数学上是不等价的，但由于单次更新参数变化有限，因此通常问题不会太大。（这就是 **A3C (Asynchronous Advantage Actor-Critic）** 算法的核心思想）
+- **异步的演员-评论家算法（asynchronous）**：我们同样有多个工作线程，但它们未必同步，每一次当我们收集到批量大小个样本时，我们就进行一次更新。但是这一方式的问题是，一个批量中可能混有不同参数的样本（考虑一次更新时可能某个工作线程正在采集数据），这在数学上是不等价的，但由于单次更新参数变化有限，因此通常问题不会太大。（这就是 Asynchronous Advantage Actor-Critic，A3C 算法的核心思想）。
 ![](4-5.png)
 
 ## 5.2 Off-Policy Actor-Critic Algorithm (Problematic)
 
 我们能否去除掉 on-policy 假设呢？这就引出了 off-policy 演员-评论家算法。我们此时只有一个线程，我们会有一个**回放缓冲区** $\mathcal{R}$，每一步我们都会将 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}', r)$ 存入回放缓冲区，然后我们从其中中采样进行更新。此时我们的每次更新方差就会非常小。
 
-online 演员-评论家算法（off-policy）**（problematic）**：
+online 演员-评论家算法（off-policy）**（存在问题的）**：
 1. 采取动作 $\boldsymbol{a}_t$，得到 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}', r)$, 储存在 $\mathcal{R}$；
 2. 从 $\mathcal{R}$ 采样一个批量； 
 3. 更新 $\hat{V}^\pi(\boldsymbol{s}_i)$，使用 $y_i= r_i + \gamma \hat{V}^\pi(\boldsymbol{s}_i')$ 与 $L(\phi) = \frac{1}{N} \sum_{i = 1}^N \left\|\hat{V}^\pi(\boldsymbol{s}_i) - y_i\right\|^2$，其中 $N$ 是批量大小；  
@@ -151,12 +151,12 @@ online 演员-评论家算法（off-policy）**（problematic）**：
 5. 计算梯度 $\nabla_\theta J(\theta) \approx \frac{1}{N} \sum_{i} \nabla_\theta \log \pi_\theta(\boldsymbol{a}_i \mid \boldsymbol{s}_i) \hat{A}^\pi(\boldsymbol{s}_i, \boldsymbol{a}_i)$；
 6. 更新 $\theta$。
 
-这个算法中有两个部分都是**不正确**的：
+这个算法中有两个部分都是不正确的：
 - 我们从回放缓冲区中采样的 $\boldsymbol{s}_i$ 对应的 $\boldsymbol{a}_i$ 并不是按照最新的策略采样的。这会导致我们计算的 $V^\pi$ 函数不再能够反映当前的策略。
 - 基于同样的理由，我们的策略梯度也是不正确的，一个可能的方式是我们可以使用重要性采样。
 
 ## 5.3 Fixing Off-Policy Actor-Critic Algorithm
-**Fixing Step 3**
+**Fixing Step 3：**
 对于第一个问题, 我们可以利用 $Q$ 函数而不是 $V$ 函数，因为 $Q$ 函数包含了动作。即使 $\boldsymbol{a}_i$ 是旧的，意味着基于当前策略在 $\boldsymbol{s}_i$ 我们不再会选择 $\boldsymbol{a}_i$，但对应的 $r_i$ 依然准确，估计的 $Q$ 函数仍然正确。
 
 我们考虑更新第 $3$ 步为：更新 $\hat{Q}^\pi(\boldsymbol{s}_i, \boldsymbol{a}_i)$ 基于 $y_i = r_i + \gamma \hat{V}^\pi(\boldsymbol{s}')$，之后做回归：
@@ -171,7 +171,7 @@ V^\pi(\boldsymbol{s}') = \mathbb{E}_{\boldsymbol{a}' \sim \pi(\boldsymbol{s}\mid
 $$
 一个无偏的估计是使用 $y_i = r_i + \gamma \hat{Q}_\phi^\pi(\boldsymbol{s}_i', \boldsymbol{a}_i')$，其中 $\boldsymbol{a}_i'$ 并不来自 $\mathcal{R}$，而是我们要从 $\pi_\theta(\boldsymbol{a}_i' \mid \boldsymbol{s}_i')$ 中采样。
 
-**Fixing Step 5**
+**Fixing Step 5：**
 对于第 $5$ 步，我们不能再使用缓冲中的动作 $\boldsymbol{a}_i$，而是使用基于当前策略 $\pi$ 选择的动作 $\boldsymbol{a}_i^\pi \sim \pi_\theta(\boldsymbol{a}, \boldsymbol{s}_i)$。
 
 在实际中我们使用 $Q$ 函数：
@@ -196,17 +196,16 @@ $$
 
 注意：
 - 在第 $4$ 步中我们可以有更加花哨的技巧，使用重参数化技巧，来更好地估计积分。
-- 这里我们使用的是随机策略，在接下来介绍的 Q-learning 中我们使用的是确定性策略。
+- 这里我们使用的是随机策略，在接下来介绍的 Q 学习中我们使用的是确定性策略。
 
 # 6 Techniques for Reducing Bias
 我们不妨回顾一下我们的两种方法：
-- **演员-评论家算法**：有更低的方差，但是不再是无偏的，只要评论家不是完美的。
-- **策略梯度**：没有偏差，但是会有很大的方差，因为使用的是单样本估计。
+- 演员-评论家算法：有更低的方差，但是不再是无偏的，只要评论家不是完美的。
+- 策略梯度：没有偏差，但是会有很大的方差，因为使用的是单样本估计。
 
 在策略梯度算法中我们主要关注了如何减小方差，而在演员-评论家算法中我们将关注如何减小以至于消除偏差。
 首先我们可以从策略梯度出发，得到两个利用评论家在保持无偏的同时实现很低的方差的方法。
 ## 6.1 Critics as state-dependent baselines
-
 由于如果基线仅依赖于状态，那么这个估计值依然是无偏的，我们的梯度估计式为：
 $$
 \nabla_\theta J(\theta) \approx \frac{1}{N} \sum_{i = 1}^{N} \sum_{t = 1}^{T} \nabla_\theta \log \pi_\theta(\boldsymbol{a}_i \mid \boldsymbol{s}_i) \left(\left(\sum_{t' = t}^{T} \gamma^{t' - t} r(\boldsymbol{s}_{i,t'}, \boldsymbol{a}_{i,t'})\right) - \hat{V}_\phi^\pi(\boldsymbol{s}_i)\right)

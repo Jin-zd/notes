@@ -133,3 +133,183 @@ $$D_{KL}(P||Q) = \int_{-\infty}^{\infty} p(x) \log \left( \frac{p(x)}{q(x)} \rig
 * 期望：KL 散度可以看作是使用分布 $Q$ 近似分布 $P$ 时，所损失的平均额外信息量（以比特或纳特为单位）。
 * 当 $P(x) > 0$ 且 $Q(x) = 0$ 时，$\log \left( \frac{P(x)}{Q(x)} \right) = \infty$，导致 $D_{KL}(P||Q) = \infty$。这意味着如果真实分布中可能出现的事件在近似分布中概率为零，则 KL 散度为无穷大。
 * 当 $P(x) = 0$ 时，按照惯例认为 $0 \log \left( \frac{0}{Q(x)} \right) = 0$。
+
+## 10 蒙特卡洛方法 (Monte Carlo Method)
+### 10.1 概述
+
+蒙特卡洛方法是一种通过随机抽样来估计数值结果的计算技术。它依赖于重复的随机抽样来获得概率结果，并利用这些结果来逼近真实值。这种方法特别适用于解决那些难以通过确定性算法或解析方法解决的问题，尤其是在涉及高维度、复杂模型或不确定性的情况下。
+### 10.2 关键步骤
+1.  构建概率模型：
+    * 确定问题的输入变量和输出变量。
+    * 为输入变量定义合适的概率分布。
+    * 建立输入变量与输出变量之间的关系模型。
+2.  生成随机数：
+    * 使用伪随机数生成器产生服从指定概率分布的随机数。
+    * 确保生成的随机数具有良好的统计特性（如均匀性、独立性）。
+3.  执行模拟：
+    * 对于每一组随机生成的输入变量，运行模型并记录输出结果。
+    * 重复此过程大量的次数（模拟次数 $N$）。
+4.  分析结果：
+    * 计算所有模拟输出结果的统计量，例如均值 ($\bar{X}$)、方差 ($\sigma^2$)、置信区间等。
+    * 均值通常作为问题解的估计值：$$\bar{X} = \frac{1}{N} \sum_{i=1}^{N} X_i$$其中，$X_i$ 是第 $i$ 次模拟的输出结果。
+5.  评估精度：
+    * 通过增加模拟次数来提高估计的精度。
+    * 可以使用中心极限定理等理论来估计结果的误差范围。
+
+### 10.3 特点
+* 易于并行化：每次模拟之间通常相互独立，方便并行计算。
+* 收敛速度慢：通常需要大量的模拟次数才能获得较高的精度，收敛速度约为 $O(1/\sqrt{N})$。
+* 高维度问题挑战：在极高维度的问题中，所需的样本数量会急剧增加（维度灾难）。
+### 10.4 提高效率的方法
+* 重要性抽样 (Importance Sampling)：将抽样集中在对结果贡献较大的区域。
+* 方差缩减技术 (Variance Reduction Techniques)：如控制变量法、分层抽样法、对偶变量法等，旨在减少估计结果的方差，提高精度。
+* 准蒙特卡洛方法 (Quasi-Monte Carlo Methods)：使用低差异序列代替伪随机数，以提高收敛速度。
+
+## 11 胡贝尔损失（Huber Loss）
+### 11.1 定义
+Huber Loss 是回归任务中常用的损失函数，结合了均方误差（MSE）和平均绝对误差（MAE）的优点，对离群点（outliers）鲁棒性。公式如下：
+$$
+L_{\delta}(y, \hat{y}) = 
+\begin{cases} 
+\frac{1}{2}(y - \hat{y})^2 & \text{if} \; |y - \hat{y}| \leq \delta, \\
+\delta \cdot |y - \hat{y}| - \frac{1}{2}\delta^2 & \text{otherwise.}
+\end{cases}
+$$
+- $y$：真实值  
+- $\hat{y}$：预测值  
+- $\delta$：超参数，控制平方误差与绝对误差的切换阈值（通常取 1.0）
+### 11.2 特点
+- 在误差较小时使用平方项（类似 MSE），误差较大时使用线性项（类似 MAE），避免对离群点过度敏感。
+- 通过调整 $\delta$ 平衡 MSE 和 MAE 的特性：$\delta$ → 0 时接近 MAE，$\delta$ → ∞ 时接近 MSE。
+- 在误差为 $\pm \delta$ 处一阶导数连续，优化过程更稳定。
+
+## 12 主-最小化 / 次-最大化 (MM) 算法
+### 12.1 核心思想
+MM 算法是一种迭代优化算法，其核心思想是通过构建一个比目标函数更容易优化的替代函数（surrogate function），并通过迭代地最小化（或最大化）这个替代函数来逼近目标函数的最小值（或最大值）。
+### 12.2 基本框架
+假设我们要最小化目标函数 $f(\mathbf{x})$。MM 算法的迭代过程如下：
+1. 构建替代函数 (Majorization)：在当前迭代点 $\mathbf{x}^{(k)}$，构建一个替代函数 $g(\mathbf{x} | \mathbf{x}^{(k)})$，该函数需要满足以下条件（对于最小化问题）：
+   - $g(\mathbf{x}^{(k)} | \mathbf{x}^{(k)}) = f(\mathbf{x}^{(k)})$  （在当前点与目标函数值相等）
+   - $g(\mathbf{x} | \mathbf{x}^{(k)}) \ge f(\mathbf{x})$ 对于所有 $\mathbf{x}$ （替代函数是目标函数的上界）
+2. 最小化替代函数 (Minimization)：找到下一个迭代点 $\mathbf{x}^{(k+1)}$，通过最小化替代函数得到：$$ \mathbf{x}^{(k+1)} = \arg\min_{\mathbf{x}} g(\mathbf{x} | \mathbf{x}^{(k)}) $$
+3. 迭代：重复步骤 1 和 2，直到满足收敛条件。
+
+对于最大化问题 (Minorization-Maximization)：
+类似地，对于最大化目标函数 $f(\mathbf{x})$，我们需要构建一个替代函数 $m(\mathbf{x} | \mathbf{x}^{(k)})$，满足：
+1. 构建替代函数 (Minorization)：
+   * $m(\mathbf{x}^{(k)} | \mathbf{x}^{(k)}) = f(\mathbf{x}^{(k)})$
+   * $m(\mathbf{x} | \mathbf{x}^{(k)}) \le f(\mathbf{x})$ 对于所有 $\mathbf{x}$ (替代函数是目标函数的下界)
+2. 最大化替代函数 (Maximization)：$$ \mathbf{x}^{(k+1)} = \arg\max_{\mathbf{x}} m(\mathbf{x} | \mathbf{x}^{(k)}) $$
+### 12.3 性质
+* 单调性 (Monotonicity)意味着目标函数的值在每次迭代中都会单调下降（或上升），保证了算法的稳定性：
+    * 对于最小化：$f(\mathbf{x}^{(k+1)}) \le g(\mathbf{x}^{(k+1)} | \mathbf{x}^{(k)}) \le g(\mathbf{x}^{(k)} | \mathbf{x}^{(k)}) = f(\mathbf{x}^{(k)})$
+    * 对于最大化：$f(\mathbf{x}^{(k+1)}) \ge m(\mathbf{x}^{(k+1)} | \mathbf{x}^{(k)}) \ge m(\mathbf{x}^{(k)} | \mathbf{x}^{(k)}) = f(\mathbf{x}^{(k)})$
+* 简化优化问题：MM 算法的关键在于选择合适的替代函数，使得最小化（或最大化）替代函数比直接优化目标函数更容易。
+### 12.4 构建替代函数
+构建合适的替代函数是 MM 算法的核心挑战。常用的方法包括：
+* 二次上界 (Quadratic Majorization)：利用目标函数的二阶信息（例如 Hessian 矩阵）构建二次上界。
+* 琴生不等式 (Jensen's Inequality)：对于凸函数或凹函数，可以利用琴生不等式构建线性或更简单的替代函数。
+* 算术-几何平均不等式 (AM-GM Inequality)：在处理包含乘积项的目标函数时非常有用。
+* 泰勒展开 (Taylor Expansion)：利用目标函数的一阶或二阶泰勒展开构建局部近似。
+
+## 13 共轭梯度下降 (Conjugate Gradient Descent)
+### 13.1 核心思想
+共轭梯度下降法是一种用于求解对称正定线性方程组 $\mathbf{Ax} = \mathbf{b}$ 的迭代方法，也可以推广到求解无约束非线性优化问题。其核心思想是在每次迭代中选择一个与先前搜索方向共轭的方向作为新的搜索方向，从而更快地收敛到解。
+### 13.2 求解线性方程组
+求解：$\mathbf{Ax} = \mathbf{b}$ (A 是对称正定矩阵)
+
+迭代过程：
+1. 初始化：
+   * 选择初始猜测 $\mathbf{x}_0$。
+   * 计算初始残差 $\mathbf{r}_0 = \mathbf{b} - \mathbf{Ax}_0$。
+   * 设置初始搜索方向 $\mathbf{p}_0 = \mathbf{r}_0$。
+   * 设置迭代次数 $k = 0$。
+2. 迭代步骤：对于 $k = 0, 1, 2, \dots$：
+   * 计算步长 (Step size)：$$ \alpha_k = \frac{\mathbf{r}_k^T \mathbf{r}_k}{\mathbf{p}_k^T \mathbf{Ap}_k} $$
+   * 更新解：$$ \mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \mathbf{p}_k $$
+   * 更新残差：$$ \mathbf{r}_{k+1} = \mathbf{b} - \mathbf{Ax}_{k+1} = \mathbf{r}_k - \alpha_k \mathbf{Ap}_k $$
+   * 计算共轭系数 (Conjugate coefficient)：$$ \beta_k = \frac{\mathbf{r}_{k+1}^T \mathbf{r}_{k+1}}{\mathbf{r}_k^T \mathbf{r}_k} $$
+   * 更新搜索方向：$$ \mathbf{p}_{k+1} = \mathbf{r}_{k+1} + \beta_k \mathbf{p}_k $$
+   * 检查收敛条件：如果满足收敛条件（例如，残差足够小），则停止迭代。
+   * 更新迭代次数： $k \leftarrow k + 1$。
+
+共轭性（Conjugacy）：
+向量 $\mathbf{u}$ 和 $\mathbf{v}$ 关于对称正定矩阵 $\mathbf{A}$ 是共轭的，如果满足：
+$$ \mathbf{u}^T \mathbf{Av} = 0 $$
+共轭性保证了在每个新的搜索方向上，不会干扰到之前迭代中已经优化过的方向上的最优性。
+性质：
+* 对于一个 $n$ 维问题，共轭梯度法在理想情况下最多经过 $n$ 次迭代就能找到精确解（在没有舍入误差的情况下）。
+* 每一步的搜索方向 $\mathbf{p}_k$ 是当前残差 $\mathbf{r}_k$ 和前一个搜索方向 $\mathbf{p}_{k-1}$ 的线性组合。
+* 残差序列 $\{\mathbf{r}_k\}$ 是相互正交的，即 $\mathbf{r}_i^T \mathbf{r}_j = 0$ 对于 $i \neq j < k$。
+* 搜索方向序列 $\{\mathbf{p}_k\}$ 是相互共轭的，即 $\mathbf{p}_i^T \mathbf{Ap}_j = 0$ 对于 $i \neq j < k$。
+
+### 13.3 求解无约束非线性优化问题 
+求解：$\min f(\mathbf{x})$
+
+将共轭梯度的思想应用于非线性优化，其目标是找到函数 $f(\mathbf{x})$ 的最小值。此时，残差 $\mathbf{r}_k$ 被负梯度 $-\nabla f(\mathbf{x}_k)$ 所替代。
+
+迭代过程 (Fletcher-Reeves 版本)：
+1. 初始化：
+   * 选择初始猜测 $\mathbf{x}_0$。
+   * 计算初始梯度 $\mathbf{g}_0 = \nabla f(\mathbf{x}_0)$。
+   * 设置初始搜索方向 $\mathbf{p}_0 = -\mathbf{g}_0$。
+   * 设置迭代次数 $k = 0$。
+2. 迭代步骤： 对于 $k = 0, 1, 2, \dots$：
+   * 计算步长 (Line search)：找到一个步长 $\alpha_k > 0$，使得 $f(\mathbf{x}_k + \alpha_k \mathbf{p}_k)$ 充分减小（例如，满足 Wolfe 条件或 Armijo 条件）。
+   * 更新解：$$ \mathbf{x}_{k+1} = \mathbf{x}_k + \alpha_k \mathbf{p}_k $$
+   * 计算新的梯度：$$ \mathbf{g}_{k+1} = \nabla f(\mathbf{x}_{k+1}) $$
+   * 计算共轭系数 (Fletcher-Reeves)：$$ \beta_k = \frac{\mathbf{g}_{k+1}^T \mathbf{g}_{k+1}}{\mathbf{g}_k^T \mathbf{g}_k} $$
+   * 更新搜索方向：$$ \mathbf{p}_{k+1} = -\mathbf{g}_{k+1} + \beta_k \mathbf{p}_k $$
+   * 检查收敛条件：如果满足收敛条件（例如，梯度足够小），则停止迭代。
+   * 更新迭代次数： $k \leftarrow k + 1$。
+
+除了 Fletcher-Reeves，还有其他计算 $\beta_k$ 的方法，例如：
+* Polak-Ribière： $\beta_k = \frac{\mathbf{g}_{k+1}^T (\mathbf{g}_{k+1} - \mathbf{g}_k)}{\mathbf{g}_k^T \mathbf{g}_k}$
+* Hestenes-Stiefel： $\beta_k = \frac{\mathbf{g}_{k+1}^T (\mathbf{g}_{k+1} - \mathbf{g}_k)}{\mathbf{p}_k^T (\mathbf{g}_{k+1} - \mathbf{g}_k)}$
+* Dai-Yuan： $\beta_k = \frac{\mathbf{g}_{k+1}^T \mathbf{g}_{k+1}}{\mathbf{p}_k^T (\mathbf{g}_{k+1} - \mathbf{g}_k)}$
+不同的 $\beta_k$ 计算方法在不同的问题上可能表现出不同的收敛性能。
+
+## 14 对偶梯度下降（Dual Gradient Descent）
+### 14.1 定义
+考虑如下带约束的优化问题：
+$$
+\begin{aligned}
+\min_{w} \quad & f(w) \\
+\text{s.t.} \quad & g_i(w) \le 0, \quad i = 1, \dots, m \\
+& h_j(w) = 0, \quad j = 1, \dots, p
+\end{aligned}
+$$
+其中，$f(w)$ 是目标函数，$g_i(w)$ 是不等式约束，$h_j(w)$ 是等式约束。
+
+定义拉格朗日函数为：
+$$L(w, \alpha, \beta) = f(w) + \sum_{i=1}^{m} \alpha_i g_i(w) + \sum_{j=1}^{p} \beta_j h_j(w)$$
+其中，$\alpha_i \ge 0$ 是与不等式约束相关的拉格朗日乘子，$\beta_j$ 是与等式约束相关的拉格朗日乘子。
+
+对偶函数 $q(\alpha, \beta)$ 定义为拉格朗日函数关于 $w$ 的最小值：
+$$q(\alpha, \beta) = \inf_{w} L(w, \alpha, \beta) = \inf_{w} \left( f(w) + \sum_{i=1}^{m} \alpha_i g_i(w) + \sum_{j=1}^{p} \beta_j h_j(w) \right)$$
+对偶问题是最大化对偶函数，并满足拉格朗日乘子的约束：
+$$
+\begin{aligned}
+\max_{\alpha, \beta} \quad & q(\alpha, \beta) \\
+\text{s.t.} \quad & \alpha_i \ge 0, \quad i = 1, \dots, m
+\end{aligned}
+$$
+对偶梯度下降是一种解决对偶问题的迭代优化算法。它通过在对偶变量（拉格朗日乘子）上执行梯度上升来最大化对偶函数。
+
+假设对偶函数 $q(\alpha, \beta)$ 是可微的，我们可以计算其关于 $\alpha$ 和 $\beta$ 的梯度。根据链式法则，如果最优解 $w^*$ 存在，并且拉格朗日函数在 $w^*$ 处可微，那么：
+$$
+\nabla_{\alpha_i} q(\alpha, \beta) = g_i(w^*) \\
+\nabla_{\beta_j} q(\alpha, \beta) = h_j(w^*)
+$$
+
+对偶梯度下降的更新规则如下：
+$$
+\alpha_i^{(k+1)} = \max(0, \alpha_i^{(k)} + \eta_k g_i(w^{(k)})) \\
+\beta_j^{(k+1)} = \beta_j^{(k)} + \eta_k h_j(w^{(k)})
+$$
+其中，$\eta_k > 0$ 是学习率，$w^{(k)}$ 是在当前对偶变量 $(\alpha^{(k)}, \beta^{(k)})$ 下最小化拉格朗日函数得到的 $w$ 的值。
+### 14.2 注意
+* 对偶梯度下降适用于对偶问题比原始问题更容易求解的情况。
+* 学习率 $\eta_k$ 的选择对算法的收敛性至关重要。
+* 在每一步都需要解决一个最小化拉格朗日函数的子问题。对于某些问题，这个子问题可能仍然很困难。
+* 当原始问题是凸的并且满足某些约束条件（如 Slater 条件）时，强对偶性成立，原始问题的最优值等于对偶问题的最优值。在这种情况下，求解对偶问题可以得到原始问题的解。

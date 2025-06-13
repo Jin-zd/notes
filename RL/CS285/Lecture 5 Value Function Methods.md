@@ -7,37 +7,37 @@ $$
 $$
 A^\pi(\boldsymbol{s}, \boldsymbol{a}) = Q^\pi(\boldsymbol{s}, \boldsymbol{a}) - V^\pi(\boldsymbol{s}) = Q^\pi(\boldsymbol{s}, \boldsymbol{a}) - \mathbb{E}_{\boldsymbol{a} \sim \pi(\boldsymbol{a} \mid \boldsymbol{s})} \left[Q^\pi(\boldsymbol{s}, \boldsymbol{a})\right]
 $$
-这给了我们一个思路：我们能否完全不使用策略梯度而仅仅使用价值函数呢？这便是 **基于价值的方法（Value-based methods）** 的基本思想了，在基于价值的方法中没有显式的策略，仅仅学习一定形式的价值函数。回顾以下记号：
+这给了我们一个思路：能否完全不使用策略梯度而仅仅使用价值函数呢？这便是 **基于价值的方法（Value-based methods）** 的基本思想了，在基于价值的方法中没有显式的策略，仅仅学习一定形式的价值函数。回顾以下记号：
 -  $A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 表示在状态 $\boldsymbol{s}$ 下采取动作 $\boldsymbol{a}$ 相较于平均动作的优势。  
 -  $\arg\max_{\boldsymbol{a}} A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 表示在状态 $\boldsymbol{s}$ 下依照策略 $\pi$ 可以采取的最优动作。 
 
-很显然如果 $A^\pi$ 准确，那么采取 $\arg\max_{\boldsymbol{a}} A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 至少和按照 $\boldsymbol{a} \sim \pi$ 采取的动作一样好。于是我们可以使用方式更新策略： 
+很显然如果 $A^\pi$ 准确，那么采取 $\arg\max_{\boldsymbol{a}} A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 至少和按照 $\boldsymbol{a} \sim \pi$ 采取的动作一样好。于是可以使用方式更新策略： 
 $$
 \pi'(\boldsymbol{a}_t \mid \boldsymbol{s}_t) = \begin{cases}  1, & \text{if } \boldsymbol{a}_t = \arg\max_{\boldsymbol{a}_t} A^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t),\\  0, & \text{otherwise}. \end{cases}
 $$
-上述过程我们展示了如何利用价值函数来更新策略。如果在此之后进行策略评估，那么我们就可以重复上述过程，不断得到更优的策略的价值函数，就得到了 **策略迭代（Policy iteration）** 算法。
+上述过程展示了如何利用价值函数来更新策略。如果在此之后进行策略评估，那么就可以重复上述过程，不断得到更优的策略的价值函数，就得到了 **策略迭代（Policy iteration）** 算法。
 
 在通用 RL 框架中，在 Part 2 中我们会拟合 $A^\pi$ （或者 $Q^\pi$, $V^\pi$）。在 Part 3 中我们使用 $\pi \gets \pi'$：
 ![](5-1.png)
 
-我们下面从具体设定中来讨论如何进行策略评估。
+下面从具体设定中来讨论如何进行策略评估。
 
 # 2 Policy Iteration and Value Iteration (Known Dynamics)
 
 假设：我们知道环境的动态 $p(\boldsymbol{s}' \mid \boldsymbol{s}, \boldsymbol{a})$，并且 $\boldsymbol{s}, \boldsymbol{a}$ 都是离散的（例如 $4 \times 4$ 的网格， $4$ 个动作）
 ![](5-2.png)
 
-此时 $V^\pi(\boldsymbol{s})$ 可以被存储在一个表格中，我们的转移算子 $\mathcal{T}$ 为一个 $16 \times 16 \times 4$ 的张量。于是我们可以利用自举更新：
+此时 $V^\pi(\boldsymbol{s})$ 可以被存储在一个表格中，转移算子 $\mathcal{T}$ 为一个 $16 \times 16 \times 4$ 的张量。于是可以利用自举更新：
 $$
 V^\pi(\boldsymbol{s}) \gets \mathbb{E}_{\boldsymbol{a} \sim \pi(\boldsymbol{a} \mid \boldsymbol{s})} \left[r(\boldsymbol{s}, \boldsymbol{a}) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \boldsymbol{a})} \left[V^\pi(\boldsymbol{s}')\right]\right]
 $$
 其中里层的 $V^\pi$ 基于已有的表格进行更新，这就是自举更新。这个式子之所以有实际意义，是因为我们知道了 $p(\boldsymbol{s}' \mid \boldsymbol{s}, \boldsymbol{a})$，也就是我们知道了 $\mathcal{T}$。
 
-而如果我们采用之前描述的确定性策略，那么可以进一步简化为：
+而如果采用之前描述的确定性策略，那么可以进一步简化为：
 $$
 V^\pi(\boldsymbol{s}) \gets r(\boldsymbol{s}, \pi(\boldsymbol{s})) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \pi(\boldsymbol{s}))} \left[V^\pi(\boldsymbol{s}')\right]
 $$
-因此我们得到了基于动态规划的 **策略迭代（Policy Iteration）** 算法：
+因此得到了基于动态规划的 **策略迭代（Policy Iteration）** 算法：
 1. 拟合 $V^\pi(\boldsymbol{s}) \gets r(\boldsymbol{s}, \pi(\boldsymbol{s})) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \pi(\boldsymbol{s}))} \left[V^\pi(\boldsymbol{s}')\right]$；
 2. $\pi \gets \pi'$。
 上述过程的第一步可以写成线性方程组，通过解线性方程组的方式一次性求解出所有的 $V^\pi(\boldsymbol{s})$。
@@ -60,7 +60,7 @@ $$
 1. 令 $y_i \gets \max_{\boldsymbol{a}_i} (r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \mathbb{E}_{\boldsymbol{s}_i' \sim p(\boldsymbol{s}_i' \mid \boldsymbol{s}_i, \boldsymbol{a}_i)} \left[V_\phi(\boldsymbol{s}_i')\right])$；
 2. 令 $\phi \gets \arg \min_\phi \frac{1}{2} \left\|V_\phi(\boldsymbol{s}_i) - y_i\right\|^2$。
 
-不要忘记这一算法的核心假设：已知动态，我们才能在第一步中需要找出 $\boldsymbol{s}_i$ 处"当前策略"的最优 动作 $\boldsymbol{a}_i$。然而在未知动态的情况下，我们通常不能从一个非初始状态多次采样。也就是说我们至多只能得到一个 $(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)$ 的样本，自然无法处理 $\max_{\boldsymbol{a}_i}$ 的问题。
+不要忘记这一算法的核心假设：已知动态，才能在第一步中需要找出 $\boldsymbol{s}_i$ 处"当前策略"的最优 动作 $\boldsymbol{a}_i$。然而在未知动态的情况下，我们通常不能从一个非初始状态多次采样。也就是说至多只能得到一个 $(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)$ 的样本，自然无法处理 $\max_{\boldsymbol{a}_i}$ 的问题。
 
 一个可能被误解的点是：尽管 $r(\boldsymbol{s}_t, \boldsymbol{a}_t)$ 的写法好像知道了奖励的解析形式，然而其实并不知道，我们只是知道了 $\boldsymbol{s}_t$ 状态下采取 $\boldsymbol{a}_t$ 动作的奖励的样本。在无模型 RL 中，我们通常不尝试学习奖励函数。
 
@@ -68,8 +68,8 @@ $$
 $$
 Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \boldsymbol{a})} \left[\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}')\right]
 $$
-尽管看起来只是发生了简单的转换，但这里其实有本质不同，我们可以应用这样的方式处理任何的 策略。我们就得到了 **拟合 Q 迭代，未知动态（Fitted Q-iteration, unknown dynamics）** 算法：
-1. 令 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \mathbb{E}_{\boldsymbol{s}_i' \sim p(\boldsymbol{s}_i' \mid \boldsymbol{s}_i, \boldsymbol{a}_i)}\left[\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')\right]$，由于我们这里只有一个 $\boldsymbol{s}'$, 于是我们近似为 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')$；
+尽管看起来只是发生了简单的转换，但这里其实有本质不同，我们可以应用这样的方式处理任何的策略，我们就得到了 **拟合 Q 迭代，未知动态（Fitted Q-iteration, unknown dynamics）** 算法：
+1. 令 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \mathbb{E}_{\boldsymbol{s}_i' \sim p(\boldsymbol{s}_i' \mid \boldsymbol{s}_i, \boldsymbol{a}_i)}\left[\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')\right]$，由于这里只有一个 $\boldsymbol{s}'$, 于是近似为 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')$；
 2. 令 $\phi \gets \arg \min_\phi \frac{1}{2} \left\|Q_\phi(\boldsymbol{s}_i, \boldsymbol{a}_i) - y_i\right\|^2$。
 ![](5-4.png)
 这一算法与 off-policy 演员-评论家算法有许多相似之处。如我们都需要一个 $\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')$ 的操作，这个操作中的 $\boldsymbol{a}'$ 通常是基于当前的 $Q$ 函数生成的。这一算法同样应用于 off-policy 的情况。我们可以想象一系列的 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}', r)$ 覆盖了整个空间，当我们在所有这些数据上表现很好时，就达到了我们的目标。与演员-评论家算法不同的是，我们只需要一个网络即可。
@@ -85,9 +85,9 @@ $$
 $$
 \mathcal{E} = \frac{1}{2} \mathbb{E}_{(\boldsymbol{s}, \boldsymbol{a}) \sim \mathcal{R}} \left[\left(Q_\phi(\boldsymbol{s}, \boldsymbol{a}) - (r + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}'))\right)^2\right]
 $$
-关于 $\mathcal{E}$ 项，我们有以下的结论：
+关于 $\mathcal{E}$ 项，有以下的结论：
 - 如果 $\mathcal{E} = 0$，则 $$Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = r + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}')$$这样的 $Q$ 函数就是 **最优 Q 函数**，对应于最优策略。 
-- 如果 $\mathcal{E} \neq 0$，我们无法给出任何的理论保证（除非是表格案例）。
+- 如果 $\mathcal{E} \neq 0$，无法给出任何的理论保证（除非是表格案例）。
 
 正因为很多实际问题中我们无法得到 $\mathcal{E} = 0$，故这个算法没有任何的理论保证。
 
@@ -98,7 +98,7 @@ $$
 上述算法是最经典的 Q 学习算法。值得注意的算法是 off-policy 的，因此在第一步理论上可以采取任何的策略。
 
 ## 4.1 Exploration with Q-learning
-在 online Q 学习中，我们在采样时通常并不会使用最大策略，因为这可能会让我们陷入一些固定的动作中。常见的的方式有：
+在 online Q 学习中，在采样时通常并不会使用最大策略，因为这可能会让我们陷入一些固定的动作中。常见的的方式有：
 - $\epsilon$ 贪心策略：
 $$
 \pi(\boldsymbol{a} \mid \boldsymbol{s}) = \begin{cases}  1 - \epsilon, & \text{if } \boldsymbol{a} = \arg\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}, \boldsymbol{a}'),\\  \epsilon / (|\mathcal{A}| - 1), & \text{otherwise}. \end{cases}
@@ -143,7 +143,7 @@ V^\ast(\boldsymbol{s}) = \max_{\boldsymbol{a}} r(\boldsymbol{s},\boldsymbol{a}) 
 $$
 化简得到 $\mathcal{B}V^\ast = V^\ast$ 而且这一不动点存在且唯一，且始终对应于最优策略。
 
-我们一定能够收敛到最优的价值函数吗？事实上我们有以下结果：
+一定能够收敛到最优的价值函数吗？事实上有以下结果：
 
 **Theorem 1**. 在表格案例中，价值迭代一定会收敛到最优的价值函数。
 证明的核心是贝尔曼算子是一个压缩映射，也就是对于任意的 $V, \bar{V}$，有 
@@ -188,7 +188,7 @@ $$
 价值迭代有收敛性保证，但是拟合价值迭代却没有，在实际中通常也不会收敛到最优解。
 
 ## 5.3 Corollaries
-事实拟合 Q 迭代/ Q 学习也没有收敛性保证，我们定义贝尔曼算子 $\mathcal{B}$ 为
+事实拟合 Q 迭代/ Q 学习也没有收敛性保证，定义贝尔曼算子 $\mathcal{B}$ 为
 $$
 \mathcal{B} Q = r + \gamma \mathcal{T} \max_{\boldsymbol{a}} Q
 $$
