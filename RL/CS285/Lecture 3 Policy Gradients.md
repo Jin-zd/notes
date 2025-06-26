@@ -98,7 +98,7 @@ $$
 ![](3-1.png)
 # 3 Reducing Variance
 ## 3.1 Causality
-我们可以基于因果性（causality）这种普适的性质来减小方差。
+我们可以基于因果性（Causality）这种普适的性质来减小方差。
 
 **Definition 1**. _Causality（因果性）_
 $t'$ 时刻的策略不应该影响 $t$ 时刻的奖励，如果 $t < t'$。

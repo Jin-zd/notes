@@ -9,7 +9,7 @@
 - 探索所有可能的行为。  
 
 这很显然是非常有意义的。
-![](https://pic4.zhimg.com/v2-8250de7f3e9ffeb1f338ce0fe8dc4d31_1440w.jpg)
+![](12-1.png)
 
 ## 2 Definition & concepts from information theory
 在本节中，我们会给出信息论中的一些定义与概念
@@ -20,14 +20,14 @@ $$
 \mathcal{H}(p) = -\sum_x p(x) \log p(x)
 $$
 不难发现当分布是一个均匀分布时，其熵是最大的，当其是一个点分布时。其熵是最小的。故熵在一定程度上可以表示一个分布的覆盖的广泛程度。
-![](https://pica.zhimg.com/v2-cdc0520fde68fa5e9a4ef1d3346a0834_1440w.jpg)
+![](12-2.png)
 **Definition 2**. _mutual information（互信息）_
 对于两个分布 $p(x)$ 与 $p(y)$，其互信息定义为 
 $$
 \mathcal{I}(x; y) = D_{KL}(p(x, y) \parallel p(x)p(y)) = \sum_{x, y} p(x, y) \log \frac{p(x, y)}{p(x)p(y)}
 $$
 互信息可以描述两个变量之间的相关性，也可以理解为一个变量中包含的关于另一个变量的信息量。
-![](https://pic4.zhimg.com/v2-8e6fe5012f0935b06acbfa3b187f9fb1_1440w.jpg)
+![](12-3.png)
 在这里，记 $\pi(\boldsymbol{s})$ 表示策略 $\pi$ 下状态的边缘分布，于是 $\mathcal{H}(\pi(\boldsymbol{s}))$ 可以表示策略覆盖状态空间的广泛程度。考虑如下 "定义" 的赋权：
 
 **Definition 3**. _"empowerment（赋权）" (Polani et ai.)_
@@ -55,7 +55,7 @@ $$
 3. 使用数据更新 $\pi$；
 4. 将 $\boldsymbol{S}$ 添加到数据（为什么不用路径上的其他状态？这与后面的一个近似有关）中，利用数据更新 $p_\theta(\boldsymbol{x} \mid \boldsymbol{z})$ 和 $q_\phi(\boldsymbol{z} \mid \boldsymbol{x})$。
 
-![](https://pic2.zhimg.com/v2-dc2caa69857f8840264f7a55f59774af_1440w.jpg)
+![](12-4.png)
 
 ### 3.2 Skew Fit
 在上面的算法流程中，有一些尚不清晰的地方。在第 $4$ 步中，并不能简单地通过最大似然估计来更新变分自编码器，否则可能陷入生成那些相似的状态。以下是解决这个问题的想法：
@@ -79,7 +79,7 @@ $$
 此时我们就能够最大化熵 $\mathcal{H}(p(\boldsymbol{G}))$。而论文中将 $\alpha$ 作为一个超参数 $\alpha \in \left.\left[-1, 0\right)\right.$，这一过程修改了上面的第 $4$ 步，相当于给了不同的数据不同的权重。
 
 这一算法可以被称作 "Skew fit"，训练的模型给了那些新颖的状态更高的出现概率，在这一意义上和前面的基于计数的探索给新颖的状态一定的附加奖励有一定的相似之处。
-![](https://pica.zhimg.com/v2-91ed78b9acaec1a06fcbbdcf5631e580_1440w.jpg)
+![](12-5.png)
 
 ### 3.3 Connection to empowerment
 考虑这一算法的目标，记目标为 $\boldsymbol{G}$，策略实际到达的状态为 $\boldsymbol{S}$，则
@@ -121,7 +121,7 @@ $$
 - 由于我们设计的 $\tilde{r}$，不妨假设奖励鼓励探索第 $2$ 部分，但随着探索的增多，接下来策略又依次主要走向第 $3,4,\ldots,k$ 部分，可能此时 $1$ 部分的密度又逐渐减小了；
 - 我们策略可能循环地依次聚焦于第 $1,2,\ldots,k$ 部分，在这些部分间来回震荡，尽管 $p_{\pi}$ 可能最终有很好的覆盖整个状态空间，但 $\pi$ 可能在这两部分来回震荡，并最终仅局限于其中一个部分。
 
-![](https://pica.zhimg.com/v2-55b313e68509eff4c8038ac75c63a35a_1440w.jpg)
+![](12-6.png)
 
 尽管状态空间模型可以对所有状态有一个相对较好的覆盖，但是最终的策略可能仅仅是几条蓝色曲线中的一条。
 
@@ -132,7 +132,7 @@ $$
 最终我返回 $\pi^\ast(\boldsymbol{a} \mid \boldsymbol{s}) = \sum_{k} \pi^k(\boldsymbol{a} \mid \boldsymbol{s})$。
 
 这里的解决方案基于博弈论，事实上 $p_\pi(\boldsymbol{s}) = p^\ast(\boldsymbol{s})$ 是 $\pi^k$ 和 $p_{\pi^k}$ 之间的一个[[Concepts#22 纳什均衡（Nash Equilibrium）|纳什均衡（Nash Equilibrium）]]，尽管混合策略的做法看起来很奇怪，但事实上最后一个时间步 $k_{\max}$ 的策略不是纳什均衡，而混合的策略是。
-![](https://pic3.zhimg.com/v2-9825546adbcae31bb056e02c1f958472_1440w.jpg)
+![](12-7.png)
 
 通常情况下在状态边际匹配后，可以通过分层强化学习等方式对具体任务进行进一步优化和微调。
 
@@ -162,12 +162,12 @@ $$
 - 目标是一个状态，也就是一个具体的目标。
 - 技能通常比状态更加复杂，例如到达某个状态的同时不经过一些区域。
 
-![](https://pica.zhimg.com/v2-f6e76242729e6cf34743f1a58db40b58_1440w.jpg)
+![](12-8.png)
 
 在这里，我们学习一系列不同的技能 $\pi(\boldsymbol{a}\mid \boldsymbol{s}, z)$，其中 $z$ 是一个技能的索引。
 
 直觉：不同的技能应当访问不同的状态空间区域。
-![](https://picx.zhimg.com/v2-d1fd61edda6d80e4d32d334482d13b83_1440w.jpg)
+![](12-9.png)
 基于这样的想法，不同技能对应的状态区域应当是很容易区分的。可以考虑形式为 $r(\boldsymbol{s}, z) = \log p_D(z \mid \boldsymbol{s})$ 的奖励，这里的 $D$ 是某种判别模型，给定一个状态，预测技能，如果从一个状态中能够很好地预测技能，也就是那么这个状态就是一个"好"状态。
 
 训练的目标就是 
@@ -175,8 +175,7 @@ $$
 \pi(\boldsymbol{a} \mid \boldsymbol{s}, z) = \arg\max_\pi \sum_z \mathbb{E}_{\boldsymbol{s} \sim \pi(\boldsymbol{s} \mid z)} \left[r(\boldsymbol{s}, z)\right]
 $$
 训练过程中，判别模型与策略都在训练。在训练起始阶段，不同 技能可能是相近的，为了让判别模型能够更好地区分，不同技能之间会有更大的差异。二者相互协同，而非生成对抗网络（GAN）中那样相互对抗。
-
-![](https://pic2.zhimg.com/v2-373d8427d1180545d8b3dc038aaa62d9_1440w.jpg)
+![](12-10.png)
 
 事实上能证明上述过程对应于最大化目标：
 $$

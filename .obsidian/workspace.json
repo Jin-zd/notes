@@ -8,31 +8,17 @@
         "type": "tabs",
         "children": [
           {
-            "id": "96e49d734ae57206",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "RL/Concepts.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Concepts"
-            }
-          },
-          {
             "id": "3ae062c780320525",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "RL/CS285/Lecture 12 Exploration 2.md",
+                "file": "RL/CS285/Lecture 13 Off-line Reinforcement Learning 1.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Lecture 12 Exploration 2"
+              "title": "Lecture 13 Off-line Reinforcement Learning 1"
             }
           },
           {
@@ -49,8 +35,7 @@
               "title": "Concepts"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -123,7 +108,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "RL/CS285/Lecture 12 Exploration 2.md",
+                "file": "RL/CS285/Lecture 13 Off-line Reinforcement Learning 1.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -133,7 +118,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Lecture 12 Exploration 2 的反向链接列表"
+              "title": "Lecture 13 Off-line Reinforcement Learning 1 的反向链接列表"
             }
           },
           {
@@ -183,13 +168,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "RL/CS285/Lecture 12 Exploration 2.md",
+                "file": "RL/CS285/Lecture 13 Off-line Reinforcement Learning 1.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Lecture 12 Exploration 2 的大纲"
+              "title": "Lecture 13 Off-line Reinforcement Learning 1 的大纲"
             }
           }
         ],
@@ -212,51 +197,51 @@
   },
   "active": "3ae062c780320525",
   "lastOpenFiles": [
+    "RL/pictures/13-12.png",
+    "RL/pictures/13-12.png.crdownload",
+    "RL/pictures/13-11.png",
+    "RL/pictures/13-11.png.crdownload",
+    "RL/pictures/13-10.png",
+    "RL/pictures/13-10.png.crdownload",
+    "RL/pictures/13-9.png",
+    "RL/pictures/13-9.png.crdownload",
+    "RL/pictures/13-8.png",
+    "RL/pictures/13-8、.png",
+    "RL/pictures/13-8、.png.crdownload",
+    "RL/pictures/13-7.png",
+    "RL/pictures/13-7.png.crdownload",
+    "RL/pictures/13-6.png",
+    "RL/pictures/13-6.png.crdownload",
+    "RL/pictures/13-5.png",
+    "RL/pictures/13-5.png.crdownload",
+    "RL/pictures/13-4.png",
+    "RL/pictures/13-4.png.crdownload",
+    "RL/pictures/13-3.png",
+    "RL/pictures/13-3.png.crdownload",
     "RL/Concepts.md",
+    "RL/CS285/Lecture 3 Policy Gradients.md",
+    "RL/CS285/Lecture 13 Off-line Reinforcement Learning 1.md",
     "RL/CS285/Lecture 12 Exploration 2.md",
+    "RL/CS285/Lecture 14 Off-line Reinforcement Learning 2.md",
     "RL/CS285/Lecture 11 Exploration 1.md",
     "RL/强化学习的数学原理.md",
     "RL/CS285/Lecture 9 Model-Based Reinforcement Learning.md",
     "RL/CS285/Lecture 21 Challenges and Open Problems.md",
-    "RL/pictures/11-8.png",
-    "RL/pictures/11-8.png.crdownload",
-    "RL/pictures/11-7.png",
-    "RL/pictures/11-7.png.crdownload",
-    "RL/pictures/11-6.png",
-    "RL/pictures/11-6.png.crdownload",
-    "RL/pictures/11-5.png",
-    "RL/pictures/11-5.png.crdownload",
-    "RL/pictures/11-4.png",
-    "RL/pictures/11-4.png.crdownload",
-    "RL/pictures/11-3.png",
-    "RL/pictures/11-3.png.crdownload",
-    "RL/pictures/11-2.png",
-    "RL/pictures/11-2.png.crdownload",
-    "RL/pictures/11-1.png",
-    "RL/pictures/11-1.png.crdownload",
     "RL/CS285/Lecture 16 Variational Inference and Generative Model.md",
     "RL/CS285/Lecture 8 Optimal Control and Planning.md",
     "RL/CS285/Lecture 10 Model-Based Policy Learning.md",
-    "RL/CS285/Lecture 13 Off-line Reinforcement Learning (1).md",
-    "RL/pictures/10-9.png",
-    "RL/pictures/10-9.png.crdownload",
-    "RL/pictures/10-8.png",
-    "RL/pictures/10-8.png.crdownload",
     "RL/CS285/Lecture 20 Meta-Learning and Transfer Learning.md",
     "RL/CS285/Lecture 19 RL with Sequence Models.md",
     "RL/CS285/Lecture 18 Inverse RL.md",
     "RL/CS285/Lecture 17 Reframing Control as an Inference Problem.md",
     "RL/CS285/Lecture 15 Reinforcement Learning Theory Basics.md",
-    "RL/CS285/Lecture 14 Off-line Reinforcement Learning (2).md",
     "RL/CS285/Lecture 1 Imitation Learning.md",
     "cv/报告.md",
     "RL/CS285/Lecture 7 Advanced Policy Gradients.md",
     "RL/CS285/Lecture 6 Deep RL with Q-Learning.md",
     "RL/CS285/Lecture 4 Actor-Critic Algorithms.md",
-    "RL/CS285/Lecture 3 Policy Gradients.md",
     "RL/CS285/Lecture 2 Introduction to Reinforcement Learning.md",
     "RL/CS285/Lecture 5 Value Function Methods.md",
-    "25-Mutimodal Stance Detection/work.md",
-    "25-Mutimodal Stance Detection/多模态立场检测论文综述 2024-11.md"
+    "25-Mutimodal Stance Detection/work.md"
   ]
 }
