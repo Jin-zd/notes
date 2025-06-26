@@ -237,7 +237,7 @@ $$
 - 当估计的优势 $\hat{A}_t$ 为正，这说明新的策略要增大这一动作的概率，$\rho(\theta',\theta) > 1$。然而更新幅度不能太大，截断重要性采样率为 $1 + \epsilon$ ，当被截断时该项没有梯度，也即不会基于这一项进行更新。
 - 当估计的优势 $\hat{A}_t$ 为负，这说明新的策略要减小这一动作的概率， $\rho(\theta',\theta) < 1$，然而更新幅度不能太大，我们截断重要性采样率为 $1 - \epsilon$，当被截断时该项没有梯度，也即说不会基于这一项进行更新。
 - 这里 $\hat{A}_t$ 是估计的优势，我们会使用在[[Lecture 4 Actor-Critic Algorithms]]一节中介绍的广义优势估计（GAE）进行估计： $$\hat{A}^\pi_{GAE}(\boldsymbol{s}_t, \boldsymbol{a}_t) = \sum_{t' = t}^\infty (\gamma \lambda)^{t' - t} \left(r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) + \gamma \hat{V}^\pi(\boldsymbol{s}_{t' + 1}) - \hat{V}^\pi(\boldsymbol{s}_{t'})\right)$$而这里的一个设计选择是我们仅仅使用 $T_0$ 步（不是 episode 长度, 而是一个远小于 episode 长度的量）的广义优势估计，回顾广义优势估计需要满足的 on-policy 假设，我们会在接下来的算法描述中保证这一点。
-- 上述过程中使用的 $V^\pi$ 是一个和动作共享参数的网络，构建如下的目标使得它们同步地优化：$$L(\theta') = \bar{A}(\theta')^{CLIP} - c_1 L_{VF}(\theta') + c_2 \mathcal{H}(\pi_{\theta'})$$这里第二项是价值函数的均方误差损失（MSE loss），最后一项是熵奖励（Entropy bonus），用于增加探索性，我们会在 [[Lecture 11 Exploration (1)]]一节中进一步讨论。
+- 上述过程中使用的 $V^\pi$ 是一个和动作共享参数的网络，构建如下的目标使得它们同步地优化：$$L(\theta') = \bar{A}(\theta')^{CLIP} - c_1 L_{VF}(\theta') + c_2 \mathcal{H}(\pi_{\theta'})$$这里第二项是价值函数的均方误差损失（MSE loss），最后一项是熵奖励（Entropy bonus），用于增加探索性，我们会在 [[Lecture 11 Exploration 1]]一节中进一步讨论。
 
 于是得到 **近端策略优化裁剪（PPO Clip）** 的算法：
 循环 $i = 1, 2, \ldots$：
