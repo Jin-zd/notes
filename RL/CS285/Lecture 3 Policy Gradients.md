@@ -6,7 +6,7 @@
 $$
 J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\sum_{t} r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right]
 $$
-由于我们不知道 $p_\theta(\tau)$ 中关于环境的概率，故无法直接计算这个期望，但是可以通过采样进行估计，也就是
+由于不知道 $p_\theta(\tau)$ 中关于环境的概率，故无法直接计算这个期望，但是可以通过采样进行估计，也就是
 $$
 J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\sum_{t} r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right] \approx \frac{1}{N} \sum_{i} \sum_{t} r(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t})
 $$

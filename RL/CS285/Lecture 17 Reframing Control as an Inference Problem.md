@@ -6,7 +6,14 @@
 
 ### 1.1 Optimal Control as a Model of Human Behavior
 
-回顾我们对 optimal control 的讨论, 当环境是 deterministic 时, 我们选取一系列 actions 使得 reward 最大化, 也就是 $\boldsymbol{a}_1, \ldots, \boldsymbol{a}_T = \arg\max_{\boldsymbol{a}_1, \ldots, \boldsymbol{a}_T} \sum_{t} r(\boldsymbol{s}_t, \boldsymbol{a}_t), \text{ s.t. } \boldsymbol{s}_{t + 1} = f(\boldsymbol{s}_t, \boldsymbol{a}_t).\\$当环境是 stochastic 时, 如果通过 **close-loop planning** (等价于一个 policy) 来进行控制, 我们可以得到 我们也可以在 随机的情况下进行 optimal control, $\pi = \arg\max_\pi \mathbb{E}_{\boldsymbol{s}_{t + 1} \sim p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t), \boldsymbol{a}_t \sim \pi(\boldsymbol{a}_t \mid \boldsymbol{s}_t)} \left[\sum_{t} r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right].\\$
+回顾我们对 optimal control 的讨论, 当环境是 deterministic 时, 我们选取一系列 actions 使得 reward 最大化, 也就是 
+$$
+\boldsymbol{a}_1, \ldots, \boldsymbol{a}_T = \arg\max_{\boldsymbol{a}_1, \ldots, \boldsymbol{a}_T} \sum_{t} r(\boldsymbol{s}_t, \boldsymbol{a}_t), \text{ s.t. } \boldsymbol{s}_{t + 1} = f(\boldsymbol{s}_t, \boldsymbol{a}_t)
+$$
+当环境是 stochastic 时, 如果通过 **close-loop planning** (等价于一个 policy) 来进行控制, 我们可以得到 我们也可以在 随机的情况下进行 optimal control, 
+$$
+\pi = \arg\max_\pi \mathbb{E}_{\boldsymbol{s}_{t + 1} \sim p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t), \boldsymbol{a}_t \sim \pi(\boldsymbol{a}_t \mid \boldsymbol{s}_t)} \left[\sum_{t} r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right]
+$$
 
 在某种程度上, 通常基于理性等假设, 人类会选择最优的行为, 这很像是某种 optimal control. 基于这一点, 使用 behavior cloning 来达到接近人类的表现是有意义的. 与此同时, 如果我们能够从人类的行为中恢复出 reward function, 那么我们就可以用这一 reward function 进行强化学习 (也可以利用其推测人类行为), 这是 **inverse RL** 的基本思想.
 
@@ -31,16 +38,25 @@ states, actions, next states 之间的概率图模型
 
 在这个模型中, 不存在我们进行 control 所需的 reward, 因此我们并不能够利用这个模型来解决 control 问题.
 
-为了包含解决问题所需的 reward 信号, 这里我们引入一个二元的 **optimality variable** $\mathcal{O}_t$, 它们表示 $t$ 时间步的行为是否最优. 这些 optimality variable 是**观测变量**. 通常我们我们会假设 $p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t) = \exp(r(\boldsymbol{s}_t, \boldsymbol{a}_t)),\\$ 其中 reward 是负值 (可以通过减去最大 reward 实现) 来保证概率属于 $[0,1]$, 同时为了记号的简便, 我们总是用 $\mathcal{O}_t$ 来表示 $\mathcal{O}_t = 1$.
+为了包含解决问题所需的 reward 信号, 这里我们引入一个二元的 **optimality variable** $\mathcal{O}_t$, 它们表示 $t$ 时间步的行为是否最优. 这些 optimality variable 是**观测变量**. 通常我们我们会假设 
+$$
+p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t) = \exp(r(\boldsymbol{s}_t, \boldsymbol{a}_t))
+$$
+其中 reward 是负值 (可以通过减去最大 reward 实现) 来保证概率属于 $[0,1]$, 同时为了记号的简便, 我们总是用 $\mathcal{O}_t$ 来表示 $\mathcal{O}_t = 1$.
 
 ![](https://picx.zhimg.com/v2-2ea4db1ccfd4cf60126f9678d07f3467_1440w.jpg)
 
 引入 optimality variable
 
-为了理解这种定义方式的合理性, 考虑 $p(\tau \mid \mathcal{O}_{1:T})$, 我们可以化简得到 $\begin{aligned} p(\tau \mid \mathcal{O}_{1:T}) = \frac{p(\tau, \mathcal{O}_{1:T})}{p(\mathcal{O}_{1:T})} \propto p(\tau, \mathcal{O}_{1:T}) &= p(\tau) p(\mathcal{O}_1 \mid \tau) \prod_{t = 2}^{T} p(\mathcal{O}_t \mid \tau, \mathcal{O}_{1:t - 1}) \\ &= p(\tau) p(\mathcal{O}_1 \mid \boldsymbol{s}_1, \boldsymbol{a}_1) \prod_{t = 2}^{T} p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t)\\ &= p(\tau) \prod_{t = 1}^{T} p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t)\\ &= p(\tau) \exp\left(\sum_{t = 1}^T r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right)\\&\propto p(\boldsymbol{s}_1) \prod_{t = 1}^{T} p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) \exp\left(\sum_{t = 1}^T r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right). \end{aligned} \\$
+为了理解这种定义方式的合理性, 考虑 $p(\tau \mid \mathcal{O}_{1:T})$, 我们可以化简得到 
+$$
+\begin{aligned} p(\tau \mid \mathcal{O}_{1:T}) = \frac{p(\tau, \mathcal{O}_{1:T})}{p(\mathcal{O}_{1:T})} \propto p(\tau, \mathcal{O}_{1:T}) &= p(\tau) p(\mathcal{O}_1 \mid \tau) \prod_{t = 2}^{T} p(\mathcal{O}_t \mid \tau, \mathcal{O}_{1:t - 1}) \\ &= p(\tau) p(\mathcal{O}_1 \mid \boldsymbol{s}_1, \boldsymbol{a}_1) \prod_{t = 2}^{T} p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t)\\ &= p(\tau) \prod_{t = 1}^{T} p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t)\\ &= p(\tau) \exp\left(\sum_{t = 1}^T r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right)\\&\propto p(\boldsymbol{s}_1) \prod_{t = 1}^{T} p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) \exp\left(\sum_{t = 1}^T r(\boldsymbol{s}_t, \boldsymbol{a}_t)\right). \end{aligned} 
+$$
 
 这里最后的正比可能让人困惑, 但实际上是合理的. 由于  
-$p(\tau) = p(\boldsymbol{s}_1) \prod_{t = 1}^{T} p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) p(\boldsymbol{s}_t \mid \boldsymbol{a}_t),\\$  
+$$
+p(\tau) = p(\boldsymbol{s}_1) \prod_{t = 1}^{T} p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) p(\boldsymbol{s}_t \mid \boldsymbol{a}_t)
+$$  
 这里的 $p(\boldsymbol{s}_t \mid \boldsymbol{a}_t)$ **并不是 policy**, 而是像 prior 一样的一个分布, 通常假设这是均匀分布 (这是因为当我们不知道关于目标 $\mathcal{O}_{1:T}$ 的任何信息时, 我们无从知道何种行为更有可能).
 
 ### 1.3 Analysis of the result

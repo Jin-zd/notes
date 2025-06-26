@@ -118,7 +118,7 @@ $$
 **Multimodal behavior** 面对同一状态/观测，人类的行为可能是多样的，例如前方有一棵树，那么人类可能选择左转或右转，而如果我们使用了高斯分布来拟合这一行为，那么我们可能会得到一个平均值，也就是直行。
 ![](1-4.png)
 
-这里的解决方法主要有两个，一个是**使用更加有表示能力的连续分布**（例如 mixture of Gaussians，latent variable models，diffusion models），另一种则是**进行离散化**。
+这里的解决方法主要有两个，一个是使用更加有表示能力的连续分布（例如 mixture of Gaussians，latent variable models，diffusion models），另一种则是进行离散化。
 
 使用更加有表示能力的连续分布：
 - **混合高斯模型（mixture of Gaussians）**：用一系列的 $w_1，\mu_1，\Sigma_1，\ldots，w_k，\mu_k，\Sigma_k$ 来表示一个混合高斯分布，这样我们就可以表示多个模态。我们可以让模型输出这些参数，并且通过这些参数表达负对数似然。

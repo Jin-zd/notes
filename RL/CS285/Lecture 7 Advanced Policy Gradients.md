@@ -1,4 +1,4 @@
-在本节中。我们先从策略梯度与策略迭代的关系出发。从理论角度解释自然策略梯度，并探讨一些更加前沿的策略梯度方法。
+在本节中，我们先从策略梯度与策略迭代的关系出发。从理论角度解释自然策略梯度，并探讨一些更加前沿的策略梯度方法。
 ## 1 Policy gradient as policy iteration
 回顾 REINFORCE 算法：
 1. 利用 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 采样 $\{\tau^i\}$；

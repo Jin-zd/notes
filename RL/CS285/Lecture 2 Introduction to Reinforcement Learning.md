@@ -1,5 +1,4 @@
 # 0 Terminology & Notation
-
 -   $\boldsymbol{s}_t$：**state**  
 -   $\boldsymbol{a}_t$：**action**  
 -   $\boldsymbol{o}_t$：**observation**  

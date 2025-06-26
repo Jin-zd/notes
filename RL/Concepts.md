@@ -313,3 +313,210 @@ $$
 * 学习率 $\eta_k$ 的选择对算法的收敛性至关重要。
 * 在每一步都需要解决一个最小化拉格朗日函数的子问题。对于某些问题，这个子问题可能仍然很困难。
 * 当原始问题是凸的并且满足某些约束条件（如 Slater 条件）时，强对偶性成立，原始问题的最优值等于对偶问题的最优值。在这种情况下，求解对偶问题可以得到原始问题的解。
+
+## 15 二阶矩（Second Moment）
+在概率论和统计学中，二阶矩是描述随机变量分布形状的重要统计量之一。它与方差紧密相关，是理解数据离散程度的基础。
+### 15.1 定义
+对于一个随机变量 $X$，$X$ 的 $n$ 阶矩定义为 $E[X^n]$，其中 $E[\cdot]$ 表示期望。因此，二阶矩就是 $E[X^2]$。
+如果 $X$ 是一个离散随机变量，其概率质量函数 (PMF) 为 $P(X=x_i) = p_i$，则二阶矩为：
+$$E[X^2] = \sum_i x_i^2 p_i$$
+如果 $X$ 是一个连续随机变量，其概率密度函数 (PDF) 为 $f(x)$，则二阶矩为：
+
+$$E[X^2] = \int_{-\infty}^{\infty} x^2 f(x) dx$$
+### 15.2 与方差的关系
+二阶矩与方差 (Variance) 之间存在重要的关系。方差衡量的是数据点相对于其均值的离散程度，而二阶矩是关于原点的离散程度。
+方差 $Var(X)$ 的定义为 $E[(X - E[X])^2]$。通过展开，可以得到方差与二阶矩之间的关系：
+$$Var(X) = E[X^2] - (E[X])^2$$
+或者，用更常见的符号表示：
+
+$$Var(X) = E[X^2] - \mu^2$$
+其中 $\mu = E[X]$ 是随机变量 $X$ 的期望（均值）。
+从这个关系可以看出：
+* 二阶矩 $E[X^2]$ 衡量的是随机变量平方的期望值。
+* 方差 $Var(X)$ 衡量的是随机变量与其均值之间的平方差的期望值。
+
+## 16 贝叶斯推断（Bayesian Inference）
+贝叶斯推断是一种统计推断方法，它利用贝叶斯定理来更新我们对某个未知参数或假设的信念。与频率学派统计不同，贝叶斯推断将参数视为随机变量，并通过观察数据来更新其概率分布。简单来说，它是一种“先有假设，再用证据修正假设”的思维方式。
+### 16.1 核心思想
+贝叶斯推断的核心在于其迭代的更新过程：
+1. 先验信念（Prior Beliefs）：在观察任何数据之前，我们对未知参数（或假设）的初始信念，用先验概率分布 $P(\theta)$ 表示。这个先验可以基于历史数据、专家知识或纯粹的主观判断。
+2. 观测数据（Observed Data）：我们收集到的实际数据 $D$。
+3. 似然度（Likelihood）：衡量在给定特定参数值 $\theta$ 的情况下，观察到当前数据 $D$ 的概率，用 $P(D|\theta)$ 表示。这反映了我们的模型如何解释数据。
+4. 后验信念（Posterior Beliefs）：在观察数据 $D$ 之后，我们对参数 $\theta$ 更新后的信念，用后验概率分布 $P(\theta|D)$ 表示。这是我们最终想要得到的，它结合了先验信息和数据信息。
+### 16.2 贝叶斯定理
+将上述思想用数学公式表示，就是著名的贝叶斯定理：
+$$P(\theta|D) = \frac{P(D|\theta) P(\theta)}{P(D)}$$
+其中：
+* $P(\theta|D)$：后验概率（Posterior Probability），在观察到数据 $D$ 后，参数 $\theta$ 的概率。
+* $P(D|\theta)$：似然度（Likelihood），在给定参数 $\theta$ 的情况下，观察到数据 $D$ 的概率。
+* $P(\theta)$：先验概率（Prior Probability），在观察任何数据之前，参数 $\theta$ 的概率。
+* $P(D)$：证据（Evidence）或边缘似然度（Marginal Likelihood），表示观察到数据 $D$ 的总概率。它是一个标准化常数，确保后验概率分布的总和（或积分）为1。通常，它可以表示为：$$P(D) = \int P(D|\theta) P(\theta) d\theta$$在实际计算中，我们经常关注后验概率与先验和似然度的乘积成正比：$$P(\theta|D) \propto P(D|\theta) P(\theta)$$
+
+## 17 狄拉克 $\delta$ 函数 (Dirac Delta Function)
+狄拉克 $\delta$ 函数，通常称为 $\delta$ 函数，是一个非常特殊的广义函数（或分布）。它在物理学、工程学、信号处理和数学中都有广泛应用，用来描述一个在某个点上具有无限大值，但在其他所有点上均为零，并且其积分是 1 的理想化“脉冲”或“点源”。
+### 17.1 定义与性质
+严格来说，$\delta$ 函数并不是一个传统的函数，因为它在一点的值是无穷大。它是一个广义函数，通过它与检验函数（test function）的积分来定义其性质。
+
+**1. 定义性质（Sifting Property / 筛选性质）：**
+$\delta$ 函数最核心的性质是它的“筛选”能力。对于任何在 $x=0$ 处连续的平滑函数 $f(x)$，我们有：
+$$\int_{-\infty}^{\infty} f(x) \delta(x) dx = f(0)$$
+更一般地，对于一个在 $x=a$ 处连续的平滑函数 $f(x)$：
+$$\int_{-\infty}^{\infty} f(x) \delta(x-a) dx = f(a)$$
+这个性质意味着 $\delta(x-a)$ 能够“挑选”出函数 $f(x)$ 在点 $a$ 处的值。
+
+**2. 核心性质：**
+* 在 $x=0$ 处，$\delta(x)$ 的值是无限大：$$\delta(0) = \infty$$
+* 在 $x \neq 0$ 的所有点，$\delta(x)$ 的值是零：$$\delta(x) = 0 \quad \text{for } x \neq 0$$
+* $\delta$ 函数在整个实数轴上的积分等于 1：$$\int_{-\infty}^{\infty} \delta(x) dx = 1$$这反映了它代表的是一个单位强度的脉冲或点源。
+### 17.2 常见的表示方法
+虽然 $\delta$ 函数本身不是一个普通的函数，但它可以被表示为一系列普通函数的极限。这些表示方法有助于我们理解它的性质和应用：
+1.  矩形脉冲的极限：考虑一个宽度为 $2\epsilon$，高度为 $1/(2\epsilon)$ 的矩形函数 $R_\epsilon(x)$：$$R_\epsilon(x) = \begin{cases} \frac{1}{2\epsilon} & \text{if } -\epsilon \le x \le \epsilon \\ 0 & \text{otherwise} \end{cases}$$当 $\epsilon \to 0$ 时，$R_\epsilon(x)$ 就趋向于 $\delta(x)$。$$\delta(x) = \lim_{\epsilon \to 0} R_\epsilon(x)$$
+2.  高斯函数的极限：高斯函数（正态分布的概率密度函数）也是一个常用的近似：$$G_\sigma(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-x^2/(2\sigma^2)}$$当标准差 $\sigma \to 0$ 时，$G_\sigma(x)$ 的峰值无限增高，宽度无限缩小，同时积分保持为 1，趋近于 $\delta(x)$。$$\delta(x) = \lim_{\sigma \to 0} G_\sigma(x)$$
+3.  正弦函数的极限：$$\delta(x) = \frac{1}{2\pi} \int_{-\infty}^{\infty} e^{ikx} dk$$或$$\delta(x) = \frac{1}{\pi} \lim_{N \to \infty} \frac{\sin(Nx)}{x}$$
+### 17.3 相关性质
+* 偶函数： $\delta(x) = \delta(-x)$
+* 缩放性质： $\delta(ax) = \frac{1}{|a|} \delta(x)$ for $a \neq 0$
+* 与函数乘积： $f(x)\delta(x-a) = f(a)\delta(x-a)$
+* 导数： 狄拉克 $\delta$ 函数的导数 $\delta'(x)$ 也是一个广义函数，定义为：$$\int_{-\infty}^{\infty} f(x) \delta'(x) dx = -f'(0)$$（通过分部积分得到）
+
+## 18 变分自编码器 (Variational Autoencoder, VAE)
+变分自编码器（VAE）是一种强大的生成模型，它结合了深度学习和概率图模型。与传统的自编码器 (Autoencoder) 专注于学习数据的低维表示不同，VAE 旨在学习数据底层的概率分布，从而能够生成与训练数据相似的全新样本。它的核心思想是引入变分推断来推断潜在变量的后验分布，而不是简单地学习一个编码。
+### 18.1 传统自编码器回顾
+在深入 VAE 之前，先简单回顾一下传统自编码器：
+* 编码器（Encoder）：将输入数据 x 映射到一个低维的潜在空间（Latent Space）中的编码 z。
+* 解码器（Decoder）：将潜在编码 z 映射回原始数据空间，生成重构数据 $\hat{x}$。
+* 目标：通过最小化输入 x 和重构 $\hat{x}$ 之间的重构误差（Reconstruction Error）来训练模型。
+
+传统自编码器的潜在空间通常是连续的，但其结构没有明确定义。这意味着我们无法简单地从潜在空间中随机采样一个 z 来生成有意义的新数据。VAE 解决了这个问题。
+### 18.2 VAE 的核心思想
+VAE 的关键在于：
+1. 潜在空间是概率性的：VAE 假设数据是由一些不可观测的潜在变量（Latent Variables） z 生成的。这些潜在变量服从一个先验概率分布（通常是标准正态分布 $p(z)$）。
+2. 编码器输出分布参数：编码器不再直接输出一个潜在向量 z，而是输出一个概率分布的参数，通常是潜在变量 z 的均值 $\mu_z$ 和方差 $\sigma_z^2$（或对数方差 $\log \sigma_z^2$）。这意味着对于每个输入 x，我们得到的是一个潜在变量的分布 $q(z|x)$，而不是一个单一的确定性点。
+3. 从分布中采样：从编码器输出的分布 $q(z|x)$ 中采样一个潜在向量 z。这个采样过程引入了随机性，使得潜在空间更加“平滑”和可生成。
+4. 解码器生成数据：解码器接收采样的 z，并尝试重构原始输入 x。
+5. 损失函数包含两部分：
+    * 重构损失（Reconstruction Loss）：衡量重构数据 $\hat{x}$ 与原始输入 x 之间的相似度，通常使用均方误差（MSE）或二元交叉熵（BCE）。
+    * KL 散度损失（KL Divergence Loss）：衡量编码器输出的潜在分布 $q(z|x)$ 与预设的先验分布 $p(z)$ 之间的相似度。这部分损失鼓励潜在空间具有良好的结构，使得我们从先验分布中采样能够生成有意义的数据。
+### 18.3 VAE 的结构与数学原理
+结构：
+* 编码器（Encoder）$q(z|x)$：
+    * 输入：数据 x
+    * 输出：潜在变量分布的参数，例如均值 $\mu(x)$ 和方差 $\sigma^2(x)$（通常编码器输出的是 $\log \sigma^2(x)$ 以保证方差非负）。
+    * 模型参数通常通过神经网络表示，例如 $\mu(x) = f_{\mu}(x)$ 和 $\log \sigma^2(x) = f_{\sigma}(x)$。
+* 重参数化技巧（Reparameterization Trick）：
+    由于采样操作是不可导的，无法直接进行反向传播。VAE 通过重参数化技巧解决了这个问题：
+    * 我们从标准正态分布 $\mathcal{N}(0, 1)$ 中采样一个随机噪声 $\epsilon$。
+    * 然后将潜在变量 z 表示为：$z = \mu(x) + \sigma(x) \odot \epsilon$，其中 $\odot$ 表示逐元素相乘。
+    * 这样，随机性从编码器的输出转移到了一个外部输入 $\epsilon$，使得梯度的计算可以通过 $\mu(x)$ 和 $\sigma(x)$ 反向传播。
+* 解码器（Decoder）$p(x|z)$:
+    * 输入：从潜在分布中采样的 z
+    * 输出：重构数据 $\hat{x}$ 的参数，例如对于图像通常是像素的均值（如果是二值图像，可以是伯努利分布的参数）。
+    * 模型参数通常通过神经网络表示，例如 $\hat{x} = g(z)$。
+
+目标函数 (Loss Function)：
+VAE 的训练目标是最大化数据的证据下界（Evidence Lower Bound，ELBO），这等价于最小化以下损失函数：
+$$\mathcal{L}(x, \hat{x}) = \text{Reconstruction Loss}(x, \hat{x}) + D_{KL}(q(z|x) || p(z))$$
+* 重构损失：衡量解码器生成 $\hat{x}$ 的效果。
+    * 对于连续数据（如图像像素值在 [0,1] 之间），常用均方误差（Mean Squared Error，MSE）：$||x - \hat{x}||^2$。
+    * 对于二值数据（如黑白图像），常用二元交叉熵（Binary Cross-Entropy，BCE）：$-\sum_{i=1}^N [x_i \log(\hat{x}_i) + (1-x_i) \log(1-\hat{x}_i)]$。
+* KL 散度损失：
+    KL 散度（Kullback-Leibler Divergence） $D_{KL}(P || Q)$ 衡量两个概率分布 P 和 Q 之间的差异。在这里，它衡量编码器推断出的潜在分布 $q(z|x)$ 与预设的先验分布 $p(z)$ 之间的距离。
+    当先验分布 $p(z)$ 设定为标准正态分布 $\mathcal{N}(0, 1)$，且编码器输出的 $q(z|x)$ 也是正态分布 $\mathcal{N}(\mu(x), \sigma^2(x))$ 时，KL 散度有一个闭合形式的解：$$D_{KL}(\mathcal{N}(\mu, \sigma^2) || \mathcal{N}(0, 1)) = \frac{1}{2} \sum_{j=1}^k (\exp(\log \sigma_j^2) + \mu_j^2 - 1 - \log \sigma_j^2)$$其中 k 是潜在空间的维度，j 是维度索引。
+    KL 散度损失项的作用：
+    * 正则化：防止编码器过度拟合训练数据，迫使 $q(z|x)$ 靠近简单的先验分布。
+    * 促使潜在空间连续平滑：确保潜在空间中的点是连续且有意义的，这样我们就可以从先验分布中随机采样并生成逼真的新数据。
+### 18.4 VAE 的生成能力
+训练完成后，VAE 可以用于生成新数据：
+1. 从先验分布中采样：从预设的先验分布 $p(z)$（通常是标准正态分布 $\mathcal{N}(0, 1)$）中随机采样一个潜在向量 z。
+2. 输入解码器：将采样的 z 输入到训练好的解码器中。
+3. 生成新数据：解码器将 z 映射回数据空间，生成一个新的样本 $\hat{x}$。
+
+由于 KL 散度损失的约束，潜在空间被鼓励形成一个平滑、连续的流形，使得从先验分布中采样的 z 值总能被解码器转化为有意义的输出。
+
+## 19 雅可比矩阵 (Jacobian Matrix)
+雅可比矩阵是一个在向量微积分中非常重要的概念，它由一个多变量向量值函数的所有一阶偏导数组成。简单来说，它描述了一个函数在给定点的局部线性变换。
+### 19.1 定义
+假设我们有一个从 $n$ 维欧几里得空间 $\mathbb{R}^n$ 到 $m$ 维欧几里得空间 $\mathbb{R}^m$ 的函数 $\mathbf{f}$: 
+$$
+\mathbf{f}(\mathbf{x}) = 
+\begin{bmatrix} f\_1(x\_1, x\_2, \dots, x\_n) \\ 
+f\_2(x\_1, x\_2, \dots, x\_n) \\ 
+\vdots \\ 
+f\_m(x\_1, x\_2, \dots, x\_n) 
+\end{bmatrix} 
+$$其中，$\mathbf{x} = [x_1, x_2, \dots, x_n]^T$ 是输入向量，$f_i$ 是 $\mathbf{f}$ 的第 $i$ 个分量函数。 那么，函数 $\mathbf{f}$ 在点 $\mathbf{x}$ 处的雅可比矩阵 $\mathbf{J}$ （或 $\mathbf{J}_{\mathbf{f}}$）是一个 $m \times n$ 矩阵，其元素由 $f_i$ 对 $x_j$ 的偏导数组成： $$\mathbf{J} = \frac{\partial\mathbf{f}}{\partial\mathbf{x}} = \begin{bmatrix} \frac{\partial f\_1}{\partial x\_1} & \frac{\partial f\_1}{\partial x\_2} & \cdots & \frac{\partial f\_1}{\partial x\_n} \\ \frac{\partial f\_2}{\partial x\_1} & \frac{\partial f\_2}{\partial x\_2} & \cdots & \frac{\partial f\_2}{\partial x\_n} \\ \vdots & \vdots & \ddots & \vdots \\ \frac{\partial f\_m}{\partial x\_1} & \frac{\partial f\_m}{\partial x\_2} & \cdots & \frac{\partial f\_m}{\partial x\_n} \end{bmatrix} $$矩阵中的第 $(i, j)$ 个元素是 $\mathbf{f}$ 的第 $i$ 个分量函数 $f_i$ 对输入向量 $\mathbf{x}$ 的第 $j$ 个分量 $x_j$ 的偏导数。
+
+特殊情况：
+- 标量值函数（m=1）：如果函数是标量值函数，即 $f: \mathbb{R}^n \to \mathbb{R}$，那么雅可比矩阵就变成了一个行向量，也就是函数的梯度的转置： $$
+\mathbf{J} = \nabla f(\mathbf{x})^T = \begin{bmatrix} \frac{\partial f}{\partial x_1} & \frac{\partial f}{\partial x_2} & \cdots & \frac{\partial f}{\partial x_n} \end{bmatrix} 
+$$
+- 向量值函数，输入是标量（n=1）：如果函数是向量值函数，但输入是标量，即 $\mathbf{f}: \mathbb{R} \to \mathbb{R}^m$，那么雅可比矩阵就变成了一个列向量，表示每个分量函数对该标量的导数： $$\mathbf{J} = \begin{bmatrix} \frac{d f\_1}{d x\_1} \\ \frac{d f\_2}{d x\_1} \\ \vdots \\ \frac{d f\_m}{d x\_1} \end{bmatrix} $$
+### 19.2 雅可比行列式
+如果 $m=n$，即雅可比矩阵是方阵，那么它的行列式被称为雅可比行列式。 $$ \det(\mathbf{J}) = \begin{vmatrix} \frac{\partial f_1}{\partial x_1} & \frac{\partial f_1}{\partial x_2} & \cdots & \frac{\partial f_1}{\partial x_n} \\ \frac{\partial f_2}{\partial x_1} & \frac{\partial f_2}{\partial x_2} & \cdots & \frac{\partial f_2}{\partial x_n} \\ \vdots & \vdots & \ddots & \vdots \\ \frac{\partial f_n}{\partial x_1} & \frac{\partial f_n}{\partial x_2} & \cdots & \frac{\partial f_n}{\partial x_n} \end{vmatrix} $$雅可比行列式在微积分中有很多应用，特别是变量替换积分时，它表示了体积或面积的伸缩因子。
+
+## 20 贝尔曼备份 (Bellman Backup)
+在强化学习（Reinforcement Learning）和动态规划（Dynamic Programming）中，贝尔曼备份是一个核心概念，它指的是一种更新值函数（Value Function）或动作值函数（Action-Value Function）的操作。这个操作利用了贝尔曼方程（Bellman Equation）的递归结构，通过将未来状态（或状态-动作对）的值“备份”到当前状态，从而迭代地计算出最优策略或给定策略下的值。
+
+贝尔曼备份的核心思想是自举（Bootstrapping）。这意味着我们在更新一个状态的值时，会利用其后继状态的估计值来计算。换句话说，它是一种“未来推算现在”的方法。通过不断重复这个备份操作，值函数会在整个状态空间中传播信息，并最终收敛到真实的值函数。
+### 20.1 贝尔曼方程
+贝尔曼备份操作是贝尔曼方程的具体实现。策略 $\pi$ 下的状态值函数 $V^\pi(s)$ 和动作值函数 $Q^\pi(s, a)$ 的贝尔曼方程：
+1. 策略 $\pi$ 下的状态值函数 $V^\pi(s)$：$$V^\pi(s) = E_\pi \left[ R_{t+1} + \gamma V^\pi(S_{t+1}) \mid S_t = s \right]$$这表示从状态 $s$ 开始，遵循策略 $\pi$ 所能获得的期望回报。它等于从状态 $s$ 采取行动获得的即时奖励 $R_{t+1}$，加上折扣后的后继状态 $S_{t+1}$ 的值 $V^\pi(S_{t+1})$ 的期望。
+2. 策略 $\pi$ 下的动作值函数 $Q^\pi(s, a)$：$$Q^\pi(s, a) = E \left[ R_{t+1} + \gamma V^\pi(S_{t+1}) \mid S_t = s, A_t = a \right]$$这表示在状态 $s$ 采取动作 $a$ 后，遵循策略 $\pi$ 所能获得的期望回报。
+### 20.2 贝尔曼备份操作
+**策略评估中的备份（Policy Evaluation Backup）：**
+当策略 $\pi$ 给定时，我们可以使用贝尔曼备份来迭代地计算 $V^\pi(s)$ 或 $Q^\pi(s, a)$。
+V-值备份（V-value Backup for Policy Evaluation）：
+对于每个状态 $s$，更新其值：
+$$V_{k+1}(s) = \sum_a \pi(a|s) \sum_{s', r} p(s', r | s, a) [r + \gamma V_k(s')]$$
+这个操作的图示通常从一个圆圈（表示状态 $s$）引出箭头到方块（表示动作 $a$），再从方块引出箭头到圆圈（表示后继状态 $s'$）。
+Q-值备份（Q-value Backup for Policy Evaluation）：
+对于每个状态-动作对 $(s, a)$，更新其值：
+$$Q_{k+1}(s, a) = \sum_{s', r} p(s', r | s, a) [r + \gamma \sum_{a'} \pi(a'|s') Q_k(s', a')]$$
+这个备份从一个方块（表示状态-动作对 $(s, a)$）引出箭头到圆圈（表示后继状态 $s'$），再从圆圈引出箭头到方块（表示后继状态的动作 $a'$）。
+
+**策略迭代中的备份（Policy Improvement/Iteration Backup）：**
+在策略迭代中，贝尔曼备份用于计算最优值函数。
+最优V-值备份（Optimal V-value Backup / Bellman Optimality Backup for V）：
+$$V_{k+1}(s) = \max_a \sum_{s', r} p(s', r | s, a) [r + \gamma V_k(s')]$$
+这个备份图示中，从状态 $s$ 的圆圈引出箭头到所有可能的动作方块，然后从这些动作方块中选择能使期望值最大化的路径。
+最优Q-值备份（Optimal Q-value Backup / Bellman Optimality Backup for Q）：
+$$Q_{k+1}(s, a) = \sum_{s', r} p(s', r | s, a) [r + \gamma \max_{a'} Q_k(s', a')]$$
+这个备份图示中，从状态-动作对 $(s, a)$ 的方块引出箭头到后继状态 $s'$ 的圆圈，然后从 $s'$ 的圆圈引出箭头到其所有可能的动作方块，并选择其中能使 $Q$ 值最大化的动作。
+
+---
+## 21 自动编码器 (Autoencoder，AE)
+
+自动编码器（Autoencoder，AE）是一种无监督神经网络，它主要用于学习输入数据的高效编码（也就是数据的低维表示或特征）。它通过尝试将输入数据“重构”出来来实现这个目的。简单来说，自动编码器会强迫神经网络去学习一个压缩的、有意义的输入表示。
+### 21.1 核心思想和结构
+一个典型的自动编码器由两个主要部分构成：
+1.  编码器（Encoder）：它的任务是将输入数据 $X$ 映射到一个低维的潜在空间（Latent Space），从而生成一个编码（Code）或潜在表示（Latent Representation）$Z$，可以表示为：$Z = f(X)$。
+2.  解码器（Decoder）：它的任务是将编码 $Z$ 从潜在空间映射回原始数据空间，生成一个重构输出（Reconstructed Output） $\hat{X}$，可以表示为：$\hat{X} = g(Z)$。
+
+自动编码器的整个训练过程是端到端（end-to-end）的，它的目标是让重构输出 $\hat{X}$ 尽可能地接近原始输入 $X$。
+### 21.2 训练目标：损失函数
+自动编码器的训练是通过最小化重构误差（Reconstruction Error）来完成的。这个误差量化了原始输入 $X$ 和重构输出 $\hat{X}$ 之间的差异。
+常见的重构误差函数包括：
+* 均方误差（Mean Squared Error，MSE）：适用于连续数据（比如图像的像素值）：$$\mathcal{L}(X, \hat{X}) = ||X - \hat{X}||^2 = \frac{1}{N} \sum_{i=1}^N (X_i - \hat{X}_i)^2$$
+* 二元交叉熵（Binary Cross-Entropy，BCE）：适用于二值数据（比如黑白图像或伯努利分布的输出）：$$\mathcal{L}(X, \hat{X}) = -\sum_{i=1}^N [X_i \log(\hat{X}_i) + (1-X_i) \log(1-\hat{X}_i)]$$
+
+通过最小化这个损失函数，编码器被迫学习如何有效地压缩数据，而解码器则被迫学习如何从这种压缩表示中恢复数据。
+### 21.3 自动编码器的种类和变体
+除了基本的自动编码器，还有很多变体，它们通过引入不同的约束或机制来学习更鲁棒或更有用的表示：
+1.  稀疏自动编码器（Sparse Autoencoder）：
+    * 在损失函数中加入一个稀疏性惩罚项，鼓励潜在表示 $Z$ 中的大部分神经元在给定输入时处于非激活状态（接近于零）。
+    * 这有助于学习更具解释性的特征，并防止过拟合。
+2.  去噪自动编码器（Denoising Autoencoder，DAE）：
+    * 输入是原始数据 $X$ 的损坏版本（例如，加入了噪声或遮挡）。
+    * 训练目标是重构原始的、未损坏的 $X$。
+    * 这使得编码器更鲁棒，能够学习到数据中更本质的特征，而不是对噪声进行编码。
+3.  栈式自动编码器（Stacked Autoencoder）：
+    * 由多个自动编码器层堆叠而成。
+    * 可以逐层进行贪婪的预训练，然后对整个网络进行微调，从而学习更深层次的特征表示。
+4.  变分自动编码器（Variational Autoencoder，VAE）：
+    * 尽管名字相似，但 VAE 本质上是生成模型。
+    * 编码器输出潜在空间分布的参数（比如均值和方差），而不是单一的编码。
+    * 通过引入 KL 散度损失来强制潜在空间服从特定的先验分布（通常是标准正态分布），从而使其能够生成新的、多样化的数据。
+5.  收缩自动编码器（Contractive Autoencoder，CAE）：
+    * 在损失函数中加入一个惩罚项，鼓励编码器在输入有小扰动时，其输出的潜在表示保持稳定。
+    * 这使得模型学习到对输入微小变化不敏感的特征。
+
