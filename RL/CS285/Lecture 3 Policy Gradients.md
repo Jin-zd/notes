@@ -154,7 +154,7 @@ $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\nabla_\theta \log p_\theta(\tau) r(\tau)\right]
 $$
 中的期望是基于当前的策略的，因此每一次更新都需要重新采样。这样的方式对于 Deep RL 来说是不理想的，因为我们每一次梯度更新策略的改变量很小，而每次数据的采样通常都是很昂贵且耗时的。
-这里我们介绍一种 **off-policy** 的方法，也就是**重要性采样（importance sampling）**。
+这里我们介绍一种 off-policy 的方法，也就是重要性采样（importance sampling）。
 
 **Definition 2**. _importance sampling（重要性采样）_
 给定两个分布 $p(x)$ _与_ $q(x)$，如果我们只有 $q(x)$ 分布下的样本，而我们想要计算 $p(x)$ 下的期望，那么我们可以通过重要性采样来计算：
@@ -183,7 +183,7 @@ $$
 $$
 这里后一个等号基于因果性，即未来的重要性采样比率不应该影响过去的奖励。
 
-如果我们忽略掉后一个重要性采样比率，那么我们就得到了**策略迭代算法（Policy Iteration Algorithm）** 的形式（先用当前采样得到的样本估计累积奖励，相当于策略评估，然后基于这个累积奖励加上当前动作对应的梯度调整策略参数，相当于策略改进）：
+如果我们忽略掉后一个重要性采样比率，那么我们就得到了策略迭代算法（Policy Iteration Algorithm）的形式（先用当前采样得到的样本估计累积奖励，相当于策略评估，然后基于这个累积奖励加上当前动作对应的梯度调整策略参数，相当于策略改进）：
 $$
 \mathbb{E}_{\tau \sim p_\theta(\tau)} \left[\sum_{t = 1}^{T} \nabla_{\theta'} \log \pi_{\theta'}(\boldsymbol{a}_t \mid \boldsymbol{s}_t) \left(\prod_{t' = 1}^{t} \frac{\pi_{\theta'}(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}{\pi_\theta(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})}\right) \left(\sum_{t' = t}^T r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) \right)\right]
 $$
@@ -227,7 +227,7 @@ $$
 作为一个解决约束优化问题的例子，也为了直观展现 KKT 情况的含义，我们给出如下利用拉格朗日对偶的过程：
 
 _Proof._ 
-**Step 1: 将原问题转化为带约束的极大极小问题** 
+Step 1：将原问题转化为带约束的极大极小问题 
 不难发现原问题 $(P)$：
 $$
 \max_{\theta'} (\theta' - \theta)^T \nabla_\theta J(\theta) \quad \text{ s.t. } \|\theta' - \theta\|^2 \leq \epsilon
@@ -237,14 +237,14 @@ $$
 \max_{\theta'} \min_{\lambda, \lambda \geq 0} \mathcal{L}(\theta', \lambda)
 $$
 
-**Step 2: 使用 [[Concepts#7 Sion 最小最大定理（Sion's Minimax Theorem）|Sion 最小最大定理（Sion's Minimax Theorem）]]**
+Step 2：使用 [[Concepts#7 Sion 最小最大定理（Sion's Minimax Theorem）|Sion 最小最大定理（Sion's Minimax Theorem）]]
 由于 $\mathcal{L}(\theta', \lambda)$ 对 $\theta'$ 是凹函数，对 $\lambda$ 是凸函数（线性也是凸函数），利用 Sion 最小最大定理有
 $$
 \max_{\theta'} \min_{\lambda, \lambda \geq 0} \mathcal{L}(\theta', \lambda) = \min_{\lambda, \lambda \geq 0} \max_{\theta'} \mathcal{L}(\theta', \lambda)
 $$
 且这两个问题的解是等价的。
 
-**Step 3: 求解内层极值得到对偶问题** 
+Step 3：求解内层极值得到对偶问题
 再考虑带参数的最值问题 $\max_{\theta'} \mathcal{L}(\theta', \lambda)$，这里对 $\theta'$ 求偏导并令其为 $0$ 可得
 $$
 \nabla_\theta J(\theta) - 2\lambda(\theta' - \theta) = 0 \Rightarrow \theta' = \theta + \frac{1}{2\lambda} \nabla_\theta J(\theta)
@@ -254,7 +254,7 @@ $$
 \min_{\lambda, \lambda \geq 0} \mathcal{L}\left(\theta + \frac{1}{2\lambda} \nabla_\theta J(\theta), \lambda\right)
 $$
 
-**Step 4: 求解对偶问题** 
+Step 4：求解对偶问题
 代入可得这个对偶问题的解为 $\lambda = \|\nabla_\theta J(\theta)\| / 2\sqrt{\epsilon}$，代入得到
 $$
 \theta' = \theta + \frac{\sqrt{\epsilon}}{\|\nabla_\theta J(\theta)\|} \nabla_\theta J(\theta)
@@ -309,17 +309,17 @@ $$
 $$
 \alpha = \sqrt{\frac{2\epsilon}{(\nabla_\theta J(\theta))^T F^{-1}(\theta) \nabla_\theta J(\theta)}}
 $$
-于是我们可以给出**自然策略梯度（Natural policy gradient）** 算法的基本流程:
-1.  利用 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 采样一系列轨迹 $\mathcal{D}$。  
-2.  估计优势函数 $\hat{A}(\boldsymbol{s}_t, \boldsymbol{a}_t)$。  
-3.  计算策略梯度 $\nabla_\theta J(\theta) = \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \hat{A}(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t})$。
-4.  利用估计 $F(\theta) \approx \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t})^T$ 计算 Fisher 信息矩阵 $F(\theta)$。
-5.  利用 $\theta' = \theta + \alpha F^{-1}(\theta) \nabla_\theta J(\theta)$ 更新参数，其中 $\alpha$ 是动态计算的学习率。
+于是可以给出自然策略梯度（Natural policy gradient）算法的基本流程:
+1. 利用 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 采样一系列轨迹 $\mathcal{D}$。  
+2. 估计优势函数 $\hat{A}(\boldsymbol{s}_t, \boldsymbol{a}_t)$。  
+3. 计算策略梯度 $\nabla_\theta J(\theta) = \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \hat{A}(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t})$。
+4. 利用估计 $F(\theta) \approx \frac{1}{N} \sum_{i = 1}^N \sum_{t = 1}^T \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t}) \nabla_\theta \log \pi_\theta(\boldsymbol{a}_{i,t} \mid \boldsymbol{s}_{i,t})^T$ 计算 Fisher 信息矩阵 $F(\theta)$。
+5. 利用 $\theta' = \theta + \alpha F^{-1}(\theta) \nabla_\theta J(\theta)$ 更新参数，其中 $\alpha$ 是动态计算的学习率。
 上述算法中我们尚未覆盖的是 $F(\theta)$ 的计算方式，这里基于的是
 $$
 F(\theta) = \mathbb{E}_{\pi_\theta(\boldsymbol{a} \mid \boldsymbol{s})} \left[\nabla_\theta \log \pi_\theta(\boldsymbol{a} \mid \boldsymbol{s}) \nabla_\theta \log \pi_\theta(\boldsymbol{a} \mid \boldsymbol{s})^T\right]
 $$
-我们用样本的均值来估计这个期望就可以得到 $F(\theta)$ 的估计。
+用样本的均值来估计这个期望就可以得到 $F(\theta)$ 的估计。
 
 使用自然策略梯度的效果：
 ![](3-3.png)

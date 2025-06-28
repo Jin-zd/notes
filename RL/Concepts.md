@@ -411,7 +411,7 @@ VAE 的关键在于：
     * 输出：重构数据 $\hat{x}$ 的参数，例如对于图像通常是像素的均值（如果是二值图像，可以是伯努利分布的参数）。
     * 模型参数通常通过神经网络表示，例如 $\hat{x} = g(z)$。
 
-目标函数 (Loss Function)：
+目标函数（Loss Function）：
 VAE 的训练目标是最大化数据的证据下界（Evidence Lower Bound，ELBO），这等价于最小化以下损失函数：
 $$\mathcal{L}(x, \hat{x}) = \text{Reconstruction Loss}(x, \hat{x}) + D_{KL}(q(z|x) || p(z))$$
 * 重构损失：衡量解码器生成 $\hat{x}$ 的效果。
@@ -540,4 +540,254 @@ $U_i(s_i^*, s_{-i}^*) \geq U_i(s_i', s_{-i}^*)$
 ### 22.3 纳什的存在性定理
 由约翰·纳什证明：任何有限博弈（有限数量的参与者和有限数量的纯策略）都至少存在一个纳什均衡，可能是纯策略纳什均衡或混合策略纳什均衡。
 
+## 23 变分导数 (Variational Derivative)
+变分导数是泛函分析中的一个概念，用于计算泛函相对于其输入函数的变化率。它类似于普通微积分中的导数，但不是针对变量，而是针对整个函数。
+### 23.1 核心概念
+* 泛函（Functional）： 将一个函数映射到一个实数（或复数）的映射。通常表示为 $J[y(x)]$，其中 $y(x)$ 是输入函数。
+* 变分（Variation）：输入函数 $y(x)$ 的一个微小变化，通常表示为 $\delta y(x)$。这个变化是任意的，但通常假设在边界处为零（即 $\delta y(x_1) = \delta y(x_2) = 0$）。
+### 23.2 定义
+泛函 $J[y(x)]$ 对函数 $y(x)$ 的变分导数 $\frac{\delta J}{\delta y(x)}$ 定义为满足以下关系式的函数：
+当 $y(x)$ 发生微小变分 $\delta y(x)$ 时，泛函 $J[y(x)]$ 的相应变化 $\delta J$ 可以表示为：
+$$ \delta J = J[y(x) + \delta y(x)] - J[y(x)] = \int \frac{\delta J}{\delta y(x)} \delta y(x) \, dx $$
+这个定义与普通导数的定义类比：$\Delta f = f'(x) \Delta x$。在这里，$\delta J$ 是“变化量”，$\frac{\delta J}{\delta y(x)}$ 是“导数”，$\delta y(x)$ 是“微小变化”，积分符号则取代了求和。
+### 23.3 欧拉-拉格朗日方程 (Euler-Lagrange Equation)
+变分导数最常见的应用之一是导出欧拉-拉格朗日方程，这是变分法中的核心方程，用于寻找使泛函取极值（通常是最小值）的函数。
 
+考虑一个泛函形式如下：
+$$J[y(x)] = \int_{x_1}^{x_2} L(x, y(x), y'(x)) \, dx$$
+其中 $L$ 是拉格朗日量，是 $x$, $y(x)$ 和 $y'(x)$ 的函数，$y'(x) = \frac{dy}{dx}$。
+
+为了使 $J[y(x)]$ 取到极值，其变分导数必须为零。即 $\frac{\delta J}{\delta y(x)} = 0$。通过推导（涉及分部积分并利用边界条件），可以得到欧拉-拉格朗日方程：
+$$ \frac{\partial L}{\partial y} - \frac{d}{dx} \left( \frac{\partial L}{\partial y'} \right) = 0 $$
+
+### 23.4 计算示例
+假设我们有一个泛函：
+$$J[y(x)] = \int_{x_1}^{x_2} \left[ \frac{1}{2} (y'(x))^2 - V(y(x)) \right] \, dx$$
+这里，拉格朗日量是 $L(x, y, y') = \frac{1}{2} (y')^2 - V(y)$。
+
+根据欧拉-拉格朗日方程：
+1.  计算 $\frac{\partial L}{\partial y}$：$$ \frac{\partial L}{\partial y} = \frac{\partial}{\partial y} \left( \frac{1}{2} (y')^2 - V(y) \right) = - \frac{dV}{dy} $$
+2.  计算 $\frac{\partial L}{\partial y'}$：$$ \frac{\partial L}{\partial y'} = \frac{\partial}{\partial y'} \left( \frac{1}{2} (y')^2 - V(y) \right) = y' $$
+3.  计算 $\frac{d}{dx} \left( \frac{\partial L}{\partial y'} \right)$：$$ \frac{d}{dx} (y') = y'' $$
+4.  代入欧拉-拉格朗日方程：$$ - \frac{dV}{dy} - y'' = 0 $$
+$$ y'' + \frac{dV}{dy} = 0 $$
+这个方程在物理学中非常常见，例如描述质量-弹簧系统的运动方程，或者在场论中描述场的动力学。
+
+## 24 分位数损失（Expectile Loss）
+### 24.1 概述
+分位数损失（Expectile Loss）是一种用于回归问题的损失函数，与分位数回归中的分位数损失（Quantile Loss）类似，但它关注的是 expectiles 而不是 quantiles。Expectiles 是对均值的一种推广，而分位数是对中位数的一种推广。分位数损失在许多方面与最小二乘损失（Mean Squared Error, MSE）相关，但允许对欠预测（under-prediction）和过预测（over-prediction）进行不对称加权。
+### 24.2 定义
+对于一个给定的真实值 $y$ 和预测值 $\hat{y}$，以及一个非对称参数 $\tau \in (0, 1)$，分位数损失 $L_\tau(y, \hat{y})$ 的定义如下：
+$$
+L_\tau(y, \hat{y}) = \begin{cases}
+    \tau (y - \hat{y})^2 & \text{if } y - \hat{y} > 0 \\
+    (1 - \tau) (y - \hat{y})^2 & \text{if } y - \hat{y} \le 0
+\end{cases}
+$$
+也可以写成更紧凑的形式：
+$$
+L_\tau(y, \hat{y}) = \tau \cdot \max(0, y - \hat{y})^2 + (1 - \tau) \cdot \max(0, \hat{y} - y)^2
+$$
+或者使用指示函数 $\mathbb{I}(\cdot)$：
+$$
+L_\tau(y, \hat{y}) = \tau \cdot (y - \hat{y})^2 \cdot \mathbb{I}(y > \hat{y}) + (1 - \tau) \cdot (y - \hat{y})^2 \cdot \mathbb{I}(y \le \hat{y})
+$$
+其中：
+* $y$：真实值（true value）；
+* $\hat{y}$：预测值（predicted value）；
+* $\tau$：非对称参数（asymmetry parameter），范围在 $(0, 1)$ 之间。它控制了对正残差（$y - \hat{y} > 0$，即欠预测) 和负残差 ($y - \hat{y} \le 0$，即过预测）的惩罚权重。
+### 24.3 参数 $\tau$ 的作用
+* 当 $\tau = 0.5$ 时，分位数损失退化为标准的均方误差（Mean Squared Error，MSE）。此时，对正残差和负残差的惩罚是相同的。$$L_{0.5}(y, \hat{y}) = 0.5 (y - \hat{y})^2 \cdot \mathbb{I}(y > \hat{y}) + 0.5 (y - \hat{y})^2 \cdot \mathbb{I}(y \le \hat{y}) = 0.5 (y - \hat{y})^2$$
+* 当 $\tau > 0.5$ 时，对欠预测（$y > \hat{y}$）的惩罚大于对过预测（$y \le \hat{y}$）的惩罚。这意味着模型会更倾向于预测更高的值，以避免欠预测。
+* 当 $\tau < 0.5$ 时，对过预测（$y \le \hat{y}$）的惩罚大于对欠预测（$y > \hat{y}$）的惩罚。这意味着模型会更倾向于预测更低的值，以避免过预测。
+
+### 24.4 特点与优势
+1. 可微分性：与分位数损失（在零点不可微）不同，expectile loss 在整个定义域上都是可微分的（除了 $y = \hat{y}$ 处的一阶导数可能不连续，但二阶导数处处存在），这使得它更容易用于基于梯度的优化算法（如梯度下降）。
+2. 不对称惩罚：通过调整参数 $\tau$，可以灵活地控制模型对不同类型预测误差（欠预测或过预测）的敏感度，这在某些应用场景中非常有用，例如：
+3. 与 MSE 的关系：当 $\tau=0.5$ 时，它就是 MSE，这意味着 expectile loss 可以看作是 MSE 的一个推广形式，它保留了 MSE 的一些良好性质（如光滑性）。
+
+### 24.5 与分位数回归的比较
+
+| 特性       | Expectile Regression                                 | Quantile Regression                              |
+| :--------- | :--------------------------------------------------- | :----------------------------------------------- |
+| **关注点** | Expectiles (对均值的推广)                            | Quantiles (对中位数的推广)                       |
+| **损失函数** | Expectile Loss (基于平方误差，可微分)              | Quantile Loss / Pinball Loss (基于绝对误差，在零点不可微分) |
+| **统计效率** | 更依赖于数据的平方误差结构，对异常值更敏感。       | 对异常值更鲁棒，因为基于绝对误差。               |
+| **计算** | 通常使用梯度下降等优化算法，更方便。               | 优化可能需要特殊的算法，因不可微分性。         |
+| **解释性** | 预测的是条件期望的加权平均值。                     | 预测的是条件分位数。                             |
+
+## 25 范数 (Norm)
+### 25.1 范数的定义
+在数学中，范数（Norm）是赋予向量空间中每个向量长度或大小的函数。它可以看作是欧几里得空间中距离概念的推广。直观上，范数衡量了一个向量“有多大”或者说“离原点有多远”。
+
+一个函数 $f: V \to \mathbb{R}$ 被称为范数，如果它满足以下三个性质：
+1.  非负性：对于任意向量 $x \in V$，有$$||x|| \ge 0 \quad \text{and} \quad ||x|| = 0 \iff x = 0$$
+2.  齐次性或绝对齐次性：对于任意向量 $x \in V$ 和任意标量 $\alpha \in \mathbb{R}$（或 $\mathbb{C}$），有$$||\alpha x|| = |\alpha| \cdot ||x||$$
+3.  三角不等式：对于任意向量 $x, y \in V$，有$$||x + y|| \le ||x|| + ||y||$$
+### 25.2 常见的范数类型
+#### 25.2.1 向量范数 (Vector Norms)
+##### 25.2.1.1 $L_p$ 范数 (p-norm)
+$L_p$ 范数是向量范数中最常用的一种，其定义为：
+$$||x||_p = \left( \sum_{i=1}^n |x_i|^p \right)^{1/p}$$
+其中 $x = [x_1, x_2, \dots, x_n]^T$ 是一个 $n$ 维向量，$p \ge 1$。
+##### 25.2.1.2 $L_1$ 范数 (曼哈顿范数 / Manhattan Norm)
+当 $p=1$ 时，称为 $L_1$ 范数，也称为曼哈顿范数或出租车范数。它表示向量各元素绝对值之和。
+$$||x||_1 = \sum_{i=1}^n |x_i|$$
+应用场景：稀疏性促进（如 LASSO 回归）。
+##### 25.2.1.3 $L_2$ 范数 (欧几里得范数 / Euclidean Norm)
+当 $p=2$ 时，称为 $L_2$ 范数，也称为欧几里得范数。它表示向量元素平方和的平方根，即向量的几何长度。
+$$||x||_2 = \sqrt{\sum_{i=1}^n |x_i|^2}$$
+应用场景：机器学习中最常用的范数，用于计算向量之间的距离，如均方误差（MSE）。
+##### 25.2.1.4 $L_\infty$ 范数 (最大范数 / Maximum Norm)
+当 $p \to \infty$ 时，称为 $L_\infty$ 范数，也称为最大范数或切比雪夫范数。它表示向量中所有元素绝对值的最大值。
+$$||x||_\infty = \max_{i} |x_i|$$
+应用场景：在某些优化问题中，要求所有误差不超过某个最大值。
+#### 25.2.2 矩阵范数 (Matrix Norms)
+矩阵范数是衡量矩阵“大小”的函数。最常见的矩阵范数是由向量范数诱导的诱导范数（Induced Norm）。
+诱导范数定义为：
+$$||A|| = \sup_{x \ne 0} \frac{||Ax||}{||x||}$$
+其中 $A$ 是一个矩阵，$x$ 是一个向量，右侧的范数是向量范数。
+##### 25.2.2.1 1-范数 (列和范数 / Column Sum Norm)
+由 $L_1$ 向量范数诱导的矩阵范数，表示矩阵各列绝对值之和的最大值。
+$$||A||_1 = \max_{1 \le j \le n} \sum_{i=1}^m |a_{ij}|$$
+##### 25.2.2.2 2-范数 (谱范数 / Spectral Norm)
+由 $L_2$ 向量范数诱导的矩阵范数，表示矩阵的最大奇异值。
+$$||A||_2 = \sqrt{\lambda_{\max}(A^T A)}$$
+其中 $\lambda_{\max}(A^T A)$ 表示矩阵 $A^T A$ 的最大特征值。
+##### 25.2.2.3 $\infty$-范数 (行和范数 / Row Sum Norm)
+由 $L_\infty$ 向量范数诱导的矩阵范数，表示矩阵各行绝对值之和的最大值。
+$$||A||_\infty = \max_{1 \le i \le m} \sum_{j=1}^n |a_{ij}|$$
+##### 25.2.2.4 Frobenius 范数 (F-范数)
+Frobenius 范数是一种非诱导范数，它将矩阵视为一个向量，并计算其元素的平方和的平方根。
+$$||A||_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}$$
+应用场景：机器学习中常用，例如在正则化中防止过拟合。
+### 25.3 范数的作用和意义
+* 度量距离和相似性：范数可以用来定义向量或矩阵之间的“距离”，进而衡量它们的相似性。例如，两个向量的 $L_2$ 距离越小，它们就越相似。
+* 正则化：在机器学习和优化问题中，范数常用于正则化项，以防止过拟合。
+    * $L_1$ 范数（LASSO）可以产生稀疏解，用于特征选择。
+    * $L_2$ 范数（Ridge 回归）可以抑制模型复杂度，使权重趋于平滑。
+* 稳定性分析：在数值分析中，范数用于分析算法的稳定性和误差传播。
+* 收敛性判断：范数可以用来判断序列的收敛性，例如向量序列或矩阵序列的收敛。
+### 25.4 范数之间的关系
+不同的范数之间存在等价关系，即对于有限维向量空间上的任意两个范数 $|| \cdot ||_a$ 和 $|| \cdot ||_b$，存在正常数 $C_1, C_2$ 使得：
+$$C_1 ||x||_a \le ||x||_b \le C_2 ||x||_a$$
+这意味着在有限维空间中，如果一个序列在一个范数下收敛，那么它在其他任何范数下也收敛。
+
+## 26 条件变分自编码器（Conditional Variational Auto Encoder，CVAE）
+### 26.1 概念
+条件变分自编码器（CVAE）是变分自编码器（VAE）的扩展，它允许我们通过引入条件信息来控制生成数据的属性。在传统的 VAE 中，潜在空间编码了数据的所有变异性，但我们无法直接指定生成图像的类别或风格。CVAE 通过将条件信息（例如，图像标签、文本描述等）引入编码器和解码器，使得生成过程能够受到引导。
+### 26.2 核心思想
+CVAE 的核心思想是在 VAE 的基础上，将额外的条件信息 $c$ 拼接（concatenate）到输入数据 $x$ 和潜在向量 $z$ 上。
+* 编码器（Encoder）：学习从输入数据 $x$ 和条件信息 $c$ 到潜在空间分布参数 (均值 $\mu$ 和方差 $\sigma^2$) 的映射。
+    * 输入：$[x, c]$
+    * 输出：$q_{\phi}(z | x, c)$
+* 解码器（Decoder）：学习从潜在向量 $z$ 和条件信息 $c$ 到重构数据 $x'$ 的映射。
+    * 输入：$[z, c]$
+    * 输出：$p_{\theta}(x | z, c)$
+
+通过这种方式，编码器在学习潜在表示时考虑了条件信息，而解码器在生成数据时也利用了条件信息，从而实现了条件生成。
+
+### 26.3 数学原理
+CVAE 的目标是最大化条件对数似然的下界 (Evidence Lower Bound, ELBO)，类似于 VAE。但这里的条件是指给定 $c$ 的情况下。
+#### 26.3.1 目标函数 (ELBO)
+CVAE 的 ELBO 可以表示为：
+$
+L(\phi, \theta; x, c) = E_{q_{\phi}(z | x, c)}[\log p_{\theta}(x | z, c)] - D_{KL}(q_{\phi}(z | x, c) || p(z | c))
+$
+其中：
+* 第一项：重构损失（Reconstruction Loss）
+    * $E_{q_{\phi}(z | x, c)}[\log p_{\theta}(x | z, c)]$
+    * 衡量解码器重构数据 $x$ 的准确性。对于连续数据，通常使用均方误差（MSE）或交叉熵（Cross-Entropy）。
+    * 这一项鼓励解码器在给定 $z$ 和 $c$ 的情况下，生成与原始输入 $x$ 相似的数据。
+* 第二项：KL 散度（KL Divergence）
+    * $D_{KL}(q_{\phi}(z | x, c) || p(z | c))$
+    * 衡量编码器学习到的潜在分布 $q_{\phi}(z | x, c)$ 与先验分布 $p(z | c)$ 之间的距离。
+    * 通常，我们假设先验分布 $p(z | c)$ 也是标准正态分布 $N(0, I)$，即条件信息不影响先验潜在空间的分布。然而，在某些更复杂的 CVAE 变体中，先验分布本身也可以依赖于条件信息 $c$。
+    * 这一项鼓励潜在空间 $z$ 具有良好的正则化特性，使得从潜在空间采样变得容易。
+
+#### 26.3.2 训练过程
+训练 CVAE 的过程与 VAE 类似，采用随机梯度下降（SGD）和重参数化技巧（Reparameterization Trick）：
+1. 编码：给定输入数据 $x$ 和条件 $c$，编码器 $q_{\phi}(z | x, c)$ 输出潜在分布的均值 $\mu(x, c)$ 和对数方差 $\log \sigma^2(x, c)$。
+2. 采样：使用重参数化技巧从 $q_{\phi}(z | x, c)$ 中采样潜在向量 $z$：$z = \mu(x, c) + \sigma(x, c) \odot \epsilon$，其中 $\epsilon \sim N(0, I)$。
+3. 解码：将采样得到的 $z$ 和条件 $c$ 输入解码器 $p_{\theta}(x | z, c)$，生成重构数据 $x'$。
+4. 计算损失：根据 ELBO 计算重构损失和 KL 散度，并求和得到总损失。
+5. 反向传播：通过反向传播更新编码器和解码器的参数 $\phi$ 和 $\theta$。
+
+### 26.4 网络结构
+CVAE 的网络结构通常包括：
+* 编码器（Encoder）：
+    * 输入层：接收 $x$ 和 $c$ 的拼接。
+    * 多层神经网络 (例如，全连接层或卷积层)。
+    * 输出层：输出 $\mu$ 和 $\log \sigma^2$。
+* 解码器（Decoder）：
+    * 输入层：接收 $z$ 和 $c$ 的拼接。
+    * 多层神经网络 (例如，全连接层或反卷积层)。
+    * 输出层：生成与输入数据 $x$ 相同维度的重构数据 $x'$。
+
+条件信息的拼接方式：
+条件信息 $c$ 可以是独热编码（one-hot encoding）的类别标签、连续的属性值或嵌入向量。它通常在输入层或隐藏层与数据 $x$ 或潜在向量 $z$ 进行拼接。
+
+## 27 变分推断（Variational Inference，VI）
+### 27.1 简介
+变分推断（Variational Inference，VI） 是一种强大的计算方法，用于近似复杂概率模型的后验分布。在许多贝叶斯模型中，计算真实的后验分布 $p(Z|X)$（其中 $Z$ 是隐变量， $X$ 是观测数据）非常困难，因为这通常涉及一个难以处理的积分（边缘似然 $p(X)$）。VI 的核心思想是，我们不直接计算这个复杂的后验，而是找到一个更简单的、容易处理的近似分布 $q(Z)$ 来逼近它。
+### 27.2 核心思想
+VI 的目标是寻找一个特定的近似分布 $q^*(Z)$，它属于一个预先定义的函数族 $\mathcal{Q}$，并且与真实的后验分布 $p(Z|X)$ 之间的“距离”最小。这个距离通常用 KL 散度来衡量：
+$$q^*(Z) = \arg \min_{q(Z) \in \mathcal{Q}} D_{KL}(q(Z) || p(Z|X))$$
+然而，直接最小化 $D_{KL}(q(Z) || p(Z|X))$ 依然需要计算 $p(Z|X)$。因此，VI 采取了一种巧妙的间接方法：最大化证据下界（Evidence Lower Bound，ELBO）。
+### 27.3 数学原理
+#### 27.3.1 KL 散度与 ELBO 的推导
+KL 散度的定义为：
+$$D_{KL}(q(Z) || p(Z|X)) = \sum_Z q(Z) \log \frac{q(Z)}{p(Z|X)}$$
+将真实后验 $p(Z|X)$ 展开为联合概率 $p(X,Z)$ 和边缘似然 $p(X)$ 的比值：$p(Z|X) = \frac{p(X,Z)}{p(X)}$。
+$$\begin{aligned}
+D_{KL}(q(Z) || p(Z|X)) &= \sum_Z q(Z) \log \frac{q(Z)}{p(X,Z)/p(X)} \\
+&= \sum_Z q(Z) \left[ \log q(Z) - \log p(X,Z) + \log p(X) \right] \\
+&= \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) + \sum_Z q(Z) \log p(X)
+\end{aligned}$$
+由于 $\sum_Z q(Z) = 1$，可以进一步简化：
+$$\begin{aligned}
+D_{KL}(q(Z) || p(Z|X)) &= \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) + \log p(X) \\
+&= \log p(X) + \left( \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) \right)
+\end{aligned}$$
+现在，重新排列上式，将 $\log p(X)$ 移到一边：
+$$\begin{aligned}
+\log p(X) &= D_{KL}(q(Z) || p(Z|X)) - \sum_Z q(Z) \log q(Z) + \sum_Z q(Z) \log p(X,Z) \\
+&= D_{KL}(q(Z) || p(Z|X)) + E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)]
+\end{aligned}$$
+将上式中的后两项定义为证据下界（Evidence Lower Bound，ELBO），记作 $\mathcal{L}(q)$：
+$$\mathcal{L}(q) = E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)]$$
+因此，有关系式：
+$$\log p(X) = D_{KL}(q(Z) || p(Z|X)) + \mathcal{L}(q)$$
+由于 KL 散度总是非负的 ($D_{KL}(q(Z) || p(Z|X)) \ge 0$)，这意味着 $\log p(X) \ge \mathcal{L}(q)$。因此，$\mathcal{L}(q)$ 确实是 $\log p(X)$ 的一个下界。
+
+还可以将 $\mathcal{L}(q)$ 进一步分解：
+$$\begin{aligned}
+\mathcal{L}(q) &= E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)] \\
+&= E_{q(Z)}[\log (p(X|Z)p(Z))] - E_{q(Z)}[\log q(Z)] \\
+&= E_{q(Z)}[\log p(X|Z)] + E_{q(Z)}[\log p(Z)] - E_{q(Z)}[\log q(Z)] \\
+&= E_{q(Z)}[\log p(X|Z)] - D_{KL}(q(Z) || p(Z))
+\end{aligned}$$
+
+#### 27.3.3.2 优化目标
+最大化 ELBO ($\mathcal{L}(q)$) 等价于最小化 $D_{KL}(q(Z) || p(Z|X))$。因为对于给定的观测数据 $X$，$\log p(X)$ 是一个常数，所以最大化 $\mathcal{L}(q)$ 会强制 $D_{KL}(q(Z) || p(Z|X))$ 趋近于零，从而使得近似分布 $q(Z)$ 尽可能地逼近真实的后验分布 $p(Z|X)$。
+
+#### 27.3.3.3 ELBO 的组成部分
+1. 重构项/似然项 $E_{q(Z)}[\log p(X|Z)]$：
+    * 这一项衡量了在近似后验分布 $q(Z)$ 下，模型生成观测数据 $X$ 的对数似然。
+    * 它鼓励近似分布 $q(Z)$ 能够很好地解释观测数据，使得重构误差尽可能小。
+2. KL 散度项 $-D_{KL}(q(Z) || p(Z))$：
+    * 这一项衡量了近似后验分布 $q(Z)$ 与隐变量的先验分布 $p(Z)$ 之间的距离。
+    * 它起到了正则化的作用，鼓励 $q(Z)$ 不要偏离我们对隐变量的先验假设太远。
+
+### 27.4 均场变分推断（Mean-Field Variational Inference）
+在实际应用中，选择一个既能有效近似真实后验又易于计算的近似分布族 $\mathcal{Q}$ 是一个关键挑战。最常用且最简化的选择是均场近似（Mean-Field Approximation）。
+
+均场假设：我们假设隐变量 $Z = \{Z_1, Z_2, \dots, Z_M\}$ 的近似分布 $q(Z)$ 可以分解为各个独立分量的乘积：
+$$q(Z) = \prod_{j=1}^M q_j(Z_j)$$
+在这种假设下，ELBO 的最大化可以通过坐标上升变分推断（Coordinate Ascent Variational Inference, CAVI）算法来实现。CAVI 算法迭代地优化每个 $q_j(Z_j)$，同时固定其他所有的 $q_k(Z_k)$ ($k \neq j$)。
+对于每个 $q_j(Z_j)$ 的最优更新公式为：
+$$\begin{aligned}
+\log q_j^*(Z_j) &= E_{\prod_{k \neq j} q_k(Z_k)}[\log p(X, Z)] + \text{const} \\
+q_j^*(Z_j) &\propto \exp \left( E_{\prod_{k \neq j} q_k(Z_k)}[\log p(X, Z)] \right)
+\end{aligned}$$
+这意味着 $q_j(Z_j)$ 的最优形式与联合分布 $p(X,Z)$ 在给定其他所有 $Z_k$ 上的期望对数成比例。通过迭代更新每个 $q_j(Z_j)$，算法会收敛到一个局部最优解。

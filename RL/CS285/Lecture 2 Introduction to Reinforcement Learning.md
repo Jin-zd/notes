@@ -1,11 +1,11 @@
 # 0 Terminology & Notation
--   $\boldsymbol{s}_t$：**state**  
--   $\boldsymbol{a}_t$：**action**  
--   $\boldsymbol{o}_t$：**observation**  
--   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$：**policy (fully observed)**.  
--   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$：**policy**  
--   $t$：**time step**  
--   $r(\boldsymbol{s}_t,\boldsymbol{a}_t)$：**reward function**，用于衡量一个状态与动作的好坏，这里我们使用了同时依赖于状态与动作的奖励函数，也可以定义仅依赖于状态的奖励函数 $r(\boldsymbol{s}_t)$  
+- $\boldsymbol{s}_t$：状态；
+- $\boldsymbol{a}_t$：动作；
+- $\boldsymbol{o}_t$：观测；
+- $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$：策略（全部可观测）；
+- $pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$：策略；
+- $t$：时间步；
+- $r(\boldsymbol{s}_t,\boldsymbol{a}_t)$：奖励函数，用于衡量一个状态与动作的好坏，这里我们使用了同时依赖于状态与动作的奖励函数，也可以定义仅依赖于状态的奖励函数 $r(\boldsymbol{s}_t)$  。
 
 这些量之间可以利用以下概率图来表示 (在部分可观测的情况下)：
 ![](1-0.png)
@@ -58,7 +58,7 @@ $$
 $$
 再导出无限时间跨度（infinite horizon）的情况，此时如果采用上面的方法，那么可能会出现一些问题，如奖励是无界的，常见的方法是：
 - 用平均奖励，即 $\frac{1}{T} \sum_{t = 1}^{T} r(\boldsymbol{s}_t,\boldsymbol{a}_t)$
-- 使用折旧因子（discount favor），即 $\sum_{t = 1}^{\infty} \gamma^t r(\boldsymbol{s}_t,\boldsymbol{a}_t)$，其中 $0 < \gamma < 1$
+- 使用折旧因子（Discount favor），即 $\sum_{t = 1}^{\infty} \gamma^t r(\boldsymbol{s}_t,\boldsymbol{a}_t)$，其中 $0 < \gamma < 1$
 
 其中折旧因子我们在之后介绍，这里我们先考虑平均奖励的情况。
 做如下的转化：将 $\{(\boldsymbol{s}_t,\boldsymbol{a}_t)\}$ 视作是在增强空间（augmented space）上的马尔可夫链，满足转移概率为
@@ -140,11 +140,11 @@ $$我们一个直观的想法是定义价值函数来表示中间复杂的嵌套
 Q(\boldsymbol{s}_1,\boldsymbol{a}_1) = r(\boldsymbol{s}_1,\boldsymbol{a}_1) + \mathbb{E}_{\boldsymbol{s}_2 \sim p(\boldsymbol{s}_2 \mid \boldsymbol{s}_1,\boldsymbol{a}_1)} \left[Q(\boldsymbol{s}_2,\pi_\theta(\boldsymbol{a}_2 \mid \boldsymbol{s}_2))\right]
 $$不难发现，如果我们知道了最佳策略的 $Q$，那么我们就已经得到了最佳的策略。
 我们用如下方式定义价值函数：
-**Definition 5**. _Q-function_
+**Definition 5**. _Q-function（Q 函数）_
 $$
 Q^{\pi}(\boldsymbol{s}_t,\boldsymbol{a}_t) = \sum_{t' = t}^{T} \mathbb{E}_{\pi} \left[r(\boldsymbol{s}_{t'},\boldsymbol{a}_{t'}) \mid \boldsymbol{s}_t,\boldsymbol{a}_t\right]
 $$
-**Definition 6**. _Value function_
+**Definition 6**. _Value function（价值函数）_
 $$
 V^{\pi}(\boldsymbol{s}_t) = \sum_{t' = t}^{T} \mathbb{E}_{\pi} \left[r(\boldsymbol{s}_{t'},\boldsymbol{a}_{t'}) \mid \boldsymbol{s}_t\right]
 $$

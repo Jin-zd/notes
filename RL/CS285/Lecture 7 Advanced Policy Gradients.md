@@ -21,7 +21,7 @@
 
 注意到当给定 $J(\theta)$ 时，进行一步参数更新，得到 $\theta'$，我们希望能够尽可能地增大 $J(\theta')$。注意通常的更新方式并不保证这一点。虽然朝着梯度方向走了一步，但是如果走的太远，$J(\theta')$ 也可能会下降。
 
-在之前关于策略梯度的一节中，我们引入了 **自然策略梯度（natural policy gradient）** 的方法，通过 KL 散度的约束来保证我们的更新不会太远，这在直觉上比通常使用的策略梯度更加合理。事实上，我们可以从理论上证明自然策略梯度的有效性。在这一理论结果的基础上，我们进一步介绍更加前沿的自然策略梯度方法，例如信赖域策略优化（TRPO）、近端策略优化（PPO）等。
+在之前关于策略梯度的一节中，我们引入了自然策略梯度（natural policy gradient）的方法，通过 KL 散度的约束来保证我们的更新不会太远，这在直觉上比通常使用的策略梯度更加合理。事实上，我们可以从理论上证明自然策略梯度的有效性。在这一理论结果的基础上，我们进一步介绍更加前沿的自然策略梯度方法，例如信赖域策略优化（TRPO）、近端策略优化（PPO）等。
 
 ### 2.1 Surrogate Advantage Function
 对于
@@ -58,7 +58,7 @@ $$
 &= \mathbb{E}_{\tau \sim p_{\theta}(\tau)} \left[\sum_{t} \frac{\pi_{\theta'}(\boldsymbol{a}_t \mid \boldsymbol{s}_t)}{\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)} \gamma^t A^{\pi_\theta}(\boldsymbol{s}_t, \boldsymbol{a}_t)\right]
 \end{aligned}
 $$
-这一目标 $\bar{A}(\theta')$ 有一个非常简洁的形式，被称为 **代理优势函数（Surrogate advantage function）**，很显然将外层的期望由 $p_{\theta'}(\boldsymbol{s}_t)$ 替换为 $p_{\theta}(\boldsymbol{s}_t)$ 会改变整个式子的值，这样的改变在什么情况下是可以忽略的呢？如果二者足够接近即 $J(\theta') - J(\theta) \approx \bar{A}(\theta')$，那么就可以使用如下方式最大化 $J(\theta')$：
+这一目标 $\bar{A}(\theta')$ 有一个非常简洁的形式，被称为代理优势函数（Surrogate advantage function），很显然将外层的期望由 $p_{\theta'}(\boldsymbol{s}_t)$ 替换为 $p_{\theta}(\boldsymbol{s}_t)$ 会改变整个式子的值，这样的改变在什么情况下是可以忽略的呢？如果二者足够接近即 $J(\theta') - J(\theta) \approx \bar{A}(\theta')$，那么就可以使用如下方式最大化 $J(\theta')$：
 $$
 \theta \gets \arg \max_{\theta'} \bar{A}(\theta')
 $$
@@ -194,7 +194,7 @@ $$
 $$
 其中 $\alpha \in (0,1)$，我们逐渐增大 $j$，也就是逐渐减小更新幅度，直到 $\bar{A}(\theta') \geq 0$ 且 KL 散度约束条件满足。
 
-于是得到 **信赖域策略优化（TRPO）** 算法：
+于是得到信赖域策略优化（TRPO）算法：
 循环 $k = 0, 1, 2, \ldots$：
 1. 利用 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 采样 $\{\tau^i\}$；
 2. 估计优势函数 $\hat{A}^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t)$；
@@ -215,7 +215,7 @@ $$
 
 这里的直觉是，如果约束条件违反过大，那么我们就增大 $\lambda$，使得约束条件更加严格，否则就降低。
 
-基于这一思路，并配合一些实际的设计选择，我们可以得到 **近端策略优化惩罚（PPO Penalty）** 算法的基本思路（更加详细的算法可以仿照后续的 PPO Clip 进行设计）：
+基于这一思路，并配合一些实际的设计选择，我们可以得到近端策略优化惩罚（PPO Penalty）算法的基本思路（更加详细的算法可以仿照后续的 PPO Clip 进行设计）：
 循环 $k = 0, 1, 2, \ldots$：
 1. 利用 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 采样 $\{\tau^i\}$；
 2. 估计优势函数 $\hat{A}^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t)$；
@@ -225,7 +225,7 @@ $$
 一个直观的感受是，PPO Penalty 与 TRPO 相比非常容易实现。
 
 ### 4.3 Ideas in PPO Clip
-通常当我们提到 近端策略优化裁剪（PPO） 时，我们指的是 **近端策略优化裁剪（PPO Clip）**。PPO Clip 的一个关键思想是，不再使用 KL 散度的约束，而是直接使用重要性采样函数（IS objective），以牺牲理论的严谨性为代价，将 KL 散度对更新范围的约束转化为对重要性采样率（IS ratio）的约束。
+通常当提到 近端策略优化裁剪（PPO） 时，我们指的是近端策略优化裁剪（PPO Clip）。PPO Clip 的一个关键思想是，不再使用 KL 散度的约束，而是直接使用重要性采样函数（IS objective），以牺牲理论的严谨性为代价，将 KL 散度对更新范围的约束转化为对重要性采样率（IS ratio）的约束。
 
 在 PPO Clip 中，我们使用如下的代理目标函数：
 $$
@@ -239,7 +239,7 @@ $$
 - 这里 $\hat{A}_t$ 是估计的优势，我们会使用在[[Lecture 4 Actor-Critic Algorithms]]一节中介绍的广义优势估计（GAE）进行估计： $$\hat{A}^\pi_{GAE}(\boldsymbol{s}_t, \boldsymbol{a}_t) = \sum_{t' = t}^\infty (\gamma \lambda)^{t' - t} \left(r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) + \gamma \hat{V}^\pi(\boldsymbol{s}_{t' + 1}) - \hat{V}^\pi(\boldsymbol{s}_{t'})\right)$$而这里的一个设计选择是我们仅仅使用 $T_0$ 步（不是 episode 长度, 而是一个远小于 episode 长度的量）的广义优势估计，回顾广义优势估计需要满足的 on-policy 假设，我们会在接下来的算法描述中保证这一点。
 - 上述过程中使用的 $V^\pi$ 是一个和动作共享参数的网络，构建如下的目标使得它们同步地优化：$$L(\theta') = \bar{A}(\theta')^{CLIP} - c_1 L_{VF}(\theta') + c_2 \mathcal{H}(\pi_{\theta'})$$这里第二项是价值函数的均方误差损失（MSE loss），最后一项是熵奖励（Entropy bonus），用于增加探索性，我们会在 [[Lecture 11 Exploration 1]]一节中进一步讨论。
 
-于是得到 **近端策略优化裁剪（PPO Clip）** 的算法：
+于是得到近端策略优化裁剪（PPO Clip）的算法：
 循环 $i = 1, 2, \ldots$：
 1. 对于每个 actor $j = 1, 2, \ldots, N$：
    a. 在真实环境中运行策略 $\pi_\theta$，收集 $T_0$ 步的轨迹数据；

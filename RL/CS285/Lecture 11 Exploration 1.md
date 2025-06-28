@@ -34,7 +34,7 @@
 - 小型、有限的马尔可夫决策过程（Small，finite MDPs）：例如易处理的规划、基于模型的强化学习。
 - 大型、无限的马尔可夫决策过程，连续空间（Large，infinite MDPs，continuous space）：例如深度强化学习。
 
-Idea：尽管对于复杂的问题难以得到具有很强理论保证的算法，但是我们接下来会从简单的问题出发介绍一些可行的探索策略并尝试将这些方法应用到更复杂的问题中。
+想法：尽管对于复杂的问题难以得到具有很强理论保证的算法，但是我们接下来会从简单的问题出发介绍一些可行的探索策略并尝试将这些方法应用到更复杂的问题中。
 
 接下来用多臂老虎机作为例子，逐步引出探索问题的一些基本方法。
 
@@ -72,7 +72,7 @@ Idea：尽管对于复杂的问题难以得到具有很强理论保证的算法�
 ### 3.2 Probability matching/ posterior sampling
 在这一做法中，会保留一个置信状态 $\hat{p}(\theta_1, \ldots, \theta_n)$。
 
-Idea：假设置信状态是正确的，使用 $\theta_1,\ldots, \theta_n \sim \hat{p}(\theta_1, \ldots, \theta_n)$，依据此选择最优动作。
+想法：假设置信状态是正确的，使用 $\theta_1,\ldots, \theta_n \sim \hat{p}(\theta_1, \ldots, \theta_n)$，依据此选择最优动作。
 这样的方式比直接求解部分可观测的马尔可夫决策过程要简单很多，这样的算法称为后验采样（Posterior sampling），也称为汤普森采样（Thompson sampling）。
 分析这一算法的理论性质是很困难的，但是实际中表现很好，具体可见 An Empirical Evaluation of Thompson Sampling. Chapelle, Li。
 
@@ -193,14 +193,14 @@ $$
 ## 6 More Novelty-Seeking Exploration
 由于只需要能够输出分数，还可以使用以下的一些更加新颖的思路。
 ### 6.1 Counting with hashes
-Idea：依然使用计数，但是我们利用一个哈希函数 $\phi(\boldsymbol{s})$ 将 $\boldsymbol{s}$ 映射到一个 $k$-bit 的哈希值，并尽可能使得相似状态有相似的哈希值。
+想法：依然使用计数，但是我们利用一个哈希函数 $\phi(\boldsymbol{s})$ 将 $\boldsymbol{s}$ 映射到一个 $k$-bit 的哈希值，并尽可能使得相似状态有相似的哈希值。
 
 具体来说，可以利用[[Concepts#21 自动编码器 (Autoencoder，AE)|自动编码器 (Autoencoder，AE)]]学习一个编码器，在此基础上进行降采样将 $\phi(\boldsymbol{s})$ 转化为只有 01 的哈希值。
 ![](11-5.png)
 参见：Tang et al. "Exploration: A Study of Count-Based Exploration"
 
 ### 6.2 Implicit density modeling with exemplar model
-Idea：可以利用分类器来进密度估计，如果一个状态很容易与已见过的状态区分，则其是新颖的，如果一个状态与过去状态难以区分, 则说明其有很高的密度。
+想法：可以利用分类器来进密度估计，如果一个状态很容易与已见过的状态区分，则其是新颖的，如果一个状态与过去状态难以区分, 则说明其有很高的密度。
 
 具体来说，对于每一个观测到的状态 $\boldsymbol{s}$，拟合一个分类器将其与所有过去的状态 $\mathcal{D}$ 区分开，利用分类器误差来获得密度。我们认为 $\{\boldsymbol{s}\}$ 是正类别，而 $\mathcal{D}$ 是负类别。
 
@@ -233,7 +233,7 @@ $$
 参见：EX2: Exploration with Exemplar Models for Deep Reinforcement Learning. Ostrovski et al. 2017
 
 ### 6.3 Heuristic estimation of counts via errors
-Idea：在训练神经网络时，对于那些出现概率大或密度高的数据，其上的误差会很小（否则总损失就会很大），而在密度小的数据上的误差会很大。
+想法：在训练神经网络时，对于那些出现概率大或密度高的数据，其上的误差会很小（否则总损失就会很大），而在密度小的数据上的误差会很大。
 
 具体来说，不妨考虑我们有一个目标函数 $f^\ast(\boldsymbol{s}, \boldsymbol{a})$，给定缓冲 $\mathcal{D} = \{(\boldsymbol{s}_i, \boldsymbol{a}_i)\}$，拟合一个 $\hat{f}_\theta(\boldsymbol{s}, \boldsymbol{a})$。可以使用 $\mathcal{E} = \|\hat{f}_\theta(\boldsymbol{s}, \boldsymbol{a}) - f^\ast(\boldsymbol{s}, \boldsymbol{a})\|^2$ 作为附加奖励，这一值越大，说明这一状态动作对越新颖。
 
@@ -249,7 +249,7 @@ Idea：在训练神经网络时，对于那些出现概率大或密度高的数�
 ### 7.1 Introduction
 回顾汤普森采样：$\theta_1,\ldots, \theta_n \sim \hat{p}(\theta_1, \ldots, \theta_n)$，$a = \arg\max_a \mathbb{E}_{\theta_a}\left[r(a)\right]$
 
-Idea：在多臂老虎机中 $\hat{p}(\theta_1, \ldots, \theta_n)$ 可以视作是奖励 $s$ 上的分布，这在马尔可夫决策过程中的近似是 Q 函数。
+想法：在多臂老虎机中 $\hat{p}(\theta_1, \ldots, \theta_n)$ 可以视作是奖励 $s$ 上的分布，这在马尔可夫决策过程中的近似是 Q 函数。
 具体来说，考虑以下的过程：
 1. 从 $p(Q)$ 中采样一个 Q 函数 $Q$；  
 2. 依据 $Q$ 做一个回合的动作；  
@@ -305,7 +305,7 @@ Idea：在多臂老虎机中 $\hat{p}(\theta_1, \ldots, \theta_n)$ 可以视作�
 
 ### 8.2  Variational information maximizing exploration（VIME）
 不难得出以下的结论：
-**Proposition 2**. 
+Proposition 2. 
 $$
 \mathbb{E}_y \left[IG(z, y)\right] = \mathbb{E}_y \left[D_{KL}(p(z\mid y) \parallel p(z))\right]
 $$
@@ -317,11 +317,11 @@ D_{KL}(p(\theta \mid h, \boldsymbol{s}_t, \boldsymbol{a}_t, \boldsymbol{s}_{t + 
 $$
 这里的 $h$ 是历史转移。
 
-Idea：不难发现如果一个转移让对 $\theta$ 的置信度有更大的变化，则其更加的提供有用信息。
+想法：不难发现如果一个转移让对 $\theta$ 的置信度有更大的变化，则其更加的提供有用信息。
 
 首先明确我们需要对模型的不确定性也就是 $\theta$ 进行一个表示，这里使用在基于模型的强化学习中提到的贝叶斯神经网络。首先使用独立性假设 $p(\theta \mid h) = \prod_i p(\theta_i \mid h)$，然后使用一个高斯分布来表示 $p(\theta_i \mid h)$，也就是 $p(\theta_i \mid h) = \mathcal{N}(\mu_{\phi,i}, \sigma_{\phi,i})$，这里的 $\phi$ 是参数，换言之会使用一个贝叶斯神经网络 $q_\phi(\theta)$ 来近似 $p(\theta \mid h)$。
 
-那么应该如何保证近似的有效性呢？可以使用变分推断，具体来说，考虑最小化 KL 散度：
+那么应该如何保证近似的有效性呢？可以使用[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]，具体来说，考虑最小化 KL 散度：
 $$
 \begin{aligned}  D_{KL}(q_\phi(\theta) \parallel p(\theta \mid h)) &= \int q_\phi(\theta) \log \frac{q_\phi(\theta)}{p(\theta \mid h)} \text{d}\theta\\  &= \int q_\phi(\theta) \log \frac{q_\phi(\theta) p(h)}{p(\theta, h)} \text{d}\theta\\  &= \log p(h) - \int q_\phi(\theta) \log \frac{p(\theta, h)}{q_\phi(\theta)} \text{d}\theta \end{aligned}
 $$

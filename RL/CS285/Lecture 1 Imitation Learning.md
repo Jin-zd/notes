@@ -1,11 +1,12 @@
 # 0 Terminology & Notation
 
--   $\boldsymbol{o}_t$：**observation**。通常情况下，observation 是我们能够观测到的，但是并不包含所有的信息
--   $\boldsymbol{s}_t$：**state**。不同于 observation，state 是一个对当前状态完整的描述，包含了所有的信息. 通常情况下，state 是不可见的，但是我们可以通过 observation 来近似地估计 state
--   $\boldsymbol{a}_t$：**action**，$\boldsymbol{a}_t$ 会影响未来的观测，可以是连续的，也可以是离散的
--   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$：**policy**。通常是一个概率分布（确定性的 policy 是一个特例）
--   $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$：**policy (fully observed)**
--   $t$：**time step** 
+- $\boldsymbol{o}_t$：观测。通常情况下，观测是我们能够观测到的，但是并不包含所有的信息；
+- $\boldsymbol{s}_t$：状态。不同于观测，状态是一个对当前状态完整的描述，包含了所有的信息. 通常情况下，状态是不可见的，但是我们可以通过观测来近似地估计状态；
+- $\boldsymbol{a}_t$：动作，动作会影响未来的观测，可以是连续的，也可以是离散的；
+- $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$：策略。通常是一个概率分布（确定性的策略是一个特例）；
+- $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$：策略（全部可观测）；
+- $t$：时间步。
+
 这些量之间可以利用以下概率图来表示 (在部分可观测的情况下)：
 ![](1-0.png)
 
@@ -13,9 +14,9 @@
 
 # 1 Imitation Learning
 
-广义来说，**模仿学习（imitation learning）** 是指从专家的行为中学习。通常情况下，专家的行为是通过一些方式收集的，例如人类的行为。我们接下来从一个例子出发展现模仿学习的一些特点：
+广义来说，模仿学习（imitation learning）是指从专家的行为中学习。通常情况下，专家的行为是通过一些方式收集的，例如人类的行为。我们接下来从一个例子出发展现模仿学习的一些特点：
 
-从人类驾驶的数据中获取每一时间步的 $\boldsymbol{o}_t，\boldsymbol{a}_t$，并将这些数据作为训练数据，在其上使用监督学习学习 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$，这样的一种方式也被称为**行为克隆（behavior cloning）**。
+从人类驾驶的数据中获取每一时间步的 $\boldsymbol{o}_t，\boldsymbol{a}_t$，并将这些数据作为训练数据，在其上使用监督学习学习 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{o}_t)$，这样的一种方式也被称为行为克隆（behavior cloning）。
 
 这样的算法能够起作用吗? 不妨仅考虑一个轨迹，我们的模型总会有一些误差，一旦出现误差则意味着到达了一个不熟悉的状态，这样的误差会被积累，直到我们到达极不熟悉的状态，这样的状态下我们的模型可能会完全失效。
 ![](1-1.png)
@@ -121,9 +122,9 @@ $$
 这里的解决方法主要有两个，一个是使用更加有表示能力的连续分布（例如 mixture of Gaussians，latent variable models，diffusion models），另一种则是进行离散化。
 
 使用更加有表示能力的连续分布：
-- **混合高斯模型（mixture of Gaussians）**：用一系列的 $w_1，\mu_1，\Sigma_1，\ldots，w_k，\mu_k，\Sigma_k$ 来表示一个混合高斯分布，这样我们就可以表示多个模态。我们可以让模型输出这些参数，并且通过这些参数表达负对数似然。
-- **隐变量模型（latent variable models）**：隐变量模型理论上可以表示任意的分布，只要模型足够复杂。一个例子是条件变分自编码器（Conditional VAE）。
-- **扩散模型（diffusion models）**：扩散模型可以用于生成图像，应用在动作生成上，考虑 $T$ 步的扩散过程，考虑 $a_{t,0}$ 是真实的 action，$a_{t,i + 1}$ 是 $a_{t，i}$ + noise，类似地让模型从 $a_{t，i}$ 预测 $a_{t，i - 1}$ （实际是预测被添加的噪声）。于是就可以得到一个能够生成出动作的模型。  
+- 混合高斯模型（mixture of Gaussians）：用一系列的 $w_1，\mu_1，\Sigma_1，\ldots，w_k，\mu_k，\Sigma_k$ 来表示一个混合高斯分布，这样我们就可以表示多个模态。我们可以让模型输出这些参数，并且通过这些参数表达负对数似然。
+- 隐变量模型（latent variable models）：隐变量模型理论上可以表示任意的分布，只要模型足够复杂。一个例子是条件变分自编码器（Conditional VAE）。
+- 扩散模型（diffusion models）：扩散模型可以用于生成图像，应用在动作生成上，考虑 $T$ 步的扩散过程，考虑 $a_{t,0}$ 是真实的 action，$a_{t,i + 1}$ 是 $a_{t，i}$ + noise，类似地让模型从 $a_{t，i}$ 预测 $a_{t，i - 1}$ （实际是预测被添加的噪声）。于是就可以得到一个能够生成出动作的模型。  
 
 离散化：
 - 对于单一维度的动作，这样的离散化很简单，然而对于高维，动作空间会指数增加。解决这一问题的一个方法是自回归离散化（autoregressive discretization），使用一些序列式模型 (RNN，GPT)。我们假设要生成 $3$ 个维度的动作。

@@ -306,9 +306,9 @@ $$
 ### 3.4 Least-squares policy iteration (LSPI)
 但是需要注意的是，前面用采样估计的时候，要求采样来源于 $\pi$，但是在离线强化学习的情况下，我们没有相应的样本。
 
-这里的做法与我们在 off-policy Q 学习和 off-policy 演员-评论家算法中是一样的，即不再配合价值函数而是评估 Q 函数，这样就可以得到一个 off-policy 的算法：最小二乘策略迭代（Least-squares policy iteration，LSPI）。
+这里的做法与我们在 off-policy Q 学习和 off-policy 演员-评论家算法中是一样的，即不再配合价值函数而是评估 $Q$ 函数，这样就可以得到一个 off-policy 的算法：最小二乘策略迭代（Least-squares policy iteration，LSPI）。
 
-Idea：将 LSTD 替换为 LSTDQ，也就是用 Q 函数来替代价值函数，换言之此时的 $\Phi$ 的会是一个 $|\mathcal{S}| |\mathcal{A}| \times K$ 的矩阵，其中每一行表示一个状态-动作对的特征。
+想法：将 LSTD 替换为 LSTDQ，也就是用 Q 函数来替代价值函数，换言之此时的 $\Phi$ 的会是一个 $|\mathcal{S}| |\mathcal{A}| \times K$ 的矩阵，其中每一行表示一个状态-动作对的特征。
 ![](13-12.png)
 
 同样可以推导出 

@@ -261,7 +261,7 @@ $$
 实际上原论文中 $\phi$ 输入为 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{a}')$，$\psi$ 输入为 $(\boldsymbol{s}, \boldsymbol{a})$，在上述推导中我们做了一些简化，但完全不影响结果。
 
 最后讨论其使用方式：
-Idea 1：用于快速恢复 Q 函数：
+想法 1：用于快速恢复 Q 函数：
 - 训练 $\psi_j^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t)$ （利用贝尔曼备份）； 
 - 获取 $\{\boldsymbol{s}_i, r_i\}$ 样本；
 - 获得 $\boldsymbol{w} \gets \arg\min_{\boldsymbol{w}} \|\phi(\boldsymbol{s}_i)^T \boldsymbol{w} - r_i\|^2$；
@@ -273,7 +273,7 @@ $$
 $$
 这里计算得到的并不是最优 Q 函数，实际上这是当前的策略的 Q 函数，因此 $\pi'$ 只是 $\pi$ 的一步策略迭代的结果。
 
-Idea 2：恢复多个 Q 函数（更好的想法）  
+想法 2：恢复多个 Q 函数（更好的想法）  
 - 训练一系列 $\psi_j^{\pi_k}(\boldsymbol{s}_t, \boldsymbol{a}_t)$ 对于一系列 $\pi_k$ （利用贝尔曼备份）；
 - 获取 $\{\boldsymbol{s}_i, r_i\}$ 样本；
 - 获得 $\boldsymbol{w} \gets \arg\min_{\boldsymbol{w}} \|\phi(\boldsymbol{s}_i)^T \boldsymbol{w} - r_i\|^2$；
@@ -307,7 +307,7 @@ $$
 
 回顾特征表示 $\mu_i(\boldsymbol{s}_t) = p(\boldsymbol{s}_{future} = i \mid \boldsymbol{s}_t)$，在连续状态空间中，我们要学习的变成了一个 $\mathcal{S}$ 到 $\mathcal{S}$ 上连续分布的映射，这一映射的学习是非常困难的。但是，其实有其他方式来估计这一概率密度。
 
-Idea：将学习后继表示的过程转化为学习一个二元分类的过程，考虑 
+想法：将学习后继表示的过程转化为学习一个二元分类的过程，考虑 
 $$
 p^\pi(F = 1 \mid \boldsymbol{s}_t, \boldsymbol{a}_t, \boldsymbol{s}_{future})
 $$

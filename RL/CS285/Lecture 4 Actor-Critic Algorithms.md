@@ -6,20 +6,20 @@ $$
 这里的 $\hat{Q}_{i,t}$ 是我们对从 $\boldsymbol{s}_{i,t}$ 开始采用 $\boldsymbol{a}_{i,t}$ 的奖励的估计。这里的估计方式是[[Concepts#10 蒙特卡洛方法 (Monte Carlo Method)|蒙特卡洛方法 (Monte Carlo Method)]]：通过将单个轨迹后续所有奖励累加得到的。由于只有单个而且很长的轨迹，这种估计方式方差很大。而且我们不能使用多个轨迹，因为收集多个轨迹需要与多次环境交互，而我们通常无法在非起始状态下开始交互。
 
 这里采用蒙特卡洛方法估计的未来奖励是对如下的 $Q$ 函数的估计：
-**Definition 1**. _Q function（Q 函数）_
+Definition 1. _Q function（Q 函数）_
 $$
 Q^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) = \sum_{t' = t}^T \mathbb{E}_{\tau \sim \pi_\theta} \left[r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'}) \mid \boldsymbol{s}_t, \boldsymbol{a}_t\right]
 $$
 回顾我们在策略梯度中还可以使用基线，也就是 $b_t = \frac{1}{N} \sum_{i = 1}^N r(\tau)$，这里的基线是利用整条轨迹估计的，可以理解为是对 $V^\pi(\boldsymbol{s}_1)$ 的一个无偏估计。
 
 我们借鉴这一思想，定义一个依赖于状态的基线：
-**Definition 2**. _value function（价值函数）_
+Definition 2. _value function（价值函数）_
 $$
 V^\pi(\boldsymbol{s}_t) = \mathbb{E}_{\boldsymbol{a}_t \sim \pi_\theta} \left[Q^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t)\right]
 $$
 
 我们从未来的奖励中减去这个基线，也就可以得到如下定义的优势函数：
-**Definition 3**. _advantage function（优势函数）_
+Definition 3. _advantage function（优势函数）_
 $$
 A^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) = Q^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) - V^\pi(\boldsymbol{s}_t)
 $$
@@ -47,7 +47,7 @@ $$
 $$
 A^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) \approx r(\boldsymbol{s}_t, \boldsymbol{a}_t) + V^\pi(\boldsymbol{s}_{t + 1}) - V^\pi(\boldsymbol{s}_t)
 $$
-但我们还需要知道 $V^\pi(\boldsymbol{s})$，目前我们使用一个参数为 $\phi$ 神经网络 $\hat{V}^\pi(\boldsymbol{s})$ 来拟合 $V^\pi(\boldsymbol{s})$。利用数据拟合这些价值函数的过程称为**策略评估（policy evaluation）**。回到原先的 RL 的通用框架，我们在 Part 2 需要拟合这些价值函数。
+但我们还需要知道 $V^\pi(\boldsymbol{s})$，目前我们使用一个参数为 $\phi$ 神经网络 $\hat{V}^\pi(\boldsymbol{s})$ 来拟合 $V^\pi(\boldsymbol{s})$。利用数据拟合这些价值函数的过程称为策略评估（policy evaluation）。回到原先的强化学习的通用框架，我们在 Part 2 需要拟合这些价值函数。
 ![](4-1.png)
 我们可以使用蒙特卡洛的方法进行策略评估，也就是： 
 $$
@@ -65,7 +65,7 @@ $$
 $$
 L(\phi) = \frac{1}{2} \sum_{i = 1}^N \left(\hat{V}^\pi(\boldsymbol{s}_{i,t}) - \sum_{t' = t}^T r(\boldsymbol{s}_{i,t'}, \boldsymbol{a}_{i,t'})\right)^2
 $$
-上述的目标也被称为**蒙特卡洛目标（Monte Carlo target）**，一个问题是其方差很大，为了减小这个方差，我们通常使用的是以下的**自举目标（Bootstrap target）**：
+上述的目标也被称为蒙特卡洛目标（Monte Carlo target），一个问题是其方差很大，为了减小这个方差，我们通常使用的是以下的自举目标（Bootstrap target）：
 $$
 y_{i,t} = \sum_{t' = t}^T \mathbb{E}_{\pi_\theta} \left[r(\boldsymbol{s}_{t'}, \boldsymbol{a}_{t'} \mid \boldsymbol{s}_{i,t})\right] \approx r(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t}) + V(\boldsymbol{s}_{i,t + 1}) \approx r(\boldsymbol{s}_{i,t}, \boldsymbol{a}_{i,t}) + \hat{V}^\pi(\boldsymbol{s}_{i,t + 1})
 $$
@@ -77,7 +77,7 @@ $$
 
 # 3 Actor-Critic Algorithm
 
-在上述讨论中, 我们有一个策略，被称为**演员（actor）**，用于生成动作，一个价值函数，被称为**评论家（critic）**，用于评估状态的价值。这种结合策略梯度和价值函数的方法被称为**演员-评论家算法（Actor-Critic Algorithms）**。我们可以得到一个简单的演员-评论家算法，即批量演员-评论家算法：
+在上述讨论中, 我们有一个策略，被称为演员（actor），用于生成动作，一个价值函数，被称为评论家（critic），用于评估状态的价值。这种结合策略梯度和价值函数的方法被称为演员-评论家算法（Actor-Critic Algorithms）。我们可以得到一个简单的演员-评论家算法，即批量演员-评论家算法：
 1. 从策略 $\pi_\theta$ 采样一系列轨迹；
 2. 拟合 $\hat{V}^\pi(\boldsymbol{s})$；
 3. 计算优势函数 $\hat{A}^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t) \approx r(\boldsymbol{s}_t, \boldsymbol{a}_t) + \hat{V}^\pi(\boldsymbol{s}_{t + 1}) - \hat{V}^\pi(\boldsymbol{s}_t)$；
@@ -135,15 +135,15 @@ $$
 5. 更新 $\theta$。
 
 注意区分 offline/ online 与 off-policy/ on-policy。offline/ online 是指在学习过程中是否与环境不断交互，而 off-policy/ on-policy 是指我们的数据是否基于当前的策略。然而这对 deep RL 来说是有许多问题的，因为仅仅使用一个样本进行更新是不稳定的，有很大的方差。我们考虑以下两个方式来解决这个问题：
-- **同步并行的演员-评论家算法（synchronous parallel）**：我们有多个同步的工作线程，每个工作线程每一步都会进行一个动作，这样我们的批量大小就等于工作线程的数量。一个问题在于不同 工作线程结束的时间可能不同，因此会有一定的同步开销。
-- **异步的演员-评论家算法（asynchronous）**：我们同样有多个工作线程，但它们未必同步，每一次当我们收集到批量大小个样本时，我们就进行一次更新。但是这一方式的问题是，一个批量中可能混有不同参数的样本（考虑一次更新时可能某个工作线程正在采集数据），这在数学上是不等价的，但由于单次更新参数变化有限，因此通常问题不会太大。（这就是 Asynchronous Advantage Actor-Critic，A3C 算法的核心思想）。
+- 同步并行的演员-评论家算法（synchronous parallel）：我们有多个同步的工作线程，每个工作线程每一步都会进行一个动作，这样我们的批量大小就等于工作线程的数量。一个问题在于不同 工作线程结束的时间可能不同，因此会有一定的同步开销。
+- 异步的演员-评论家算法（asynchronous）：我们同样有多个工作线程，但它们未必同步，每一次当我们收集到批量大小个样本时，我们就进行一次更新。但是这一方式的问题是，一个批量中可能混有不同参数的样本（考虑一次更新时可能某个工作线程正在采集数据），这在数学上是不等价的，但由于单次更新参数变化有限，因此通常问题不会太大。（这就是 Asynchronous Advantage Actor-Critic，A3C 算法的核心思想）。
 ![](4-5.png)
 
 ## 5.2 Off-Policy Actor-Critic Algorithm (Problematic)
 
-我们能否去除掉 on-policy 假设呢？这就引出了 off-policy 演员-评论家算法。我们此时只有一个线程，我们会有一个**回放缓冲区** $\mathcal{R}$，每一步我们都会将 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}', r)$ 存入回放缓冲区，然后我们从其中中采样进行更新。此时我们的每次更新方差就会非常小。
+我们能否去除掉 on-policy 假设呢？这就引出了 off-policy 演员-评论家算法。我们此时只有一个线程，我们会有一个回放缓冲区 $\mathcal{R}$，每一步我们都会将 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}', r)$ 存入回放缓冲区，然后我们从其中中采样进行更新。此时我们的每次更新方差就会非常小。
 
-online 演员-评论家算法（off-policy）**（存在问题的）**：
+online 演员-评论家算法（off-policy）（存在问题的）：
 1. 采取动作 $\boldsymbol{a}_t$，得到 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}', r)$, 储存在 $\mathcal{R}$；
 2. 从 $\mathcal{R}$ 采样一个批量； 
 3. 更新 $\hat{V}^\pi(\boldsymbol{s}_i)$，使用 $y_i= r_i + \gamma \hat{V}^\pi(\boldsymbol{s}_i')$ 与 $L(\phi) = \frac{1}{N} \sum_{i = 1}^N \left\|\hat{V}^\pi(\boldsymbol{s}_i) - y_i\right\|^2$，其中 $N$ 是批量大小；  
@@ -237,7 +237,7 @@ $$
 ![](4-6.png)
 
 ## 6.4 Generalized advantage estimation
-我们为什么一定要选择一个 $n$ 呢？我们其实可以加权所有的 $n$ 的情况，也就是构造一个 **广义优势估计（Generalized Advantage Estimation，GAE）**：
+我们为什么一定要选择一个 $n$ 呢？我们其实可以加权所有的 $n$ 的情况，也就是构造一个广义优势估计（Generalized Advantage Estimation，GAE）：
 $$
 \hat{A}^\pi_{GAE}(\boldsymbol{s}_t, \boldsymbol{a}_t) = \sum_{n = 1}^{\infty} w_n \hat{A}^\pi_{n}(\boldsymbol{s}_t, \boldsymbol{a}_t)
 $$

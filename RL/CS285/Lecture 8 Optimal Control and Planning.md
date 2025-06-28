@@ -42,7 +42,7 @@ $$
 \boldsymbol{a}_1, \ldots, \boldsymbol{a}_T = \arg\max_{\boldsymbol{a}_1, \ldots, \boldsymbol{a}_T} \mathbb{E}\left[\sum_{t = 1}^T r(\boldsymbol{s}_t, \boldsymbol{a}_t) \mid \boldsymbol{a}_1, \ldots, \boldsymbol{a}_T\right]
 $$
 
-不难发现这样的方式在随机的情况可能是次优的的，因为每当完成一次状态转移后，我们都会获得一些新信息，这些信息可以帮助我们更好地选择动作。例如当进行 $\boldsymbol{a}_1$ 到达 $\boldsymbol{s}_2$ 后，我们就不再需要考虑 $p(\boldsymbol{s}_2 \mid \boldsymbol{s}_1, \boldsymbol{a}_1)$ 中的随机性，而可以进行更好地决策。上述的一次性选择一系列动作的方式是 **开环控制（open-loop control）**。接下来给出相关的定义：
+不难发现这样的方式在随机的情况可能是次优的的，因为每当完成一次状态转移后，我们都会获得一些新信息，这些信息可以帮助我们更好地选择动作。例如当进行 $\boldsymbol{a}_1$ 到达 $\boldsymbol{s}_2$ 后，我们就不再需要考虑 $p(\boldsymbol{s}_2 \mid \boldsymbol{s}_1, \boldsymbol{a}_1)$ 中的随机性，而可以进行更好地决策。上述的一次性选择一系列动作的方式是开环控制（open-loop control）。接下来给出相关的定义：
 
 **Definition 1**. _open-loop control（开环控制）_
 智能体观测初始化状态，选择一系列动作并且执行。 
@@ -153,7 +153,7 @@ $$
 同时我们使用 $V_t(\boldsymbol{x}_t)$ 表示在第 $t$ 时间步位于 $\boldsymbol{x}_t$ 的代价，$Q_t(\boldsymbol{x}_t, \boldsymbol{u}_t)$ 表示在第 $t$ 时间步位于 $\boldsymbol{x}_t$，采取 $\boldsymbol{u}_t$ 的代价。
 
 考虑如下的推导过程:
-**用 $\boldsymbol{x}_T$ 表示 $\boldsymbol{u}_T$：** 由于最后一个动作 $\boldsymbol{u}_T$ 对之后不产生任何影响，于是可以直接解出最后一个动作，这是基本情况，有 
+用 $\boldsymbol{x}_T$ 表示 $\boldsymbol{u}_T$：由于最后一个动作 $\boldsymbol{u}_T$ 对之后不产生任何影响，于是可以直接解出最后一个动作，这是基本情况，有 
 $$
 Q_T(\boldsymbol{x}_T, \boldsymbol{u}_T) = const + \frac{1}{2} \begin{bmatrix}  \boldsymbol{x}_T\\  \boldsymbol{u}_T \end{bmatrix}^T \boldsymbol{C}_T \begin{bmatrix}  \boldsymbol{x}_T\\  \boldsymbol{u}_T \end{bmatrix} + \begin{bmatrix}  \boldsymbol{x}_T\\  \boldsymbol{u}_T \end{bmatrix}^T \boldsymbol{c}_T
 $$
@@ -182,7 +182,7 @@ $$
 $$
 V(\boldsymbol{x}_T) = const + \frac{1}{2} \boldsymbol{x}_T^T \boldsymbol{V}_{T} \boldsymbol{x}_T + \boldsymbol{x}_T^T \boldsymbol{v}_T
 $$
-**用 $\boldsymbol{x}_{T - 1}$ 表示 $\boldsymbol{u}_{T - 1}$：** 接下来考虑如何解出 $\boldsymbol{u}_{T - 1}$，用 $\boldsymbol{x}_{T - 1}$ 表示。但值得注意的是 $\boldsymbol{u}_{T - 1}$ 还会影响 $\boldsymbol{x}_T$，故 
+用 $\boldsymbol{x}_{T - 1}$ 表示 $\boldsymbol{u}_{T - 1}$：接下来考虑如何解出 $\boldsymbol{u}_{T - 1}$，用 $\boldsymbol{x}_{T - 1}$ 表示。但值得注意的是 $\boldsymbol{u}_{T - 1}$ 还会影响 $\boldsymbol{x}_T$，故 
 $$
 f(\boldsymbol{x}_{T - 1}, \boldsymbol{u}_{T - 1}) = \boldsymbol{F}_{T - 1} \begin{bmatrix}  \boldsymbol{x}_{T - 1}\\  \boldsymbol{u}_{T - 1} \end{bmatrix} + \boldsymbol{f}_{T - 1}
 $$

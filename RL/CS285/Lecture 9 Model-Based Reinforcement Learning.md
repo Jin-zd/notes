@@ -141,7 +141,7 @@ $$
 
 ## 3.1 State space (latent space) models
 
-在复杂观测的情况下，我们并没有一个明确的状态空间，但是我们可以考虑学习一个状态空间模型，其中的状态空间 $\mathcal{S}$ 是一个低维的潜在空间。这里仅讨论这一类方法背后的思想，对于变分推断等内容我们会在之后的专门一节[[Lecture 16 Variational Inference and Generative Model]]中讨论。
+在复杂观测的情况下，我们并没有一个明确的状态空间，但是我们可以考虑学习一个状态空间模型，其中的状态空间 $\mathcal{S}$ 是一个低维的潜在空间。这里仅讨论这一类方法背后的思想，对于[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]等内容我们会在之后的专门一节[[Lecture 16 Variational Inference and Generative Model]]中讨论。
 
 为方便理解，将其中一种可能的设计方式与 [[Concepts#18 变分自编码器 (Variational Autoencoder, VAE)|变分自编码器 (Variational Autoencoder, VAE)]] 中的思想类比：将观测空间 $\mathcal{O}$ 中的观测投影到一个低维的潜在空间 $\mathcal{S}$ 中，这类似于将数据空间 $\mathcal{X}$ 中的数据投影到一个低维的潜在空间 $\mathcal{Z}$。
 
@@ -157,7 +157,7 @@ $$
 - 单步编码器（single-step encoder）：$q_\psi(\boldsymbol{s}_t \mid \boldsymbol{o}_t)$  
 
 ## 3.2 Example with single-step encoder
-考虑最简单的 $q_\psi(\boldsymbol{s}_t \mid \boldsymbol{o}_t)$，目前也只考虑简单的确定性情况（随机情况需要变分推断，在之后讨论）。此时编码器可以表示为 
+考虑最简单的 $q_\psi(\boldsymbol{s}_t \mid \boldsymbol{o}_t)$，目前也只考虑简单的确定性情况（随机情况需要[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]，在之后讨论）。此时编码器可以表示为 
 $$
 q_\psi(\boldsymbol{s}_t \mid \boldsymbol{o}_t) = \delta(\boldsymbol{s}_t = g_\psi(\boldsymbol{o}_t)) \Rightarrow \boldsymbol{s}_t = g_\psi(\boldsymbol{o}_t)
 $$

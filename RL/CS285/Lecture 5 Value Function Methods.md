@@ -7,7 +7,7 @@ $$
 $$
 A^\pi(\boldsymbol{s}, \boldsymbol{a}) = Q^\pi(\boldsymbol{s}, \boldsymbol{a}) - V^\pi(\boldsymbol{s}) = Q^\pi(\boldsymbol{s}, \boldsymbol{a}) - \mathbb{E}_{\boldsymbol{a} \sim \pi(\boldsymbol{a} \mid \boldsymbol{s})} \left[Q^\pi(\boldsymbol{s}, \boldsymbol{a})\right]
 $$
-这给了我们一个思路：能否完全不使用策略梯度而仅仅使用价值函数呢？这便是 **基于价值的方法（Value-based methods）** 的基本思想了，在基于价值的方法中没有显式的策略，仅仅学习一定形式的价值函数。回顾以下记号：
+这给了我们一个思路：能否完全不使用策略梯度而仅仅使用价值函数呢？这便是基于价值的方法（Value-based methods）的基本思想了，在基于价值的方法中没有显式的策略，仅仅学习一定形式的价值函数。回顾以下记号：
 -  $A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 表示在状态 $\boldsymbol{s}$ 下采取动作 $\boldsymbol{a}$ 相较于平均动作的优势。  
 -  $\arg\max_{\boldsymbol{a}} A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 表示在状态 $\boldsymbol{s}$ 下依照策略 $\pi$ 可以采取的最优动作。 
 
@@ -15,7 +15,7 @@ $$
 $$
 \pi'(\boldsymbol{a}_t \mid \boldsymbol{s}_t) = \begin{cases}  1, & \text{if } \boldsymbol{a}_t = \arg\max_{\boldsymbol{a}_t} A^\pi(\boldsymbol{s}_t, \boldsymbol{a}_t),\\  0, & \text{otherwise}. \end{cases}
 $$
-上述过程展示了如何利用价值函数来更新策略。如果在此之后进行策略评估，那么就可以重复上述过程，不断得到更优的策略的价值函数，就得到了 **策略迭代（Policy iteration）** 算法。
+上述过程展示了如何利用价值函数来更新策略。如果在此之后进行策略评估，那么就可以重复上述过程，不断得到更优的策略的价值函数，就得到了策略迭代（Policy iteration）算法。
 
 在通用 RL 框架中，在 Part 2 中我们会拟合 $A^\pi$ （或者 $Q^\pi$, $V^\pi$）。在 Part 3 中我们使用 $\pi \gets \pi'$：
 ![](5-1.png)
@@ -37,15 +37,15 @@ $$
 $$
 V^\pi(\boldsymbol{s}) \gets r(\boldsymbol{s}, \pi(\boldsymbol{s})) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \pi(\boldsymbol{s}))} \left[V^\pi(\boldsymbol{s}')\right]
 $$
-因此得到了基于动态规划的 **策略迭代（Policy Iteration）** 算法：
+因此得到了基于动态规划的策略迭代（Policy Iteration）算法：
 1. 拟合 $V^\pi(\boldsymbol{s}) \gets r(\boldsymbol{s}, \pi(\boldsymbol{s})) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \pi(\boldsymbol{s}))} \left[V^\pi(\boldsymbol{s}')\right]$；
 2. $\pi \gets \pi'$。
 上述过程的第一步可以写成线性方程组，通过解线性方程组的方式一次性求解出所有的 $V^\pi(\boldsymbol{s})$。
 
-事实上，第二步的 $A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 可以被视作是 $Q^\pi(\boldsymbol{s}, \boldsymbol{a})$。故利用 $\arg\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a})$ 就可以恢复出策略。因此我们并不需要显式保存 $\pi$，因此可以得到以下 **价值迭代（Value Iteration）** 算法：
+事实上，第二步的 $A^\pi(\boldsymbol{s}, \boldsymbol{a})$ 可以被视作是 $Q^\pi(\boldsymbol{s}, \boldsymbol{a})$。故利用 $\arg\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a})$ 就可以恢复出策略。因此我们并不需要显式保存 $\pi$，因此可以得到以下价值迭代（Value Iteration）算法：
 1. 拟合 $Q(\boldsymbol{s}, \boldsymbol{a}) \gets r(\boldsymbol{s}, \boldsymbol{a}) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \boldsymbol{a})} \left[V(\boldsymbol{s}')\right]$；
 2. $V(\boldsymbol{s}) \gets \max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a})$。
-更进一步的，我们可以将第二步取最大值的过程直接写在第一步中，或者将第一步的 $Q$ 函数直接写在第二步中，分别得到经典的 **价值迭代** 与 **Q 迭代（Q-iteration）** 算法。
+更进一步的，我们可以将第二步取最大值的过程直接写在第一步中，或者将第一步的 $Q$ 函数直接写在第二步中，分别得到经典的价值迭代与 Q 迭代（Q-iteration）算法。
 
 # 3 Fitted Value Iteration & Q-Iteration
 在之前的表格示例中, 我们使用一个大表格来存储价值函数。然而在实际问题中这是不可行的：
@@ -56,7 +56,7 @@ $$
 $$
 L(\phi) = \frac{1}{2} \left\|V_\phi(\boldsymbol{s}) - \max_{\boldsymbol{a}} Q^\pi(\boldsymbol{s}, \boldsymbol{a})\right\|^2
 $$
-于是就有了 **拟合值迭代，已知动态（Fitted value iteration, known dynamics）** 算法：
+于是就有了拟合值迭代，已知动态（Fitted value iteration, known dynamics）算法：
 1. 令 $y_i \gets \max_{\boldsymbol{a}_i} (r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \mathbb{E}_{\boldsymbol{s}_i' \sim p(\boldsymbol{s}_i' \mid \boldsymbol{s}_i, \boldsymbol{a}_i)} \left[V_\phi(\boldsymbol{s}_i')\right])$；
 2. 令 $\phi \gets \arg \min_\phi \frac{1}{2} \left\|V_\phi(\boldsymbol{s}_i) - y_i\right\|^2$。
 
@@ -68,13 +68,13 @@ $$
 $$
 Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \gamma \mathbb{E}_{\boldsymbol{s}' \sim p(\boldsymbol{s}' \mid \boldsymbol{s}, \boldsymbol{a})} \left[\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}')\right]
 $$
-尽管看起来只是发生了简单的转换，但这里其实有本质不同，我们可以应用这样的方式处理任何的策略，我们就得到了 **拟合 Q 迭代，未知动态（Fitted Q-iteration, unknown dynamics）** 算法：
+尽管看起来只是发生了简单的转换，但这里其实有本质不同，我们可以应用这样的方式处理任何的策略，我们就得到了拟合 Q 迭代，未知动态（Fitted Q-iteration, unknown dynamics）算法：
 1. 令 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \mathbb{E}_{\boldsymbol{s}_i' \sim p(\boldsymbol{s}_i' \mid \boldsymbol{s}_i, \boldsymbol{a}_i)}\left[\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')\right]$，由于这里只有一个 $\boldsymbol{s}'$, 于是近似为 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')$；
 2. 令 $\phi \gets \arg \min_\phi \frac{1}{2} \left\|Q_\phi(\boldsymbol{s}_i, \boldsymbol{a}_i) - y_i\right\|^2$。
 ![](5-4.png)
 这一算法与 off-policy 演员-评论家算法有许多相似之处。如我们都需要一个 $\max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}')$ 的操作，这个操作中的 $\boldsymbol{a}'$ 通常是基于当前的 $Q$ 函数生成的。这一算法同样应用于 off-policy 的情况。我们可以想象一系列的 $(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}', r)$ 覆盖了整个空间，当我们在所有这些数据上表现很好时，就达到了我们的目标。与演员-评论家算法不同的是，我们只需要一个网络即可。
 
-完整的 **拟合 Q 迭代（Fitted Q-iteration）** 算法：
+完整的拟合 Q 迭代（Fitted Q-iteration）算法：
 1. 使用一些 policy 收集数据集 $\{(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)\}$，获得大小为 $N$ 的数据集； 
 2. 重复以下 $K$ 次； 
 3. 令 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \max_{\boldsymbol{a}_i'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}_i')$；
@@ -86,12 +86,12 @@ $$
 \mathcal{E} = \frac{1}{2} \mathbb{E}_{(\boldsymbol{s}, \boldsymbol{a}) \sim \mathcal{R}} \left[\left(Q_\phi(\boldsymbol{s}, \boldsymbol{a}) - (r + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}'))\right)^2\right]
 $$
 关于 $\mathcal{E}$ 项，有以下的结论：
-- 如果 $\mathcal{E} = 0$，则 $$Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = r + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}')$$这样的 $Q$ 函数就是 **最优 Q 函数**，对应于最优策略。 
+- 如果 $\mathcal{E} = 0$，则 $$Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = r + \gamma \max_{\boldsymbol{a}'} Q_\phi(\boldsymbol{s}', \boldsymbol{a}')$$这样的 $Q$ 函数就是最优 $Q$ 函数，对应于最优策略。 
 - 如果 $\mathcal{E} \neq 0$，无法给出任何的理论保证（除非是表格案例）。
 
 正因为很多实际问题中我们无法得到 $\mathcal{E} = 0$，故这个算法没有任何的理论保证。
 
-我们也可以利用上述算法的特例构造一个 online 的算法，也即 **Q 学习（Q-Learning）** 算法：
+我们也可以利用上述算法的特例构造一个 online 的算法，也即 Q 学习（Q-Learning）算法：
 1. 采取动作 $\boldsymbol{a}_t$, 得到 $(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)$；
 2. 设置 $y_i \gets r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \max_{\boldsymbol{a}_i'} Q_\phi(\boldsymbol{s}_i', \boldsymbol{a}_i')$；
 3. 采取一步梯度下降 $\phi \gets \phi - \alpha \nabla_\phi \frac{1}{2} \left\|Q_\phi(\boldsymbol{s}_i, \boldsymbol{a}_i) - y_i\right\|^2$。

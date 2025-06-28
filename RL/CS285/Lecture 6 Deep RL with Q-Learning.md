@@ -6,7 +6,7 @@
 后者相对容易解决，不妨考虑以下两种方式：
 - 参考演员-评论家算法中介绍的解决方法：进行并行，也就是多个工作线程同时进行采样，可以进一步分为同步和异步两种方式。
 ![](6-1.png)
-- 使用回放缓冲区（replay buffer），也就是将之前的样本存储在一个缓冲中，每次从缓冲中采样进行更新，具体来说可以考虑如下**带回放缓冲区的 Q 学习（Q-learning with replay buffer）** 算法：
+- 使用回放缓冲区（replay buffer），也就是将之前的样本存储在一个缓冲中，每次从缓冲中采样进行更新，具体来说可以考虑如下带回放缓冲区的 Q 学习（Q-learning with replay buffer）算法：
 	- 从缓冲 $\mathcal{B}$ 采样一个批量 $\{(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)\}$；
 	- 令 $\phi \gets \arg \min_\phi \frac{1}{2} \left\|Q_\phi(\boldsymbol{s}_i, \boldsymbol{a}_i) - y_i\right\|^2$。
 ![](6-2.png)
@@ -14,7 +14,7 @@
 此时我们的样本不再相关，而且由于我们每个批量有很多的样本，可以降低方差。
 
 不过我们依然需要周期地利用一些策略来采样，于是我们可以使用 $\epsilon$ 贪心策略来进行探索。将所有整理起来就是：
-**带回放缓冲区的 Q 学习（Q-learning with replay buffer）**：
+带回放缓冲区的 Q 学习（Q-learning with replay buffer）：
 1. 从环境中采样，$\{(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)\}$，存入缓冲区 $\mathcal{B}$；
 2. 重复以下 $K$ 次；
 3. 从缓冲区 $\mathcal{B}$ 采样一个批量 $\{(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)\}$；
@@ -33,7 +33,7 @@
 
 通常 $K$ 的值会比较小，也就是说我们不会在每次更新中都进行多次的梯度下降，这与监督学习中是很接近的。而 $N$ 会是一个比较大的值（例如 $10000$），因为我们需要保证我们的目标网络是比较稳定的。
 
-我们可以给出经典的 **深度 Q 学习（Deep Q-learning）** 算法：
+我们可以给出经典的深度 Q 学习（Deep Q-learning）算法：
 1. 采取动作 $\boldsymbol{a}_i$，得到 $(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)$，添加到缓冲区 $\mathcal{B}$；
 2. 从缓冲区 $\mathcal{B}$ 采样一个批量 $\{(\boldsymbol{s}_i, \boldsymbol{a}_i, \boldsymbol{s}_i', r_i)\}$；
 3. 利用目标网络计算目标 $y_i = r(\boldsymbol{s}_i, \boldsymbol{a}_i) + \gamma \max_{\boldsymbol{a}_i'} Q_{\phi'}(\boldsymbol{s}_i', \boldsymbol{a}_i')$；
@@ -42,7 +42,7 @@
 
 这实际上是上面的算法的一个特例，也就是 $K = 1$。
 
-我们还有其他设计目标网络的方式，当前的方式的一个奇怪的地方在于，我们目标网络在一些时间点上会突然发生变化，在一些时候会保持不变，但是在一些地方会感觉明显在拟合移动目标。一个可能的解决方式是使用 **波利亚克平均，也称参数平均（Polyak Averaging）**，也就是：
+我们还有其他设计目标网络的方式，当前的方式的一个奇怪的地方在于，我们目标网络在一些时间点上会突然发生变化，在一些时候会保持不变，但是在一些地方会感觉明显在拟合移动目标。一个可能的解决方式是使用波利亚克平均，也称参数平均（Polyak Averaging），也就是：
 $$
 \phi' \gets \tau \phi + (1 - \tau) \phi'
 $$
@@ -75,7 +75,7 @@ $$
 $$
 \max_{\boldsymbol{a}'} Q_{\phi'}(\boldsymbol{s}', \boldsymbol{a}') = Q_{\phi'}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi'}(\boldsymbol{s}', \boldsymbol{a}'))
 $$
-如果我们能够把选取 $\arg\max_{\boldsymbol{a}'}$ 与获取对应的值这两个过程分开，也就是使用两个”独立“的网络，由于两个网络参数不同，它们的噪声也会不同，就能很大程度上解决这一问题。这样的方式称为 **双 Q 学习（Double Q-learning）**，具体来说，考虑以下两个网络:：
+如果我们能够把选取 $\arg\max_{\boldsymbol{a}'}$ 与获取对应的值这两个过程分开，也就是使用两个”独立“的网络，由于两个网络参数不同，它们的噪声也会不同，就能很大程度上解决这一问题。这样的方式称为双 Q 学习（Double Q-learning），具体来说，考虑以下两个网络:：
 $$
 Q_{\phi_A}(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \gamma Q_{\phi_B}(\boldsymbol{s}', \arg\max_{\boldsymbol{a}'} Q_{\phi_A}(\boldsymbol{s}', \boldsymbol{a}'))
 $$
@@ -136,7 +136,7 @@ $$
 $$
 Q_\phi(\boldsymbol{s}, \boldsymbol{a}) = -\frac{1}{2} (\boldsymbol{a} - \boldsymbol{\mu}_\phi(\boldsymbol{s}))^T P_\phi(\boldsymbol{s}) (\boldsymbol{a} - \boldsymbol{\mu}_\phi(\boldsymbol{s})) + V_\phi(\boldsymbol{s})
 $$
-上述使用二次函数的方式称为 **归一化优势函数（Normalized Advantage Functions，NAF）**，此时获取 argmax 与 max 都变得非常简单：
+上述使用二次函数的方式称为归一化优势函数（Normalized Advantage Functions，NAF），此时获取 argmax 与 max 都变得非常简单：
 $$
 \arg\max_{\boldsymbol{a}} Q(\boldsymbol{s}, \boldsymbol{a}) = \mu_\phi(\boldsymbol{s})
 $$
@@ -152,7 +152,7 @@ $$
 $$
 \mu_\theta(\boldsymbol{s}) \approx \arg\max_{\boldsymbol{a}} Q_\phi(\boldsymbol{s}, \boldsymbol{a})
 $$
-一个例子是 **深度确定性策略梯度（Deep Deterministic Policy Gradient，DDPG）** 算法，由于 $\mu_\theta(\boldsymbol{s})$ 实际上可以理解为一个确定性的策略，故其实很像是一个确定性的演员-评论家算法。在这个算法中，我们设计新的目标：
+一个例子是深度确定性策略梯度（Deep Deterministic Policy Gradient，DDPG）算法，由于 $\mu_\theta(\boldsymbol{s})$ 实际上可以理解为一个确定性的策略，故其实很像是一个确定性的演员-评论家算法。在这个算法中，我们设计新的目标：
 $$
 y_j = r_j + \gamma Q_{\phi'}(\boldsymbol{s}'_j, \mu_{\theta}(\boldsymbol{s}'_j))
 $$
@@ -172,13 +172,13 @@ $$
 可以注意到在 DDPG 算法中并没有用到我们之前介绍的很多稳定性技巧，例如双 Q 学习。从相关算法的发展历史看，DDPG 算法是最早的算法之一，而后续这类型的算法如双延迟深度确定性策略梯度算法（Twin Delayed DDPG，TD3），除了引入我们介绍的双 Q 学习外，还引入了延迟策略更新（换言之更新 $\mu_\theta$ 的频率更低），目标策略平滑（向 $\mu_\theta$ 拟合的目标中添加噪声，防止策略过度利用 $Q$ 函数中的误差）。
 
 # 6 Implementation Tips and Examples
-**基本提示：**
+基本提示：
 - Q 学习相对来说不容易稳定，通常需要现在简单的任务上进行测试，确定算法的正确性。
 - 使用更大的回放缓冲区通常会增强算法的稳定性。
 - Q 学习的训练通常需要比较长的时间，并且在训练开始的很长一段时间可能并不会比随机策略好。
 - 开始时，可以使用较大的 $\epsilon$ （用于探索），逐渐减小.  
 
-**高级技巧：**
+高级技巧：
 贝尔曼误差梯度（Bellman error gradients）： 
 $$
 \nabla_\phi \frac{1}{2} \sum_{i = 1}^N \left\|Q_\phi(\boldsymbol{s}_i, \boldsymbol{a}_i) - y_i\right\|^2
