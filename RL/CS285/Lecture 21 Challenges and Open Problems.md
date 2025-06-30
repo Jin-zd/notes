@@ -2,15 +2,15 @@
 
 我们首先简单回顾一下过去介绍的内容:
 
--   从根本上来说, 我们之前介绍的是 learning-based control method, 这包括 **[imitation learning](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=imitation+learning&zhida_source=entity) (learning from demonstration)** 和 **reinforcement learning (learning from reward)**.  
+-   从根本上来说, 我们之前介绍的是 learning-based control method, 这包括 imitation learning (learning from demonstration) 和 reinforcement learning (learning from reward).  
     
--   之后我们介绍了 RL 中的一些 "classic" **model-free RL** 算法, 例如 **policy gradient** 和 **[value-based methods](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=value-based+methods&zhida_source=entity)** 以及介于它们之间的 **[actor-critic](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=actor-critic&zhida_source=entity)** 算法. 同时我们也介绍了这几类算法的对应例子, 例如 **[TRPO](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=TRPO&zhida_source=entity) 和 [PPO](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=PPO&zhida_source=entity)**, **DQN** 以及 **[SAC](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=SAC&zhida_source=entity)**.  
+-   之后我们介绍了 RL 中的一些 "classic" model-free RL 算法, 例如 policy gradient 和 value-based methods以及介于它们之间的 actor-critic 算法. 同时我们也介绍了这几类算法的对应例子, 例如 TRPO 和 PPO, DQN 以及 SAC.  
     
--   之后我们介绍了另一类可能的算法: **model-based control** (例如 **LQR**), 这些方法未必是 learning-based methods, 但它们也可**和 learning-based methods 结合**, 得到 **model-based RL w/o policy** (例如 **[MPC](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=MPC&zhida_source=entity)**). 而这样的方式也可也**和 RL 的 policy learning 结合**, 得到 **model-based RL with policy** (例如 **Dyna-Q**).  
+-   之后我们介绍了另一类可能的算法: model-based control (例如 LQR), 这些方法未必是 learning-based methods, 但它们也可和 learning-based methods 结合, 得到 model-based RL w/o policy (例如 MPC). 而这样的方式也可也和 RL 的 policy learning 结合, 得到 model-based RL with policy (例如 Dyna-Q).  
     
--   我们剩下讨论的一些内容在某种意义上正交于我们之前讨论的内容, 例如 **exploration**, [unsupervised RL](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=unsupervised+RL&zhida_source=entity) (如 skill discovery). 我们还介绍了一些工具例如 probabilistic inference, 以及利用其建立的 **control as inference** 的框架, 在这基础上我们可以得到 **inverse RL** 的算法.  
+-   我们剩下讨论的一些内容在某种意义上正交于我们之前讨论的内容, 例如 exploration, unsupervised RL (如 skill discovery). 我们还介绍了一些工具例如 probabilistic inference, 以及利用其建立的 control as inference 的框架, 在这基础上我们可以得到 inverse RL 的算法.  
     
--   我们同样还介绍了 **offline RL**, **RL with sequence model**, **[meta-learning](https://zhida.zhihu.com/search?content_id=256336687&content_type=Article&match_order=1&q=meta-learning&zhida_source=entity)** 等等其他内容.  
+-   我们同样还介绍了 offline RL, RL with sequence model, meta-learning 等等其他内容.  
     
 
 ![](https://pic2.zhimg.com/v2-56d66cee64d25163ccabcd79d77924af_1440w.jpg)
@@ -21,18 +21,18 @@
 
 ### Challenges with core algorithms:
 
--   **Stability:** 算法是否收敛?  
+-   Stability: 算法是否收敛?  
     
--   **Efficiency:** 收敛需要多少时间/sample?  
+-   Efficiency: 收敛需要多少时间/sample?  
     
--   **Generalization:** 在收敛后, 其泛化性怎么样?  
+-   Generalization: 在收敛后, 其泛化性怎么样?  
     
 
 ### Challenges with assumptions:
 
--   问题的 **formulation 是否合理**, 这个问题是否可以建模为一个 RL 问题? 还是说有更好的假设?  
+-   问题的 formulation 是否合理, 这个问题是否可以建模为一个 RL 问题? 还是说有更好的假设?  
     
--   **supervision 的来源**是什么? 例如对于 imitation learning, supervision 来自于 demonstration, 而对于 RL 来说则是来自于 reward.  
+-   supervision 的来源是什么? 例如对于 imitation learning, supervision 来自于 demonstration, 而对于 RL 来说则是来自于 reward.  
     
 
 接下来我们从以上提到的一些角度进行讨论.
@@ -47,7 +47,7 @@
 
 当然深度学习中的很多技巧例如 更大规模的网络, normalization, data augmentation (参见 Image Augmentation Is All You Need: Regularizing Deep Reinforcement Learning from Pixels, Ilya Kostrikov, Denis Yarats, Rob Fergus) 都可以让训练更稳定.
 
-**Some Open Problems:** 尽管基于 classic machine learning theory 会认为深度学习会出现严重的过拟合, 但是实际上深度学习通常能够表现地很好, 这说明存在着某种潜在的 regularizing effect, 例如 SGD 本身. 然而 value-based method 事实上不是 gradient descent, 因此一个可能的研究方向就是这样的一种 "magic" 是否在 value-based methods 中同样存在.
+Some Open Problems: 尽管基于 classic machine learning theory 会认为深度学习会出现严重的过拟合, 但是实际上深度学习通常能够表现地很好, 这说明存在着某种潜在的 regularizing effect, 例如 SGD 本身. 然而 value-based method 事实上不是 gradient descent, 因此一个可能的研究方向就是这样的一种 "magic" 是否在 value-based methods 中同样存在.
 
 ### Policy gradient methods
 
@@ -55,11 +55,11 @@
 
 ### Model-based RL
 
-这一类算法表面上看这会是一个稳定的选择, 因为 model 学习的过程是 supervised learning. 然而, 这一类方法中 model 在训练中不断改变, 这里的问题是, **model 变得准确不能直接使得 policy 更好**:
+这一类算法表面上看这会是一个稳定的选择, 因为 model 学习的过程是 supervised learning. 然而, 这一类方法中 model 在训练中不断改变, 这里的问题是, model 变得准确不能直接使得 policy 更好:
 
 虽然如果我们的 model 是 perfect 的, 此时可以得到 optimal policy, 但是 model 变好并不一样. 有可能 model 以一种特定的方式改善, 例如可能在某一些地方准确性略微下降, 而这给 policy 带来灾难性的后果, 或者说, model 的不同 error 虽然在训练 model 的监督学习意义下是一样的, 但是对 policy 影响并不一致.
 
-在 **model-based policy learning** 一节中我们介绍了使用 backpropagate through time 的方法来更新 policy, 但这种方法效果并不好, 因此我们通常还是会使用 model-free 的算法, 将 model 作为一种加速的方式.
+在 model-based policy learning 一节中我们介绍了使用 backpropagate through time 的方法来更新 policy, 但这种方法效果并不好, 因此我们通常还是会使用 model-free 的算法, 将 model 作为一种加速的方式.
 
 model based methods 还有一些其他的问题, 例如 policy 可能会利用 model 的一些错误, 在这个意义上这种方法像是一种对抗性的过程.
 
@@ -67,17 +67,17 @@ model based methods 还有一些其他的问题, 例如 policy 可能会利用 m
 
 不同的算法在 sample efficiency 上有很大差异
 
--   **gradient-free methods** (例如 NES, CMA 等)  
+-   gradient-free methods (例如 NES, CMA 等)  
     
--   **fully online methods** (例如 A3C), 这样的方法大约需要 $10^8$ 个 steps, 需要现实中大约 $$$15$$$ 天.  
+-   fully online methods (例如 A3C), 这样的方法大约需要 $10^8$ 个 steps, 需要现实中大约 $$$15$$$ 天.  
     
--   **policy gradient methods** (例如 TRPO), 这样的算法通常需要 $10^7$ 个 steps, 需要现实中大约 $1.5$ 天.  
+-   policy gradient methods (例如 TRPO), 这样的算法通常需要 $10^7$ 个 steps, 需要现实中大约 $1.5$ 天.  
     
--   **replay buffer value estimation methods** (Q-learning, DDPG, NAF, SAC 等), 这样的方法大约需要 $$$10^6$$$ 个 steps, 对于一些简单的任务可能只需要几小时.  
+-   replay buffer value estimation methods (Q-learning, DDPG, NAF, SAC 等), 这样的方法大约需要 $$$10^6$$$ 个 steps, 对于一些简单的任务可能只需要几小时.  
     
--   **model-based deep RL** (PETS, guided policy search)  
+-   model-based deep RL (PETS, guided policy search)  
     
--   **model-based "shallow" RL** (例如 PILCO), 但是使用的是没有办法扩展到大规模的方法, 例如 Gaussian Process.
+-   model-based "shallow" RL (例如 PILCO), 但是使用的是没有办法扩展到大规模的方法, 例如 Gaussian Process.
 
 ![](https://pic4.zhimg.com/v2-0c6acc09506d7bb68813b776418ab3c3_1440w.jpg)
 
@@ -100,7 +100,7 @@ model based methods 还有一些其他的问题, 例如 policy 可能会利用 m
 -   在 RL 中, 通常我们只会在一个小规模的数据上训练, 且我们主要关注单任务上的效果, 也只会用 performance 来评估.  
     
 
-为什么我们不能简单像一般的深度学习那样扩大 RL 的规模呢? 这实际上和 RL 本身的 **workflow** 有密切的关系:
+为什么我们不能简单像一般的深度学习那样扩大 RL 的规模呢? 这实际上和 RL 本身的 workflow 有密切的关系:
 
 -   对于 supervised learning 来说, 通常只需要从真实世界中获取数据一次, 之后就需要通过一个算法/模型训练即可. 如果我们不满意非常简单, 无论是调整超参数还是调整模型和算法, 都只需要重新在数据集上训练就行.
 
@@ -116,14 +116,14 @@ model based methods 还有一些其他的问题, 例如 policy 可能会利用 m
 
 因此对于 RL 的改进不能仅仅局限在具体的方法上, 也可也从 workflow 的角度使得整个 RL 更加可行. 本课程中介绍了很多相关的研究方向:
 
--   **offline RL:** 如果我们能从一个预先收集好的 dataset 中学习, 那么整个 RL 的 workflow 就会变得和 supervised learning 一样, 即使我们修改了算法, 也不需要重新收集数据.  
+-   offline RL: 如果我们能从一个预先收集好的 dataset 中学习, 那么整个 RL 的 workflow 就会变得和 supervised learning 一样, 即使我们修改了算法, 也不需要重新收集数据.  
     
--   **meta-learning:** 这同样是一种 workflow 的改进. 如果我们能够得到一个 meta-learner, 那么我们可以从过去的经验中更快的学习. 另一方面, pretraining + finetuning 也可以看作是 meta-learning 的一种方式.  
+-   meta-learning: 这同样是一种 workflow 的改进. 如果我们能够得到一个 meta-learner, 那么我们可以从过去的经验中更快的学习. 另一方面, pretraining + finetuning 也可以看作是 meta-learning 的一种方式.  
     
 
-刚才我们主要侧重在 **scaling up** 上, 而在 **generalization** 层面, 我们依然有很长的路要走. 目前如果训练一个 humanoid 在完全平坦的平面上奔跑, 换算在真实世界中的时间需要 6 天. 但现实世界远比这样的环境复杂, 难道对于每一种环境, 我们都要专门训练一次吗?
+刚才我们主要侧重在 scaling up 上, 而在 generalization 层面, 我们依然有很长的路要走. 目前如果训练一个 humanoid 在完全平坦的平面上奔跑, 换算在真实世界中的时间需要 6 天. 但现实世界远比这样的环境复杂, 难道对于每一种环境, 我们都要专门训练一次吗?
 
-为了完成多样的任务, 一个可能的思路是我们之前讨论过的 **transfer learning** 和 **meta-learning** 的方法. 一个简单的例子是 multi-task learning: 在这样的算法中, 可能会有更严重的 variance 和 sample efficiency 问题, 一方面我们可以考虑直接求解一个 augmented MDP, 也可也考虑专门设计一些算法来处理 multi-task 的问题.
+为了完成多样的任务, 一个可能的思路是我们之前讨论过的 transfer learning 和 meta-learning 的方法. 一个简单的例子是 multi-task learning: 在这样的算法中, 可能会有更严重的 variance 和 sample efficiency 问题, 一方面我们可以考虑直接求解一个 augmented MDP, 也可也考虑专门设计一些算法来处理 multi-task 的问题.
 
 ![](https://pic1.zhimg.com/v2-aadb387fd5a15613d2ddb54fe5592bda_1440w.jpg)
 
@@ -131,31 +131,31 @@ model based methods 还有一些其他的问题, 例如 policy 可能会利用 m
 
 ### 2.4 Assumptions: Where does the supervision come from?
 
-我们都清楚 RL 的建模, 在 RL 中我们会有一个 reward function, 这是 **supervision** 的来源. 但是很多时候归根到底 reward 是哪里来的? 是我们设计的.
+我们都清楚 RL 的建模, 在 RL 中我们会有一个 reward function, 这是 supervision 的来源. 但是很多时候归根到底 reward 是哪里来的? 是我们设计的.
 
 在这种思路下, 如果我们要进行 multi-task learning, 那么我们就得给每个任务设计一个 reward, 在一些问题中 reward 非常简单, 但是在更多情况下, reward 作为一种 supervision 是很难设计的, 例如让 robot 倒水, 一个稀疏的 reward 是 naive 的, 但问题是我们的 agent 从中往往无法学到任何东西.
 
 实际上很多时候 reward 并不是我们唯一的选择, 很多时候可以有其他的 supervision 的来源:
 
--   **Demonstration:** 参见 Muelling, K et al. (2013). Learning to Select and Generalize Striking Movements in Robot Table Tennis.  
+-   Demonstration: 参见 Muelling, K et al. (2013). Learning to Select and Generalize Striking Movements in Robot Table Tennis.  
     
--   **Language:** 参见 Andreas et al. (2018). Learning with latent language.  
+-   Language: 参见 Andreas et al. (2018). Learning with latent language.  
     
--   **Human preference:** 参见 Christiano et al. (2017). Deep reinforcement learning from human preferences  
+-   Human preference: 参见 Christiano et al. (2017). Deep reinforcement learning from human preferences  
     
 
 还有一些可能的方式, 例如能否自动的生成 objective? (利用 automatic skill discovery)
 
-关于 supervision 的选择, 有一些值得思考的问题: 我们的 supervision 需要告诉 agent **what to do** 还是 **how to do**?
+关于 supervision 的选择, 有一些值得思考的问题: 我们的 supervision 需要告诉 agent what to do 还是 how to do?
 
--   对于 **demonstration** 来说, 我们的 supervision 不仅回答了 what, 也回答了 how, 例如我们给出了一个 robot 倒水的 demonstration, 那么 robot 不仅知道了我们要倒水, 还知道了怎么倒水.  
+-   对于 demonstration 来说, 我们的 supervision 不仅回答了 what, 也回答了 how, 例如我们给出了一个 robot 倒水的 demonstration, 那么 robot 不仅知道了我们要倒水, 还知道了怎么倒水.  
     
--   对于 **reward function** 来说, 我们的 supervision 通常仅仅回答了 what, 例如仅当 robot 倒水成功时才会给出 reward, 但是并没有告诉 robot 怎么倒水. 但是如果我们给出了一个很好的 reward function, 那么也可以部分地回答了 how 的问题.  
+-   对于 reward function 来说, 我们的 supervision 通常仅仅回答了 what, 例如仅当 robot 倒水成功时才会给出 reward, 但是并没有告诉 robot 怎么倒水. 但是如果我们给出了一个很好的 reward function, 那么也可以部分地回答了 how 的问题.  
     
--   这其实有一个 **tradeoff**, 我们希望我们的算法能够找到更好的 solution, 那么我们不应该有过多细节的 supervision. 但是如果我们的 supervision 过于 high-level, 也可能导致整个 learning 变得非常困难.  
+-   这其实有一个 tradeoff, 我们希望我们的算法能够找到更好的 solution, 那么我们不应该有过多细节的 supervision. 但是如果我们的 supervision 过于 high-level, 也可能导致整个 learning 变得非常困难.  
     
 
-从上述关于 supervision 的讨论中我们其实想要引出一个更加重要的事情: 很多时候我们**不要拘泥于 RL 本身已有的很多 formulation**, 它们并不是完全不能改变的. 我们需要仔细考虑它们是否真的适合 problem setting, 比如我们可以考虑的是:
+从上述关于 supervision 的讨论中我们其实想要引出一个更加重要的事情: 很多时候我们不要拘泥于 RL 本身已有的很多 formulation, 它们并不是完全不能改变的. 我们需要仔细考虑它们是否真的适合 problem setting, 比如我们可以考虑的是:
 
 -   数据是什么?  
     
@@ -189,7 +189,7 @@ engineering a control system
 -   而 RL 给我们带来了另一种 engineering 的方式: 我们建模问题, 并进行 simulation, 然后运行 RL 算法, 得出控制的方式.  
     
 
-**Remark**:
+Remark:
 
 -   从这一角度理解的启示是, 我们要开发更加高效的 simulator, 并且开发能够更好地利用 simulation 的 RL 算法.  
     
@@ -200,9 +200,9 @@ engineering a control system
 
 在这一部分中, 我们想提出的是在真实世界中进行 RL 才是我们的真正目标, 具体来说我们先考虑到以下几个例子:
 
-**Example 1**. _Moravec's paradox_
+Example 1. _Moravec's paradox_
 
-_一个研究 RL 的 motivation 是这样的 **Moravec's paradox**:_
+_一个研究 RL 的 motivation 是这样的 Moravec's paradox:_
 
 _AI 可以在棋类比赛上胜过世界冠军, 但是并不是真的 robot 在下棋, 而是由现实中的人代替 AI 进行实际操作. 这是一个非常怪异的现象, 我们的 model 的"智能"足够在棋盘上赢过世界冠军, 却不能够完成任何一个人类都可以做到的实际的棋子移动._
 
@@ -219,7 +219,7 @@ _Moravec's paradox 看起来是关于 AI 的 statement, 实际上可以理解为
 -   _在我们所在的 hard universe 中, motor control 和 perception 是非常困难的._  
     
 
-**Example 2**. _另一个例子是考虑一个人在荒岛上生存, 这个问题中有一系列特点:_
+Example 2. _另一个例子是考虑一个人在荒岛上生存, 这个问题中有一系列特点:_
 
 -   _极少的外部 supervision 告诉我们应当做什么_  
     
@@ -254,7 +254,7 @@ _在 hard universes 中:_
 -   _Main question: can RL generalize and adapt._  
     
 
-上述的几个例子直观展现了现实世界这个 hard universe 中的问题与我们通常 RL 研究中的 easy universe 中的问题的不同. 很显然, **我们的最终目标应当是 RL 能够在现实世界这样的 hard universe 中取得好的效果**. 但是在目前的 RL 研究中, 我们通常只考虑 easy universe 中的任务, 我们需要更多地尝试解决这些 hard universe 中的问题.
+上述的几个例子直观展现了现实世界这个 hard universe 中的问题与我们通常 RL 研究中的 easy universe 中的问题的不同. 很显然, 我们的最终目标应当是 RL 能够在现实世界这样的 hard universe 中取得好的效果. 但是在目前的 RL 研究中, 我们通常只考虑 easy universe 中的任务, 我们需要更多地尝试解决这些 hard universe 中的问题.
 
 但是如果要解决现实世界中的问题, 我们需要考虑一些问题:
 
@@ -271,7 +271,7 @@ _在 hard universes 中:_
 
 接下来我们从几个 robotic task 的例子来给出一些解决上述问题的启发:
 
-**Example 3**. _Other ways to communicate objective_
+Example 3. _Other ways to communicate objective_
 
 _除了 reward function 之外, 有没有其他方式来传达目标呢? 实际上, 一个可行的做法是 learning from preference. 这里我们没有固定的 reward function, 而是像 RLHF 那样让人类评价哪个 action 更符合指令._
 
@@ -281,7 +281,7 @@ Deep reinforcement learning from human preferences
 
 _参见: Paul Christiano, Jan Leike, Tom B. Brown, Miljan Martic, Shane Legg, Dario Amodei. Deep reinforcement learning from human preferences. 2017._
 
-**Example 4**. _Learn fully autonomously_
+Example 4. _Learn fully autonomously_
 
 _在现实中如果我们部署一个 robot manipulation task, 那么我们需要构建一整套系统 (或者人为复位), 使得我们的机械臂可以复位然后不断尝试, 这是相当繁琐的, 并且实质上并不利于 policy 的泛化性._
 
@@ -309,7 +309,7 @@ Deep Dynamics Models for Learning Dexterous Manipulation
 
 Reset-Free Reinforcement Learning via Multi-Task Learning: Learning Dexterous Manipulation Behaviors without Human Intervention
 
-**Example 5**. _How bootsrap exploration from experience?_
+Example 5. _How bootsrap exploration from experience?_
 
 _一个角度是, 在现实中并不是什么 action 都可以 explore 的, 例如一些行为可能会给 agent 本身带来极为严重的伤害. 而如何避免这些 action 就需要一些 prior knowledge._
 
@@ -327,13 +327,13 @@ _参见: Singh\*, Hui\*, Zhou, Yu, Rhinehart, Levine. Parrot: Data-driven behavi
 
 ### 3.3 Reinforcement Learning as "Universal" Learning
 
-在这一个视角中, 我们将 RL 视作一种 **"universal" learning** 的方式.
+在这一个视角中, 我们将 RL 视作一种 "universal" learning 的方式.
 
 目前 LLM 的成功是基于大量的无标注预训练数据 + 少量标注的数据, 其背后的 knowledge 很大程度来自于我们通过自监督学习学到的分布 $p_\theta(\boldsymbol{x})$ . 目前这样的训练方式取得很大成功, 很大程度上因为我们能够从大量廉价的数据中学习到知识. 当然一个挑战是这些数据不能都是垃圾, 也就是我们不能学习一个 low quality 的数据分布. 实际上, 一个更好的做法是使用 RL:
 
 machine learning 的目的可以理解是为了产生 adaptable 和 complex 的 decisions. (这可能不那么显然, 对于 image classification 来说, 其背后的 decision 是预测 label 后发生的事情, 例如识别到了险情, decision 是否报警.)
 
-实际上 RL 是一种更好地利用 low quality data 的方式, 当我们获取到大量的 low quality data 时, 建模其密度分布可能并不是很好的选择, 我们从中需要学习到的不是在 world 中**如何做**, 而是在 world 中**能够做到什么**, 换言之在学习 how the world works (dynamic) 的信息. 而之后我们再通过 reward function 等学习到关于 task 的信息, 并从关于 world 的知识中找出那些 best possible 的 decision.
+实际上 RL 是一种更好地利用 low quality data 的方式, 当我们获取到大量的 low quality data 时, 建模其密度分布可能并不是很好的选择, 我们从中需要学习到的不是在 world 中如何做, 而是在 world 中能够做到什么, 换言之在学习 how the world works (dynamic) 的信息. 而之后我们再通过 reward function 等学习到关于 task 的信息, 并从关于 world 的知识中找出那些 best possible 的 decision.
 
 ![](https://pic4.zhimg.com/v2-88fb18c53a14651f47575ce92a2c6b01_1440w.jpg)
 
@@ -351,7 +351,7 @@ RL as universal learning
 
 一个利用 offline RL 作为 recipe 的例子如下:
 
-**Example 6**. _Use offline RL train large language models_
+Example 6. _Use offline RL train large language models_
 
 _通常情况下我们使用 RLHF 等方式来对齐 LLM, 尽管其可以让回答更加符合人类偏好, 但是这样一种 single-step 的建模并不擅长于完成整个对话目标._
 
@@ -412,4 +412,4 @@ Yann LeCun&#39;s cake
     
 -   Application matters: 很多时候将方法应用到挑战性的 real-world 中可以告诉我们缺失了哪些重要的东西. RL 的历史上有很长一段时间忽略了这件事情.  
     
--   **Think big and start small!**
+-   Think big and start small!

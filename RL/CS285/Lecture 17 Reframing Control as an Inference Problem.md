@@ -24,7 +24,7 @@ $$
 过去介绍的线性二次型调节器（Linear Quadratic Regulator，LQR）方法等都是确定性的，这样的建模方式无法解释为什么人类会有一些随机性的行为。这里引入一个概率模型来解释这些接近最优的行为。
 
 首先先考虑状态、动作、下一状态之间的概率图模型，也就是
-![](https://pic4.zhimg.com/v2-924173b0d79aacd30c79f6a3194b9835_1440w.jpg)
+![](17-1.png)
 
 在这个模型中，不存在进行控制所需的奖励，因此我们并不能够利用这个模型来解决控制问题。
 
@@ -33,7 +33,7 @@ $$
 p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t) = \exp(r(\boldsymbol{s}_t, \boldsymbol{a}_t))
 $$
 其中奖励是负值（可以通过减去最大奖励实现）来保证概率属于 $[0,1]$，同时为了记号的简便，我们总是用 $\mathcal{O}_t$ 来表示 $\mathcal{O}_t = 1$。
-![](https://picx.zhimg.com/v2-2ea4db1ccfd4cf60126f9678d07f3467_1440w.jpg)
+![](17-2.png)
 
 为了理解这种定义方式的合理性，考虑 $p(\tau \mid \mathcal{O}_{1:T})$，可以化简得到 
 $$
@@ -64,17 +64,17 @@ $$
 2. $p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t) = \exp(r(\boldsymbol{s}_t, \boldsymbol{a}_t))$ 是已知的，也就是知道奖励函数。
 
 总的来说，会有以下三种推断问题：
-1. 计算后向信息：$\beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t) = p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)$（也就是给定当前的状态和行为，当前及之后的行为是否最优）；
+1. 计算反向信息：$\beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t) = p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)$（也就是给定当前的状态和行为，当前及之后的行为是否最优）；
 2. 计算策略：$p(\boldsymbol{a}_t \mid \boldsymbol{s}_t, \mathcal{O}_{1:T})$，即使在确定性的情况下，我们通常更关心如何得到一个策略而不是一个完整的规划，因此会考虑的是 $p(\boldsymbol{a}_t \mid \boldsymbol{s}_t, \mathcal{O}_{1:T})$；
 3. 计算前向信息：$\alpha_t(\boldsymbol{s}_t) = p(\boldsymbol{s}_t \mid \mathcal{O}_{1:{t - 1}})$（也就是如果前面的行为是最优的，那么当前的状态的分布是什么，这对逆强化学习非常重要）。 
 
-这里的后向信息、前向信息是概率图模型（例如隐马尔可夫模型）中的术语，它们具有不同的用处，简单来说在本节中需要用后向信息来计算策略，而前向信息可以用来计算状态边际分布，进而用来进行逆强化学习，这些会在下一节中具体讨论。
+这里的反向信息、前向信息是概率图模型（例如隐马尔可夫模型）中的术语，它们具有不同的用处，简单来说在本节中需要用反向信息来计算策略，而前向信息可以用来计算状态边际分布，进而用来进行逆强化学习，这些会在下一节中具体讨论。
 
 ## 2 Control as Inference
 在这里我们具体介绍将控制问题转化为推断问题的方法，尽管之前简要提及了在随机情况下直接最大化后验概率是有问题的，但是目前依然以随机性动态的普遍情况进行分析。
 ### 2.1 Backward messages
 #### 2.1.1 Calculation
-首先考虑后向信息，就是 $\beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t) = p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)$，也就是给定当前的状态和行为，当前及之后的行为是否最优，首先可以进行如下的转化：
+首先考虑反向信息，就是 $\beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t) = p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)$，也就是给定当前的状态和行为，当前及之后的行为是否最优，首先可以进行如下的转化：
 $$
 \begin{aligned} \beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t) &= p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)\\ &= \int p(\mathcal{O}_{t:T}, \boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) \text{d}\boldsymbol{s}_{t + 1}\\ &= \int p(\mathcal{O}_{t + 1:T} \mid \boldsymbol{s}_{t + 1}) p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) p(\mathcal{O}_t \mid \boldsymbol{s}_t, \boldsymbol{a}_t) \text{d}\boldsymbol{s}_{t + 1}\\ \end{aligned}
 $$
@@ -88,7 +88,7 @@ $$
 
 但值得注意的是，这里的 $p(\boldsymbol{a}_{t + 1} \mid \boldsymbol{s}_{t + 1})$ 并不是策略，而是像先验一样的一个分布，通常假设这是均匀分布（这是因为当不知道关于目标 $\mathcal{O}_{1:T}$ 的任何信息时，无从知道何种行为更有可能）。
 
-不难发现可以递归地计算后向信息，从 $t = T - 1$ 到 $t = 1$（之所以从 $t = T - 1$ 开始是因为知道 $\beta_T(\boldsymbol{s}_T, \boldsymbol{a}_T) = \exp(r(\boldsymbol{s}_T, \boldsymbol{a}_T))$，并可以计算出 $\beta_T(\boldsymbol{s}_T)$）：
+不难发现可以递归地计算反向信息，从 $t = T - 1$ 到 $t = 1$（之所以从 $t = T - 1$ 开始是因为知道 $\beta_T(\boldsymbol{s}_T, \boldsymbol{a}_T) = \exp(r(\boldsymbol{s}_T, \boldsymbol{a}_T))$，并可以计算出 $\beta_T(\boldsymbol{s}_T)$）：
 $$
 \begin{aligned} &\beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t) = p(\mathcal{O}_{t} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) \mathbb{E}_{\boldsymbol{s}_{t + 1} \sim p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)}[\beta_{t + 1}(\boldsymbol{s}_{t + 1})]\\ &\beta_t(\boldsymbol{s}_t) = \mathbb{E}_{\boldsymbol{a}_t \sim p(\boldsymbol{a}_t \mid \boldsymbol{s}_t)}[\beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t)] \end{aligned}
 $$
@@ -138,7 +138,7 @@ $$
 就可以满足原先的贝尔曼更新。于是总是可以通过调整奖励的方式使得动作对是均匀的，再结合我们设置为均匀分布的基本直觉即可发现使用均匀分布是合理的。
 
 ### 2.2 Policy
-利用后向信息的结果，能够计算最优策略 $\pi(\boldsymbol{a}_t \mid \boldsymbol{s}_t) = p(\boldsymbol{a}_t \mid \boldsymbol{s}_t, \mathcal{O}_{1:T})$，有 
+利用反向信息的结果，能够计算最优策略 $\pi(\boldsymbol{a}_t \mid \boldsymbol{s}_t) = p(\boldsymbol{a}_t \mid \boldsymbol{s}_t, \mathcal{O}_{1:T})$，有 
 $$
 \begin{aligned} p(\boldsymbol{a}_t \mid \boldsymbol{s}_t, \mathcal{O}_{1:T}) &= p(\boldsymbol{a}_t \mid \boldsymbol{s}_t, \mathcal{O}_{t:T})\\ &= \frac{p(\boldsymbol{a}_t, \boldsymbol{s}_t \mid \mathcal{O}_{t:T})}{p(\boldsymbol{s}_t \mid \mathcal{O}_{t:T})}\\ &= \frac{p(\mathcal{O}_{t:T}\mid \boldsymbol{a}_t, \boldsymbol{s}_t) p(\boldsymbol{a}_t, \boldsymbol{s}_t) / p(\mathcal{O}_{t:T})}{p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t) p(\boldsymbol{s}_t) / p(\mathcal{O}_{t:T})}\\ &= \frac{p(\mathcal{O}_{t:T}\mid \boldsymbol{a}_t, \boldsymbol{s}_t)}{p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t)} \frac{p(\boldsymbol{a}_t, \boldsymbol{s}_t)}{p(\boldsymbol{s}_t)}\\ &= \frac{\beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t)}{\beta_t(\boldsymbol{s}_t)} \end{aligned}
 $$
@@ -157,7 +157,7 @@ $$
 不难发现这与玻尔兹曼探索相似，同时当温度下降时更加接近贪心策略。
 
 ### 2.3 Forward messages
-最后考虑前向信息与后向信息的差别在于，前向信息的形式非常复杂：
+最后考虑前向信息与反向信息的差别在于，前向信息的形式非常复杂：
 $$
 \begin{aligned} \alpha_t(\boldsymbol{s}_t) &= p(\boldsymbol{s}_t \mid \mathcal{O}_{1:t - 1})\\ &= \int p(\boldsymbol{s}_t, \boldsymbol{s}_{t - 1}, \boldsymbol{a}_{t - 1} \mid \mathcal{O}_{1:t - 1}) \text{d}\boldsymbol{s}_{t - 1} \text{d}\boldsymbol{a}_{t - 1}\\ &= \int p(\boldsymbol{s}_t \mid \boldsymbol{s}_{t - 1}, \boldsymbol{a}_{t - 1}, \mathcal{O}_{1:t - 1}) p(\boldsymbol{a}_{t - 1} \mid \boldsymbol{s}_{t - 1}, \mathcal{O}_{1:t - 1}) p(\boldsymbol{s}_{t - 1} \mid \mathcal{O}_{1:t - 1}) \text{d}\boldsymbol{s}_{t - 1} \text{d}\boldsymbol{a}_{t - 1}\\ &= \int p(\boldsymbol{s}_t \mid \boldsymbol{s}_{t - 1}, \boldsymbol{a}_{t - 1}) p(\boldsymbol{a}_{t - 1} \mid \boldsymbol{s}_{t - 1}, \mathcal{O}_{t - 1}) p(\boldsymbol{s}_{t - 1} \mid \mathcal{O}_{1:t - 1}) \text{d}\boldsymbol{s}_{t - 1} \text{d}\boldsymbol{a}_{t - 1}\\ \end{aligned}
 $$
@@ -179,29 +179,29 @@ $$
 $$
 \begin{aligned} p(\boldsymbol{s}_t \mid \mathcal{O}_{1:T}) &= \frac{p(\boldsymbol{s}_t, \mathcal{O}_{1:T})}{p(\mathcal{O}_{1:T})}\\ &= \frac{p(\mathcal{O}_{t:T} \mid \boldsymbol{s}_t) p(\boldsymbol{s}_t, \mathcal{O}_{1:t - 1})}{p(\mathcal{O}_{1:T})}\\ &\propto \beta_t(\boldsymbol{s}_t) \alpha_t(\boldsymbol{s}_t) p(\mathcal{O}_{1:t - 1}) \propto \beta_t(\boldsymbol{s}_t) \alpha_t(\boldsymbol{s}_t). \end{aligned}
 $$
-考虑 $p(\boldsymbol{s}_t) \propto \beta_t(\boldsymbol{s}_t) \alpha_t(\boldsymbol{s}_t)$ 背后的直觉，这里可以把前向信息与后向信息视作两个锥形：
+考虑 $p(\boldsymbol{s}_t) \propto \beta_t(\boldsymbol{s}_t) \alpha_t(\boldsymbol{s}_t)$ 背后的直觉，这里可以把前向信息与反向信息视作两个锥形：
 - 后向的锥：表示了那些能够以高概率到达目标的状态；
 - 前向的锥：表示了那些能够从初始状态出发以高奖励到达的状态。
 
-![](https://pic1.zhimg.com/v2-61e39376b723855e8f444bfe5a3f208e_1440w.jpg)
+![](17-3.png)
 
 状态边际分布就是这两个锥的交集，不难发现这一交集两侧窄，中间宽。这与人类的行为是类似的，根据行为学上的研究，人的行为的状态也有类似的状态分布，在行为轨迹靠中间的位置通常可能有着更大的偏差。
-![](https://picx.zhimg.com/v2-a60eb2db332011678f249daa4e16f6dd_1440w.jpg)
+![](17-4.png)
 
 关于前向信息的推断方法会在逆强化学习中有着重要的应用。
 
 ### 2.5 Summary of Control as Inference
 到目前为止，我们给出了最优控制的概率图模型，并将控制视作是推断的一种方式：
 - 后向的过程类似于一种软版本的价值迭代；
-- 可以利用后向信息恢复策略，就像是利用价值函数恢复策略一样； 
-- 可以利用前向信息和后向信息恢复状态边际分布。
+- 可以利用反向信息恢复策略，就像是利用价值函数恢复策略一样； 
+- 可以利用前向信息和反向信息恢复状态边际分布。
 
 ## 3 Control as Variational Inference
 在之前的推断方法中，我们会通过准确的方式进行计算，然而现实中的问题更加复杂，并且不知道转移动态，需要通过样本来近似，因此需要使用近似的推断。
 
 接下来会使用上一节介绍的[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]方法来从刚才介绍的[[#2 Control as Inference]]中推导出的无模型的强化学习算法。但在介绍变分推断之前，我们先来解决之前一节中提到的问题，也就是过高估计问题。
 ### 3.1 Optimism problem
-在后向信息中，从 $t = T - 1$ 到 $t = 1$：
+在反向信息中，从 $t = T - 1$ 到 $t = 1$：
 $$
 \beta_t(\boldsymbol{s}_t, \boldsymbol{a}_t) = p(\mathcal{O}_{t} \mid \boldsymbol{s}_t, \boldsymbol{a}_t) \mathbb{E}_{\boldsymbol{s}_{t + 1} \sim p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)}[\beta_{t + 1}(\boldsymbol{s}_{t + 1})]\
 $$
@@ -271,7 +271,7 @@ $$
 也即不能篡改动态，并且只需要学习 $q(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$，根据惯例可以用 $\pi(\boldsymbol{a}_t \mid \boldsymbol{s}_t) = q(\boldsymbol{a}_t \mid \boldsymbol{s}_t)$ 来表示。
 
 这对应于概率图模型：
-![](https://pic2.zhimg.com/v2-50017c426314a910ee1952267b79224b_1440w.jpg)
+![](17-5.png)
 
 这里希望采样的数据中观测到的最优性变量都为 $1$ 的概率尽可能大，也即希望最大化对数似然 $\log p(\boldsymbol{x})$。基于上一节[[Lecture 16 Variational Inference and Generative Model]]中所学知识，我们知道对数似然与最大证据下界（ELBO）的关系:
 $$
@@ -425,7 +425,7 @@ $$
 这里的 $\hat{A}(s_t, a_t)$ 是一个任何一个优势估计器，包括广义优势估计（Generalized Advantage Estimation，GAE）等等，为了体现目标中的熵一项，需要做的只是在优势中减去各 $t'$ 时间步的 $- \log \pi_\theta(\boldsymbol{a}_{t'} \mid \boldsymbol{s}_{t'})$。
 
 ### 4.3 Policy gradient vs Q-learning
-实际上刚才讨论的软 Q 学习与“熵正则化” 策略梯度是非常接近的。
+实际上刚才讨论的软 Q 学习与熵正则化策略梯度是非常接近的。
 #### 4.3.1 Rewritting policy gradient with value function
 注意到最后的梯度表达式中的
 $$
@@ -457,139 +457,105 @@ $$
 因此在一定的意义上，我们最大化熵意义下的策略梯度与软 Q 学习是等价的。
 
 ### 4.4 Soft Actor-Critic (SAC)
-
-Soft Actor-Critic (SAC) 是目前常用的 continuous action space off-policy 算法, 其中的基本思想与我们之前的讨论是一致的, 类似于整合了 soft Q-learning 与 entropy-regularized policy gradient 的方法. 由于与前面提到的两种算法不同, SAC 是广泛应用于实际问题的算法, 因此我们从更加 practical 的角度进行介绍:
-
+软演员-评论家（Soft Actor-Critic，SAC）是目前常用的连续动作空间 off-policy 算法，其中的基本思想与我们之前的讨论是一致的，类似于整合了软 Q 学习与熵正则化策略梯度的方法。由于与前面提到的两种算法不同，软演员-评论家是广泛应用于实际问题的算法，因此我们从更加实际的角度进行介绍。
 ####  4.4.1 Overview
-
-SAC 是一个 off-policy actor-critic 算法, 在下方论文的实现中, 我们使用了一个 actor 网络 $\pi_\phi(\boldsymbol{a} \mid \boldsymbol{s})$ 以及 四个 critic 网络 $Q_{\theta_1}(\boldsymbol{s}, \boldsymbol{a})$ , $Q_{\theta_2}(\boldsymbol{s}, \boldsymbol{a})$ , $Q_{\bar{\theta}_1}(\boldsymbol{s}, \boldsymbol{a})$ , $Q_{\bar{\theta}_2}(\boldsymbol{s}, \boldsymbol{a})$ , 前两个作为当前网络, 后两个作为 target 网络, 使用两组的原因是为了减小 Q-function 的 overestimation 问题 (我们在 Deep RL with Q-function 中详细介绍过, 也不难理解仅仅使用 $2$ 个 critic 网络也是可行的, 将 target 网络用来选取 argmax, 再用当前网络计算 target value 即可).
+软演员-评论家是一个 off-policy 演员-评论家算法，在下方论文的实现中，我们使用了一个演员网络 $\pi_\phi(\boldsymbol{a} \mid \boldsymbol{s})$ 以及四个评论家网络 $Q_{\theta_1}(\boldsymbol{s}, \boldsymbol{a})$，$Q_{\theta_2}(\boldsymbol{s}, \boldsymbol{a})$ $Q_{\bar{\theta}_1}(\boldsymbol{s}, \boldsymbol{a})$，$Q_{\bar{\theta}_2}(\boldsymbol{s}, \boldsymbol{a})$，前两个作为当前网络，后两个作为目标网络，使用两组的原因是为了减小 $Q$ 函数的高估问题（在基于 $Q$ 函数的深度强化学习中详细介绍过，也不难理解仅仅使用 $2$ 个评论家网络也是可行的，将目标网络用来选取 $\arg \max$，再用当前网络计算目标价值即可）。
 
 ####  4.4.2 Objective of Q-function
-
-SAC 的 Q-function 的目标是最小化 Bellman error, 也就是  
+软演员-评论家的 $Q$ 函数的目标是最小化贝尔曼误差，也就是  
 $$
 J_Q(\theta) = \mathbb{E}_{(\boldsymbol{s}_t, \boldsymbol{a}_t) \sim \mathcal{D}} \left[\frac{1}{2}\left(Q_\theta(\boldsymbol{s}_t, \boldsymbol{a}_t) - (r(\boldsymbol{s}_t, \boldsymbol{a}_t) + \gamma \mathbb{E}_{\boldsymbol{s}_{t + 1} \sim p(\boldsymbol{s}_{t + 1} \mid \boldsymbol{s}_t, \boldsymbol{a}_t)}[V_{\bar{\theta}}(\boldsymbol{s}_{t + 1})])\right)^2\right]
 $$
-这里的 $V$ 需要利用 $Q$ 和 $\log \pi$ 来计算, 代入就有 (去掉外层的期望)  
+这里的 $V$ 需要利用 $Q$ 和 $\log \pi$ 来计算，代入就有（去掉外层的期望）
 $$
 \nabla_\theta J_Q(\theta) = \nabla_\theta Q_\theta(\boldsymbol{s}_t, \boldsymbol{a}_t) \left(Q_\theta(\boldsymbol{s}_t, \boldsymbol{a}_t) - (r(\boldsymbol{s}_t, \boldsymbol{a}_t) + \gamma Q_{\bar{\theta}}(\boldsymbol{s}_{t + 1}, \boldsymbol{a}_{t + 1}) - \alpha \log \pi_\phi(\boldsymbol{a}_{t + 1} \mid \boldsymbol{s}_{t + 1}))\right)
 $$
 
 #### 4.4.3 Objective of policy
-
-SAC 的 policy 的目标是最大化 Q-value 与 entropy 的和, 如果写成 loss 就是最小化  
-$$$J_\pi(\phi) = \mathbb{E}_{\boldsymbol{s}_t \sim \mathcal{D}} \left[\mathbb{E}_{\boldsymbol{a}_t \sim \pi_\phi(\boldsymbol{a}_t \mid \boldsymbol{s}_t)}[\alpha \log \pi_\phi(\boldsymbol{a}_t \mid \boldsymbol{s}_t) - Q_\theta(\boldsymbol{s}_t, \boldsymbol{a}_t)]\right].\\$$$  
-通常的方法中, 这里的 Q-function 仅仅作为一种 baseline, 因而不会有梯度流入 Q-function, 而在 SAC 中, 我们考虑使用 tractable 的 policy 类型, 这样我们可以使用 reparameterization trick: 考虑  
+软演员-评论家的常量的目标是最大化 Q 值与熵的和，如果写成损失就是最小化  
+$$
+J_\pi(\phi) = \mathbb{E}_{\boldsymbol{s}_t \sim \mathcal{D}} \left[\mathbb{E}_{\boldsymbol{a}_t \sim \pi_\phi(\boldsymbol{a}_t \mid \boldsymbol{s}_t)}[\alpha \log \pi_\phi(\boldsymbol{a}_t \mid \boldsymbol{s}_t) - Q_\theta(\boldsymbol{s}_t, \boldsymbol{a}_t)]\right]
+$$
+通常的方法中，这里的 $Q$ 函数仅仅作为一种基线，因而不会有梯度流入 $Q$ 函数，而在软演员-评论家中，考虑使用易处理的策略类型，这样我们可以使用重参数化技巧，考虑  
 $$
 \boldsymbol{a}_t = f_\phi(\epsilon_t;\boldsymbol{s}_t)
 $$
-进而可以重写 loss 为
+进而可以重写损失为
 $$
 J_\pi(\phi) = \mathbb{E}_{\boldsymbol{s}_t \sim \mathcal{D}, \epsilon_t \sim \mathcal{N}} \left[\alpha \log \pi_\phi(f_\phi(\epsilon_t;\boldsymbol{s}_t) \mid \boldsymbol{s}_t) - Q_\theta(\boldsymbol{s}_t, f_\phi(\epsilon_t;\boldsymbol{s}_t))\right]
 $$
-从而得到梯度的估计 (去掉外层的期望)
+从而得到梯度的估计（去掉外层的期望）
 $$
 \nabla_\phi J_\pi(\phi) = \nabla_\phi \alpha\log \pi_\phi(f_\phi(\epsilon_t;\boldsymbol{s}_t) \mid \boldsymbol{s}_t) + (\nabla_{\boldsymbol{a}_t} \alpha \log \pi_\phi(\boldsymbol{a}_t \mid \boldsymbol{s}_t) - \nabla_{\boldsymbol{a}_t} Q_\theta(\boldsymbol{s}_t, \boldsymbol{a}_t)) \nabla_\phi f_\phi(\epsilon_t;\boldsymbol{s}_t)
 $$
 
 ####  4.4.4 Automatic temperature adjustment
-
-事实上, SAC 算法容易受到 temperature $\alpha$ 的影响, 且由于通常随着训练的进行, 我们的 policy 的随机性应当随之下降, 这里我们可以使用一个自动调整的方法, 构造一个约束优化问题:
+事实上，软演员-评论家算法容易受到温度 $\alpha$ 的影响，且由于通常随着训练的进行，策略的随机性应当随之下降，这里可以使用一个自动调整的方，构造一个约束优化问题：
 $$
 \max_{\pi_1,\ldots, \pi_T} \mathbb{E}\left[\sum_{t = 1}^T r(\boldsymbol{s}_t,\boldsymbol{a}_t)\right], \text{ s.t. } \mathcal{H}(\pi_t(\cdot\mid\boldsymbol{s}_t)) \geq \mathcal{H}_0
 $$
-这里 $\mathcal{H}_0$ 是一个理想的熵限制条件, 论文中的 choice 是 $-\dim(\mathcal{A})$ .  
-Note: 值得注意的是, 对于连续概率分布, entropy 没有离散分布那样的明确含义 (例如平均编码长度等), 例如 entropy 也不一定是正数, 如一元高斯分布的熵是 $\log (\sqrt{2e\pi \sigma^2})$ , 如果 $\sigma$ 比较小完全可以是负数. 而事实上, 如果高斯分布的基础上还进行一个 $\tanh$ 变换 (对于原论文中的 HalfCheetah-v1 需要将动作分量限制在 $[-1,1]$ ), 则熵还会减小.  
-  
-最终我们可以得到的结果是 (可以参见 Policy Gradient Algorithms | Lil'Log) 的详细推导), 对于 temperature $\alpha$ 优化如下的目标函数:  
-$$$J(\alpha) = \mathbb{E}_{\boldsymbol{a}_t \sim \pi_t} \left[-\alpha \log \pi_t(\boldsymbol{a}_t \mid \boldsymbol{s}_t) - \alpha \mathcal{H}_0\right],\\$$$ 具体来说我们依然梯度下降来优化 $\alpha$ .
+这里 $\mathcal{H}_0$ 是一个理想的熵限制条件，论文中的选择是 $-\dim(\mathcal{A})$。
 
-![](https://pic1.zhimg.com/v2-c65b59c151260cdf64439a03a16560be_1440w.jpg)
-
-SAC 算法流程
-
+值得注意的是，对于连续概率分布，熵没有离散分布那样的明确含义（例如平均编码长度等），例如熵也不一定是正数，如一元高斯分布的熵是 $\log (\sqrt{2e\pi \sigma^2})$，如果 $\sigma$ 比较小完全可以是负数。而事实上，如果高斯分布的基础上还进行一个 $\tanh$ 变换（对于原论文中的 HalfCheetah-v1 需要将动作分量限制在 $[-1,1]$），则熵还会减小。
   
-参见: Soft Actor-Critic Algorithms and Applications, Haarnoja et al., 2018  
-  
-(有另一篇更早的论文也是关于 SAC 的, Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor, Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine, '2018)
+最终可以得到的结果是（可以参见 Policy Gradient Algorithms | Lil'Log 的详细推导），对于温度 $\alpha$ 优化如下的目标函数：
+$$
+J(\alpha) = \mathbb{E}_{\boldsymbol{a}_t \sim \pi_t} \left[-\alpha \log \pi_t(\boldsymbol{a}_t \mid \boldsymbol{s}_t) - \alpha \mathcal{H}_0\right]
+$$
+具体来说我们依然梯度下降来优化 $\alpha$ .
+
+![](17-6.png)
+
+参见：Soft Actor-Critic Algorithms and Applications, Haarnoja et al., 2018（有另一篇更早的论文也是关于软演员-评论家的：Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning with a Stochastic Actor, Tuomas Haarnoja, Aurick Zhou, Pieter Abbeel, Sergey Levine, '2018）
 
 ### 4.5 Side Note on Energy-Based Policies
-
-上述的几种包含 policy 的算法实际上都可以视作是 energy-based policies, 我们会定义一个能量函数 $E(\boldsymbol{s}, \boldsymbol{a})$ 来衡量在状态 $\boldsymbol{s}$ 下采取动作 $\boldsymbol{a}$ 的代价或 "不合理性". policy 由能量函数确定, 其形式为
+上述的几种包含策略的算法实际上都可以视作是基于能量的策略，我们会定义一个能量函数 $E(\boldsymbol{s}, \boldsymbol{a})$ 来衡量在状态 $\boldsymbol{s}$ 下采取动作 $\boldsymbol{a}$ 的代价或"不合理性"。策略由能量函数确定，其形式为
 $$
 \pi(\boldsymbol{a} \mid \boldsymbol{s}) = \frac{1}{Z(\boldsymbol{s})} \exp(-E(\boldsymbol{s}, \boldsymbol{a}))
 $$
-这里的 $Z$ 是归一化因子, 使得
+这里的 $Z$ 是归一化因子，使得
 $$
 \frac{1}{Z(\boldsymbol{s})}\int \exp(-E(\boldsymbol{s}, \boldsymbol{a})) \text{d}\boldsymbol{a} = 1
 $$
 
-实际上 energy-based policy 等价于 soft value function, 考虑 Q-function $Q(\boldsymbol{s}, \boldsymbol{a}): \mathcal{S} \times \mathcal{A} \to \mathbb{R}$ 使得
+实际上基于能量的策略等价于软价值函数，考虑 Q 函数 $Q(\boldsymbol{s}, \boldsymbol{a}): \mathcal{S} \times \mathcal{A} \to \mathbb{R}$ 使得
 $$
 E(\boldsymbol{s}, \boldsymbol{a}) = -\frac{1}{\alpha}Q(\boldsymbol{s}, \boldsymbol{a})
 $$
-即可得到 soft value function 的形式.
+即可得到软价值函数的形式。
 
-事实上, 基于我们之前的推导还可以发现 max-entropy policy 和 soft value function 也是等价的, 因此 energy-based policies, soft Q-learning 与 entropy-regularized policy gradient 三者是等价的.
+事实上，基于之前的推导还可以发现最大熵策略和软价值函数也是等价的，因此基于能量的策略、软 Q 学习与熵正则化策略梯度三者是等价的。
 
 ### 4.6 Benefits of soft optimality
-
--   事实上这是对人类行为的一种更好的建模.  
-    
--   可以改善 exploration 并避免 entropy collapse. 由于得到的 policy 有更高的随机性, 这非常有利于 finetune 的过程.  
-    
--   相较于 max 操作可以更好地处理两个 action 概率相近的情况  
-    
--   对于各种干扰可以更加 robust, 因为我们能够覆盖更广的 state, 能从这些干扰中恢复  
-    
--   我们可以逐渐降低 temperature, 从而更加接近 greedy policy, 当我们的 reward 信号足够强时.  
-    
+软最优性的好处：
+- 事实上这是对人类行为的一种更好的建模；
+- 可以改善探索并避免熵坍缩，由于得到的策略有更高的随机性，这非常有利于微调的过程； 
+- 相较于最大化操作可以更好地处理两个动作概率相近的情况；
+- 对于各种干扰可以更加鲁棒，因为能够覆盖更广的状态，能从这些干扰中恢复；
+- 可以逐渐降低温度，从而更加接近贪心策略，当奖励信号足够强时。
 
 ### 4.7 Example Methods and Applications
+示例，基于能量的随机性策略
 
-Example 3. _Stochastic energy-based policies_
-
-_在 energy-based policies 中, 如果 Q-function (Energy function) 有两个峰值, 则两个峰值都会得到探索, 直到我们完全搞清楚哪一个更好._
-
+在基于能量的策略中，如果 $Q$ 函数（能量函数）有两个峰值，则两个峰值都会得到探索，直到完全搞清楚哪一个更好。
 ![](https://pic3.zhimg.com/v2-c0ec913e13c1d0437b2480aeba03138e_1440w.jpg)
+不难发现，在常规方法下，如果这个 $Q$ 函数有两个峰值，有可能最终的结果是只有一个更高的会得到探索。
+![](17-7.png)
+与此同时，这是一种预训练中的有效做法，使用软 $Q$ 学习得到的策略具有较大的熵，探索能力更强，由于能够覆盖更多的状态，通常只需要更短的时间进行微调。
+![](17-8.png)
+相较于深度确定性策略梯度（Deep Deterministic Policy Gradient，DDPG），基于软最优性的算法能够更好地应用到预训练+微调的情境中（因为得到的策略有更大的随机性）。
 
-Q-function 存在两个峰值的情况
+参见：Reinforcement Learning with Deep Energy-Based Policies, Haarnoja et al., 2017
 
-_不难发现, 在常规方法下, 如果这个 Q-function 有两个峰值, 有可能最终的结果是只有一个更高的会得到探索._
-
-![](https://pic1.zhimg.com/v2-08dfcb9c436316a8893309c0d9ab8a16_1440w.jpg)
-
-两个 hypothesis 都能得到有效探索
-
-_与此同时, 这是一种 pretraining 中的有效做法, 使用 soft Q-learning 得到的策略具有较大的 entropy, 探索能力更强, 由于能够覆盖更多的状态, 通常只需要更短的时间进行 finetune._
-
-![](https://pic3.zhimg.com/v2-2f549c4330993de12d8cf8e863805f42_1440w.jpg)
-
-相较于 DDPG, 基于 soft optimality 的算法能够更好地应用到 pretraining + finetune 的情境中 (因为得到的 policy 有更大的随机性)
-
-_参见 Reinforcement Learning with Deep Energy-Based Policies, Haarnoja et al., 2017_
-
-其他一些 robotic 相关的应用:
-
--   Haarnoja, Pong, Zhou, Dalal, Abbeel, L. Composable Deep Reinforcement Learning for Robotic Manipulation. '18  
-    
--   Haarnoja, Zhou, Ha, Tan, Tucker, L. Learning to Walk via Deep Reinforcement Learning. '19  
-    
+其他一些机器人的相关的应用：
+- Haarnoja, Pong, Zhou, Dalal, Abbeel, L. Composable Deep Reinforcement Learning for Robotic Manipulation. '18  
+- Haarnoja, Zhou, Ha, Tan, Tucker, L. Learning to Walk via Deep Reinforcement Learning. '19  
 
 ## 5 Summary
-
--   本节中, 我们讨论了如何将 RL 视作概率图模型中的 inference.  
-    
-
--   我们可以把 value function 视作是一种 backward message  
-    
--   最大化 reward 与 entropy 的和 (自然地, 当 reward 增大时, entropy 的相对影响会减小)  
-    
--   使用 variational inference 来避免直接 inference 中的 optimism 问题.  
-    
-
--   我们介绍了一系列利用 soft optimality 的算法, 例如 soft Q-learning, entropy-regularized policy gradient 与 soft actor-critic.  
-    
--   这些算法更好地建模了人类行为, 并且能够更好地处理 exploration 问题.  
-    
--   事实上, 我们可以发现$$\textit{Energy-based policies} \Leftrightarrow \textit{Soft Q-learning} \Leftrightarrow \textit{Entropy-regularized policy gradient}$$这三种方法是等价的.
+本节中，我们讨论了如何将强化学习视作概率图模型中的推断。
+- 我们可以把价值函数视作是一种反向信息；
+- 最大化奖励与熵的和（自然地，当奖励增大时，熵的相对影响会减小）；
+- 使用变分推断来避免直接推断中的过高估计问题；
+- 我们介绍了一系列利用软最优性的算法，例如软 Q 学习、熵正则化策略梯度与软演员 - 评论家。
+- 这些算法更好地建模了人类行为，并且能够更好地处理探索问题； 
+- 事实上，我们可以发现基于能量的策略、软 Q 学习、熵正则化策略梯度这三种方法是等价的。

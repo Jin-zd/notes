@@ -1,5 +1,5 @@
 ## 1 From open-loop planning to close-loop policy learning
-回顾上一节介绍的 MPC 算法：
+回顾上一节介绍的模型预测控制（Model Predictive Control，MPC）算法：
 1. 运行基本策略 $\pi_0(\boldsymbol{a}_t, \boldsymbol{s}_t)$，收集 $\mathcal{D} = \{(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{s}')_i\}$；
 2. 学习动态模型 $f(\boldsymbol{s}, \boldsymbol{a})$ 来最小化 $\sum_{i} \|f(\boldsymbol{s}_i, \boldsymbol{a}_i) - \boldsymbol{s}'_i\|^2$；
 3. 依据 $f(\boldsymbol{s}, \boldsymbol{a})$ 来进行规划； 
