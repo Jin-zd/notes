@@ -71,8 +71,8 @@ Definition 3. _"shot"_
 直觉：任何在领域间不同的都是无关的。
 
 例如：
-- 例如现实世界中可能有雨，而仿真器中可能没有，那么不变性假设则告诉我们是否有雨和如何驾驶无关；
-- 另一方面在现实世界和仿真器中驾驶地点在分布上是一致的，因此驾驶地点根据假设是有关的。
+- 例如现实世界中可能有雨，而模拟器中可能没有，那么不变性假设则告诉我们是否有雨和如何驾驶无关；
+- 另一方面在现实世界和模拟器中驾驶地点在分布上是一致的，因此驾驶地点根据假设是有关的。
 
 严格来说，不变性假设是说：
 
@@ -98,7 +98,7 @@ Definition 4. _invariance assumption（不变性假设）_
 如果动态并不一致，那么仅仅输出一个一致的表征可能并不足够，因为不能忽略这些动态的差异。
 
 这里的一个做法是惩罚那些在源领域可以做到，但是在目标领域中做不到的行为。
-例如在现实中到达目标中间可以有一堵墙，而在仿真器中没有，那么可以做的是修改奖励为：
+例如在现实中到达目标中间可以有一堵墙，而在模拟器中没有，那么可以做的是修改奖励为：
 $$
 \tilde{r}(\boldsymbol{s}, \boldsymbol{a}) = r(\boldsymbol{s}, \boldsymbol{a}) + \Delta r(\boldsymbol{s}, \boldsymbol{a})
 $$
@@ -377,7 +377,7 @@ $$
 
 ### 8.3 Basic algorithm idea
 具体来说，算法流程如下：
-1. 从 $\hat{p}(\boldsymbol{z} \mid \boldsymbol{s}_{1:i}, \boldsymbol{a}_{1:i}, r_{1:i})$ 中采样 $\boldsymbol{z}$（通过[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]来估计这个后验）；
+1. 从 $\hat{p}(\boldsymbol{z} \mid \boldsymbol{s}_{1:i}, \boldsymbol{a}_{1:i}, r_{1:i})$ 中采样 $\boldsymbol{z}$（通过[[Concepts#3 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]来估计这个后验）；
 2. 依据 $\pi_\theta(\boldsymbol{a}_t \mid \boldsymbol{s}_t, \boldsymbol{z})$ 采取动作来收集更多数据，这些数据称作上下文，记作 $\boldsymbol{c}_{1:i} = \{\boldsymbol{s}_{1:i}, \boldsymbol{a}_{1:i}, \boldsymbol{s}'_{1:i} r_{1:i}\}$；
 3. 重复上述过程若干次后，再按照上述思路收集数，然后通过数据和上下文，利用损失函数更新元学习器 $\theta$ 以及估计的后验。 
 
@@ -388,7 +388,7 @@ $$
 
 
 ### 8.4 Variational inference for meta-RL
-我们还没有介绍如何得到这样一个后验 $p(\boldsymbol{z} \mid \boldsymbol{s}_{1:i}, \boldsymbol{a}_{1:i}, r_{1:i})$，这里会使用[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]，一个具体的例子是如下的 PEARL: Probabilistic Embeddings for Actor-Critic Reinforcement Learning：
+我们还没有介绍如何得到这样一个后验 $p(\boldsymbol{z} \mid \boldsymbol{s}_{1:i}, \boldsymbol{a}_{1:i}, r_{1:i})$，这里会使用[[Concepts#3 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]，一个具体的例子是如下的 PEARL: Probabilistic Embeddings for Actor-Critic Reinforcement Learning：
 
 首先这里训练策略的算法是软演员-评论家（SAC），我们会有策略和 Q 函数 $\pi_\theta(\boldsymbol{a} \mid \boldsymbol{s}, \boldsymbol{z})$，$Q_\theta(\boldsymbol{s}, \boldsymbol{a}, \boldsymbol{z})$，同时会通过推断网络：$q_\phi(\boldsymbol{z} \mid \boldsymbol{s}_{1:i}, \boldsymbol{a}_{1:i}, r_{1:i})$ 来近似后验，它们都是元学习器的一部分。
 

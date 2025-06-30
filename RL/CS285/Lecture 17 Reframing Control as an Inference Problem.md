@@ -199,7 +199,7 @@ $$
 ## 3 Control as Variational Inference
 在之前的推断方法中，我们会通过准确的方式进行计算，然而现实中的问题更加复杂，并且不知道转移动态，需要通过样本来近似，因此需要使用近似的推断。
 
-接下来会使用上一节介绍的[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]方法来从刚才介绍的[[#2 Control as Inference]]中推导出的无模型的强化学习算法。但在介绍变分推断之前，我们先来解决之前一节中提到的问题，也就是过高估计问题。
+接下来会使用上一节介绍的[[Concepts#3 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]方法来从刚才介绍的[[#2 Control as Inference]]中推导出的无模型的强化学习算法。但在介绍变分推断之前，我们先来解决之前一节中提到的问题，也就是过高估计问题。
 ### 3.1 Optimism problem
 在反向信息中，从 $t = T - 1$ 到 $t = 1$：
 $$

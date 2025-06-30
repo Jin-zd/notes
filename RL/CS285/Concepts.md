@@ -22,24 +22,70 @@ $$d_{TV}(P, Q) = \sup_{A \in \mathcal{A}} |P(A) - Q(A)|$$
 * 对称性： $d_{TV}(P, Q) = d_{TV}(Q, P)$
 * 三角不等式： $d_{TV}(P, R) \leq d_{TV}(P, Q) + d_{TV}(Q, R)$
 
+## 3 变分推断（Variational Inference，VI）
+### 3.1 简介
+变分推断（Variational Inference，VI） 是一种强大的计算方法，用于近似复杂概率模型的后验分布。在许多贝叶斯模型中，计算真实的后验分布 $p(Z|X)$（其中 $Z$ 是隐变量， $X$ 是观测数据）非常困难，因为这通常涉及一个难以处理的积分（边缘似然 $p(X)$）。VI 的核心思想是，我们不直接计算这个复杂的后验，而是找到一个更简单的、容易处理的近似分布 $q(Z)$ 来逼近它。
+### 3.2 核心思想
+VI 的目标是寻找一个特定的近似分布 $q^*(Z)$，它属于一个预先定义的函数族 $\mathcal{Q}$，并且与真实的后验分布 $p(Z|X)$ 之间的“距离”最小。这个距离通常用 KL 散度来衡量：
+$$q^*(Z) = \arg \min_{q(Z) \in \mathcal{Q}} D_{KL}(q(Z) || p(Z|X))$$
+然而，直接最小化 $D_{KL}(q(Z) || p(Z|X))$ 依然需要计算 $p(Z|X)$。因此，VI 采取了一种巧妙的间接方法：最大化证据下界（Evidence Lower Bound，ELBO）。
+### 3.3 数学原理
+#### 3.3.1 KL 散度与 ELBO 的推导
+KL 散度的定义为：
+$$D_{KL}(q(Z) || p(Z|X)) = \sum_Z q(Z) \log \frac{q(Z)}{p(Z|X)}$$
+将真实后验 $p(Z|X)$ 展开为联合概率 $p(X,Z)$ 和边缘似然 $p(X)$ 的比值：$p(Z|X) = \frac{p(X,Z)}{p(X)}$。
+$$\begin{aligned}
+D_{KL}(q(Z) || p(Z|X)) &= \sum_Z q(Z) \log \frac{q(Z)}{p(X,Z)/p(X)} \\
+&= \sum_Z q(Z) \left[ \log q(Z) - \log p(X,Z) + \log p(X) \right] \\
+&= \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) + \sum_Z q(Z) \log p(X)
+\end{aligned}$$
+由于 $\sum_Z q(Z) = 1$，可以进一步简化：
+$$\begin{aligned}
+D_{KL}(q(Z) || p(Z|X)) &= \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) + \log p(X) \\
+&= \log p(X) + \left( \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) \right)
+\end{aligned}$$
+现在，重新排列上式，将 $\log p(X)$ 移到一边：
+$$\begin{aligned}
+\log p(X) &= D_{KL}(q(Z) || p(Z|X)) - \sum_Z q(Z) \log q(Z) + \sum_Z q(Z) \log p(X,Z) \\
+&= D_{KL}(q(Z) || p(Z|X)) + E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)]
+\end{aligned}$$
+将上式中的后两项定义为证据下界（Evidence Lower Bound，ELBO），记作 $\mathcal{L}(q)$：
+$$\mathcal{L}(q) = E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)]$$
+因此，有关系式：
+$$\log p(X) = D_{KL}(q(Z) || p(Z|X)) + \mathcal{L}(q)$$
+由于 KL 散度总是非负的 ($D_{KL}(q(Z) || p(Z|X)) \ge 0$)，这意味着 $\log p(X) \ge \mathcal{L}(q)$。因此，$\mathcal{L}(q)$ 确实是 $\log p(X)$ 的一个下界。
 
-## 3 柯西序列（Cauchy sequence）
-### 3.1 定义
-在一个度量空间 $(X, d)$ 中，一个序列 $\{x_n\}_{n=1}^\infty$ 被称为柯西序列，如果对于任意给定的 $\epsilon > 0$，都存在一个正整数 $N$，使得对于所有 $n, m > N$，都有 $d(x_n, x_m) < \epsilon$。
-直观地理解，柯西序列是指随着序列的进行，序列中的项越来越“靠近”彼此。无论我们选择多么小的正数 $\epsilon$，在序列的某个位置之后的所有项之间的距离都将小于 $\epsilon$。
-### 3.2 性质
-1.  收敛序列一定是柯西序列：
-    如果一个序列 $\{x_n\}$ 收敛于 $L$，那么对于任意 $\epsilon > 0$，存在 $N$ 使得当 $n > N$ 时，$d(x_n, L) < \frac{\epsilon}{2}$。因此，对于 $n, m > N$，根据三角不等式有：$$d(x_n, x_m) \le d(x_n, L) + d(L, x_m) < \frac{\epsilon}{2} + \frac{\epsilon}{2} = \epsilon$$所以，收敛序列满足柯西序列的定义。
-2.  柯西序列是有界的：
-    设 $\{x_n\}$ 是一个柯西序列。取 $\epsilon = 1$，则存在一个正整数 $N$ 使得对于所有 $n, m > N$，有 $d(x_n, x_m) < 1$。特别地，对于所有 $n > N$，有 $d(x_n, x_{N+1}) < 1$，这意味着 $x_n$ 落在以 $x_{N+1}$ 为中心，半径为 1 的开球内。
-    考虑集合 $\{x_1, x_2, \dots, x_N, x_{N+1}\}$，令 $M = \max\{d(x_i, x_j) \mid 1 \le i, j \le N+1\} + 1$。那么对于序列中的任意两项 $x_i$ 和 $x_j$，它们的距离 $d(x_i, x_j)$ 都小于某个有限值，因此序列是有界的。更具体地说，我们可以找到一个包含所有序列项的足够大的球。
-3.  在完备的度量空间中，柯西序列一定是收敛序列：
-    一个度量空间被称为完备的，如果该空间中的每一个柯西序列都收敛到该空间中的一个点。实数集 $\mathbb{R}$ 配备上标准的绝对值度量是完备的，欧几里得空间 $\mathbb{R}^n$ 也是完备的。有理数集 $\mathbb{Q}$ 配备上标准的绝对值度量不是完备的，因为存在由有理数组成的柯西序列，其极限是无理数（不在 $\mathbb{Q}$ 中）。
-4.  柯西序列的子列：
-    如果 $\{x_n\}$ 是一个柯西序列，那么它的任何子列 $\{x_{n_k}\}$ 也是一个柯西序列。这是因为子列中的项仍然是原序列中的项，所以对于任意 $\epsilon > 0$，存在 $N$ 使得当 $n, m > N$ 时，$d(x_n, x_m) < \epsilon$。对于子列，当 $n_k, n_j > N$ 时（这意味着 $k$ 和 $j$ 都足够大），同样有 $d(x_{n_k}, x_{n_j}) < \epsilon$。
-5.  柯西序列的极限的唯一性（如果存在）：
-    如果一个柯西序列 $\{x_n\}$ 收敛到 $L_1$ 并且也收敛到 $L_2$，那么 $L_1 = L_2$。这是因为根据收敛的定义，对于任意 $\epsilon > 0$，存在 $N_1$ 使得当 $n > N_1$ 时，$d(x_n, L_1) < \frac{\epsilon}{2}$，并且存在 $N_2$ 使得当 $n > N_2$ 时，$d(x_n, L_2) < \frac{\epsilon}{2}$。取 $N = \max(N_1, N_2)$，则对于 $n > N$，有：$$d(L_1, L_2) \le d(L_1, x_n) + d(x_n, L_2) < \frac{\epsilon}{2} + \frac{\epsilon}{2} = \epsilon$$由于 $\epsilon$ 是任意正数，因此必须有 $d(L_1, L_2) = 0$，即 $L_1 = L_2$。
+还可以将 $\mathcal{L}(q)$ 进一步分解：
+$$\begin{aligned}
+\mathcal{L}(q) &= E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)] \\
+&= E_{q(Z)}[\log (p(X|Z)p(Z))] - E_{q(Z)}[\log q(Z)] \\
+&= E_{q(Z)}[\log p(X|Z)] + E_{q(Z)}[\log p(Z)] - E_{q(Z)}[\log q(Z)] \\
+&= E_{q(Z)}[\log p(X|Z)] - D_{KL}(q(Z) || p(Z))
+\end{aligned}$$
 
+#### 3.3.3.2 优化目标
+最大化 ELBO ($\mathcal{L}(q)$) 等价于最小化 $D_{KL}(q(Z) || p(Z|X))$。因为对于给定的观测数据 $X$，$\log p(X)$ 是一个常数，所以最大化 $\mathcal{L}(q)$ 会强制 $D_{KL}(q(Z) || p(Z|X))$ 趋近于零，从而使得近似分布 $q(Z)$ 尽可能地逼近真实的后验分布 $p(Z|X)$。
+
+#### 3.3.3.3 ELBO 的组成部分
+1. 重构项/似然项 $E_{q(Z)}[\log p(X|Z)]$：
+    * 这一项衡量了在近似后验分布 $q(Z)$ 下，模型生成观测数据 $X$ 的对数似然。
+    * 它鼓励近似分布 $q(Z)$ 能够很好地解释观测数据，使得重构误差尽可能小。
+2. KL 散度项 $-D_{KL}(q(Z) || p(Z))$：
+    * 这一项衡量了近似后验分布 $q(Z)$ 与隐变量的先验分布 $p(Z)$ 之间的距离。
+    * 它起到了正则化的作用，鼓励 $q(Z)$ 不要偏离我们对隐变量的先验假设太远。
+
+### 3.4 均场变分推断（Mean-Field Variational Inference）
+在实际应用中，选择一个既能有效近似真实后验又易于计算的近似分布族 $\mathcal{Q}$ 是一个关键挑战。最常用且最简化的选择是均场近似（Mean-Field Approximation）。
+
+均场假设：我们假设隐变量 $Z = \{Z_1, Z_2, \dots, Z_M\}$ 的近似分布 $q(Z)$ 可以分解为各个独立分量的乘积：
+$$q(Z) = \prod_{j=1}^M q_j(Z_j)$$
+在这种假设下，ELBO 的最大化可以通过坐标上升变分推断（Coordinate Ascent Variational Inference, CAVI）算法来实现。CAVI 算法迭代地优化每个 $q_j(Z_j)$，同时固定其他所有的 $q_k(Z_k)$ ($k \neq j$)。
+对于每个 $q_j(Z_j)$ 的最优更新公式为：
+$$\begin{aligned}
+\log q_j^*(Z_j) &= E_{\prod_{k \neq j} q_k(Z_k)}[\log p(X, Z)] + \text{const} \\
+q_j^*(Z_j) &\propto \exp \left( E_{\prod_{k \neq j} q_k(Z_k)}[\log p(X, Z)] \right)
+\end{aligned}$$
+这意味着 $q_j(Z_j)$ 的最优形式与联合分布 $p(X,Z)$ 在给定其他所有 $Z_k$ 上的期望对数成比例。通过迭代更新每个 $q_j(Z_j)$，算法会收敛到一个局部最优解。
 
 ## 4 占用率测度 (Occupancy Measure)
 ### 4.1 定义
@@ -727,67 +773,3 @@ CVAE 的网络结构通常包括：
 条件信息的拼接方式：
 条件信息 $c$ 可以是独热编码（one-hot encoding）的类别标签、连续的属性值或嵌入向量。它通常在输入层或隐藏层与数据 $x$ 或潜在向量 $z$ 进行拼接。
 
-## 27 变分推断（Variational Inference，VI）
-### 27.1 简介
-变分推断（Variational Inference，VI） 是一种强大的计算方法，用于近似复杂概率模型的后验分布。在许多贝叶斯模型中，计算真实的后验分布 $p(Z|X)$（其中 $Z$ 是隐变量， $X$ 是观测数据）非常困难，因为这通常涉及一个难以处理的积分（边缘似然 $p(X)$）。VI 的核心思想是，我们不直接计算这个复杂的后验，而是找到一个更简单的、容易处理的近似分布 $q(Z)$ 来逼近它。
-### 27.2 核心思想
-VI 的目标是寻找一个特定的近似分布 $q^*(Z)$，它属于一个预先定义的函数族 $\mathcal{Q}$，并且与真实的后验分布 $p(Z|X)$ 之间的“距离”最小。这个距离通常用 KL 散度来衡量：
-$$q^*(Z) = \arg \min_{q(Z) \in \mathcal{Q}} D_{KL}(q(Z) || p(Z|X))$$
-然而，直接最小化 $D_{KL}(q(Z) || p(Z|X))$ 依然需要计算 $p(Z|X)$。因此，VI 采取了一种巧妙的间接方法：最大化证据下界（Evidence Lower Bound，ELBO）。
-### 27.3 数学原理
-#### 27.3.1 KL 散度与 ELBO 的推导
-KL 散度的定义为：
-$$D_{KL}(q(Z) || p(Z|X)) = \sum_Z q(Z) \log \frac{q(Z)}{p(Z|X)}$$
-将真实后验 $p(Z|X)$ 展开为联合概率 $p(X,Z)$ 和边缘似然 $p(X)$ 的比值：$p(Z|X) = \frac{p(X,Z)}{p(X)}$。
-$$\begin{aligned}
-D_{KL}(q(Z) || p(Z|X)) &= \sum_Z q(Z) \log \frac{q(Z)}{p(X,Z)/p(X)} \\
-&= \sum_Z q(Z) \left[ \log q(Z) - \log p(X,Z) + \log p(X) \right] \\
-&= \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) + \sum_Z q(Z) \log p(X)
-\end{aligned}$$
-由于 $\sum_Z q(Z) = 1$，可以进一步简化：
-$$\begin{aligned}
-D_{KL}(q(Z) || p(Z|X)) &= \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) + \log p(X) \\
-&= \log p(X) + \left( \sum_Z q(Z) \log q(Z) - \sum_Z q(Z) \log p(X,Z) \right)
-\end{aligned}$$
-现在，重新排列上式，将 $\log p(X)$ 移到一边：
-$$\begin{aligned}
-\log p(X) &= D_{KL}(q(Z) || p(Z|X)) - \sum_Z q(Z) \log q(Z) + \sum_Z q(Z) \log p(X,Z) \\
-&= D_{KL}(q(Z) || p(Z|X)) + E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)]
-\end{aligned}$$
-将上式中的后两项定义为证据下界（Evidence Lower Bound，ELBO），记作 $\mathcal{L}(q)$：
-$$\mathcal{L}(q) = E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)]$$
-因此，有关系式：
-$$\log p(X) = D_{KL}(q(Z) || p(Z|X)) + \mathcal{L}(q)$$
-由于 KL 散度总是非负的 ($D_{KL}(q(Z) || p(Z|X)) \ge 0$)，这意味着 $\log p(X) \ge \mathcal{L}(q)$。因此，$\mathcal{L}(q)$ 确实是 $\log p(X)$ 的一个下界。
-
-还可以将 $\mathcal{L}(q)$ 进一步分解：
-$$\begin{aligned}
-\mathcal{L}(q) &= E_{q(Z)}[\log p(X,Z)] - E_{q(Z)}[\log q(Z)] \\
-&= E_{q(Z)}[\log (p(X|Z)p(Z))] - E_{q(Z)}[\log q(Z)] \\
-&= E_{q(Z)}[\log p(X|Z)] + E_{q(Z)}[\log p(Z)] - E_{q(Z)}[\log q(Z)] \\
-&= E_{q(Z)}[\log p(X|Z)] - D_{KL}(q(Z) || p(Z))
-\end{aligned}$$
-
-#### 27.3.3.2 优化目标
-最大化 ELBO ($\mathcal{L}(q)$) 等价于最小化 $D_{KL}(q(Z) || p(Z|X))$。因为对于给定的观测数据 $X$，$\log p(X)$ 是一个常数，所以最大化 $\mathcal{L}(q)$ 会强制 $D_{KL}(q(Z) || p(Z|X))$ 趋近于零，从而使得近似分布 $q(Z)$ 尽可能地逼近真实的后验分布 $p(Z|X)$。
-
-#### 27.3.3.3 ELBO 的组成部分
-1. 重构项/似然项 $E_{q(Z)}[\log p(X|Z)]$：
-    * 这一项衡量了在近似后验分布 $q(Z)$ 下，模型生成观测数据 $X$ 的对数似然。
-    * 它鼓励近似分布 $q(Z)$ 能够很好地解释观测数据，使得重构误差尽可能小。
-2. KL 散度项 $-D_{KL}(q(Z) || p(Z))$：
-    * 这一项衡量了近似后验分布 $q(Z)$ 与隐变量的先验分布 $p(Z)$ 之间的距离。
-    * 它起到了正则化的作用，鼓励 $q(Z)$ 不要偏离我们对隐变量的先验假设太远。
-
-### 27.4 均场变分推断（Mean-Field Variational Inference）
-在实际应用中，选择一个既能有效近似真实后验又易于计算的近似分布族 $\mathcal{Q}$ 是一个关键挑战。最常用且最简化的选择是均场近似（Mean-Field Approximation）。
-
-均场假设：我们假设隐变量 $Z = \{Z_1, Z_2, \dots, Z_M\}$ 的近似分布 $q(Z)$ 可以分解为各个独立分量的乘积：
-$$q(Z) = \prod_{j=1}^M q_j(Z_j)$$
-在这种假设下，ELBO 的最大化可以通过坐标上升变分推断（Coordinate Ascent Variational Inference, CAVI）算法来实现。CAVI 算法迭代地优化每个 $q_j(Z_j)$，同时固定其他所有的 $q_k(Z_k)$ ($k \neq j$)。
-对于每个 $q_j(Z_j)$ 的最优更新公式为：
-$$\begin{aligned}
-\log q_j^*(Z_j) &= E_{\prod_{k \neq j} q_k(Z_k)}[\log p(X, Z)] + \text{const} \\
-q_j^*(Z_j) &\propto \exp \left( E_{\prod_{k \neq j} q_k(Z_k)}[\log p(X, Z)] \right)
-\end{aligned}$$
-这意味着 $q_j(Z_j)$ 的最优形式与联合分布 $p(X,Z)$ 在给定其他所有 $Z_k$ 上的期望对数成比例。通过迭代更新每个 $q_j(Z_j)$，算法会收敛到一个局部最优解。

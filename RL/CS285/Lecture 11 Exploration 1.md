@@ -321,7 +321,7 @@ $$
 
 首先明确我们需要对模型的不确定性也就是 $\theta$ 进行一个表示，这里使用在基于模型的强化学习中提到的贝叶斯神经网络。首先使用独立性假设 $p(\theta \mid h) = \prod_i p(\theta_i \mid h)$，然后使用一个高斯分布来表示 $p(\theta_i \mid h)$，也就是 $p(\theta_i \mid h) = \mathcal{N}(\mu_{\phi,i}, \sigma_{\phi,i})$，这里的 $\phi$ 是参数，换言之会使用一个贝叶斯神经网络 $q_\phi(\theta)$ 来近似 $p(\theta \mid h)$。
 
-那么应该如何保证近似的有效性呢？可以使用[[Concepts#27 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]，具体来说，考虑最小化 KL 散度：
+那么应该如何保证近似的有效性呢？可以使用[[Concepts#3 变分推断（Variational Inference，VI）|变分推断（Variational Inference，VI）]]，具体来说，考虑最小化 KL 散度：
 $$
 \begin{aligned}  D_{KL}(q_\phi(\theta) \parallel p(\theta \mid h)) &= \int q_\phi(\theta) \log \frac{q_\phi(\theta)}{p(\theta \mid h)} \text{d}\theta\\  &= \int q_\phi(\theta) \log \frac{q_\phi(\theta) p(h)}{p(\theta, h)} \text{d}\theta\\  &= \log p(h) - \int q_\phi(\theta) \log \frac{p(\theta, h)}{q_\phi(\theta)} \text{d}\theta \end{aligned}
 $$
