@@ -1,415 +1,241 @@
 ## 1 Brief Review
-
 我们首先简单回顾一下过去介绍的内容:
-
--   从根本上来说, 我们之前介绍的是 learning-based control method, 这包括 imitation learning (learning from demonstration) 和 reinforcement learning (learning from reward).  
-    
--   之后我们介绍了 RL 中的一些 "classic" model-free RL 算法, 例如 policy gradient 和 value-based methods以及介于它们之间的 actor-critic 算法. 同时我们也介绍了这几类算法的对应例子, 例如 TRPO 和 PPO, DQN 以及 SAC.  
-    
--   之后我们介绍了另一类可能的算法: model-based control (例如 LQR), 这些方法未必是 learning-based methods, 但它们也可和 learning-based methods 结合, 得到 model-based RL w/o policy (例如 MPC). 而这样的方式也可也和 RL 的 policy learning 结合, 得到 model-based RL with policy (例如 Dyna-Q).  
-    
--   我们剩下讨论的一些内容在某种意义上正交于我们之前讨论的内容, 例如 exploration, unsupervised RL (如 skill discovery). 我们还介绍了一些工具例如 probabilistic inference, 以及利用其建立的 control as inference 的框架, 在这基础上我们可以得到 inverse RL 的算法.  
-    
--   我们同样还介绍了 offline RL, RL with sequence model, meta-learning 等等其他内容.  
-    
-
-![](https://pic2.zhimg.com/v2-56d66cee64d25163ccabcd79d77924af_1440w.jpg)
-
-课程内容的思维导图
+- 从根本上来说，我们之前介绍的是基于学习的控制方法，这包括模仿学习（从演示中学习）和强化学习（从奖励中学习）；
+- 之后我们介绍了强化学习中的一 “经典”无模型强化学习算法，例如策略梯度和基于值的方法以及介于它们之间的演 -评论家算法。同时我们也介绍了这几类算法的对应例子，例如信赖域策略优化（TRPO）和近端策略优化（PPO）、深度 Q 网络（DQN）以及软演员 - 评论家（SAC）；
+- 之后我们介绍了另一类可能的算法：基于模型的控制（例如线性二次调节器，LQR），这些方法未必是基于学习的方法，但它们也可和基于学习的方法结合，得到无策略的基于模型的强化学习（例如模型预测控制，MPC）。而这样的方式也可也和强化学习的策略学习结合，得到有策略的基于模型的强化学习（例如动态规划 - Q，Dyna - Q）；
+- 我们剩下讨论的一些内容在某种意义上正交于我们之前讨论的内容，例如探索、无监督强化学习（如技能发现）。我们还介绍了一些工具例如概率推断，以及利用其建立的 “控制即推断” 的框架，在这基础上我们可以得到逆强化学习的算法；
+- 我们同样还介绍了离线强化学习、基于序列模型的强化学习、元学习等等其他内容。
+![](21-1.png)
 
 ## 2 Challenges in Deep Reinforcement Learning
+核心算法面临的挑战：​ 
+- 稳定性：算法是否收敛？ ​
+- 效率：收敛需要多少时间 / 样本？
+- 泛化性：在收敛后，其泛化性怎么样？
 
-### Challenges with core algorithms:
+假设方面的挑战：
+- 问题的构建是否合理，能否将该问题建模为强化学习问题？是否存在更好的假设？
+- 监督的来源是什么？例如，在模仿学习中，监督来自示范；而在强化学习中，监督则来自奖励。
 
--   Stability: 算法是否收敛?  
-    
--   Efficiency: 收敛需要多少时间/sample?  
-    
--   Generalization: 在收敛后, 其泛化性怎么样?  
-    
-
-### Challenges with assumptions:
-
--   问题的 formulation 是否合理, 这个问题是否可以建模为一个 RL 问题? 还是说有更好的假设?  
-    
--   supervision 的来源是什么? 例如对于 imitation learning, supervision 来自于 demonstration, 而对于 RL 来说则是来自于 reward.  
-    
-
-接下来我们从以上提到的一些角度进行讨论.
-
+接下来我们从以上提到的一些角度进行讨论。
 ### 2.1 Stability and hyperparameter tuning
+对于强化学习而言，我们需要自行获取数据，而非使用[[Concepts#1 独立同分布（i.i.d.）|独立同分布（i.i.d.）]]的数据，同时我们的目标是优化一个目标函数，而非简单地学习真实标签。这些额外的调整意味着强化学习对一系列超参数更为敏感，这给设计稳定的强化学习算法带来了挑战。
 
-对于 RL 来说, 我们的数据需要自己获取, 而不是 i.i.d. 的, 同时我们的目标是优化一个 objective 而不是简单地学习 ground truth. 这些额外的调整意味着我们的 RL 对一系列超参数更加敏感, 这给我们设计稳定的 RL 算法带来了挑战.
+基于价值的方法：
+通常无法保证基于 Q 学习估计的算法收敛，同时我们需要大量超参数来实现稳定性，例如目标网络延迟、经验回放缓冲区大小、裁剪、学习率等。当然，深度学习中的许多技巧（如更大规模的网络、归一化、数据增强，参见 Image Augmentation Is All You Need: Regularizing Deep Reinforcement Learning from Pixels, Ilya Kostrikov, Denis Yarats, Rob Fergus）都可以使训练更加稳定。
+一些开放性问题：尽管基于经典机器学习理论会认为深度学习会出现严重的过拟合，但实际上深度学习通常能够表现得很好，这说明存在某种潜在的正则化效应，例如随机梯度下降本身。然而，基于价值的方法事实上并非梯度下降，因此一个可能的研究方向是探究这种“魔力”是否同样存在于基于值的方法中。
 
-### Value function based methods
+策略梯度方法：
+对于策略梯度相关的算法，我们通常有更深入的研究，也有一些收敛性的保证。但代价是我们有更高的方差。其他强化学习算法通常存在来自值函数的偏差，而策略则具有很大的方差但没有偏差。这意味着我们需要大量样本进行训练，同时我们需要考虑的超参数有学习率、批量大小和基线设计。
 
-对基于 Q-learning estimation 的算法通常并不能保证收敛, 同时我们需要有非常多的超参数来实现稳定, 例如 target network delay, replay buffer size, clipping, learning rate 等等.
+基于模型的强化学习：
+这一类算法，表面上看似乎是一个稳定的选择，因为模型的学习过程属于监督学习。然而，在这类方法中，模型在训练过程中会不断变化。这里的问题在于，模型变得准确并不能直接使策略变得更好：尽管如果我们的模型是完美的，此时能够得到最优策略，但模型变好的情况并非如此。模型有可能以某种特定方式改进，例如可能在某些地方的准确性略有下降，而这会给策略带来灾难性的后果；或者说，模型的不同误差虽然在训练模型的监督学习意义上是相同的，但对策略的影响并不一致。
+在[[Lecture 10 Model-Based Policy Learning]]一节中，我们介绍了使用反向传播通过时间的方法来更新策略，但这种方法效果并不好，因此我们通常还是会使用无模型的算法，将模型作为一种加速的方式。
 
-当然深度学习中的很多技巧例如 更大规模的网络, normalization, data augmentation (参见 Image Augmentation Is All You Need: Regularizing Deep Reinforcement Learning from Pixels, Ilya Kostrikov, Denis Yarats, Rob Fergus) 都可以让训练更稳定.
-
-Some Open Problems: 尽管基于 classic machine learning theory 会认为深度学习会出现严重的过拟合, 但是实际上深度学习通常能够表现地很好, 这说明存在着某种潜在的 regularizing effect, 例如 SGD 本身. 然而 value-based method 事实上不是 gradient descent, 因此一个可能的研究方向就是这样的一种 "magic" 是否在 value-based methods 中同样存在.
-
-### Policy gradient methods
-
-对于 policy gradient 相关的算法, 我们通常有更加深入的研究, 也有一些收敛性的保证. 但是代价是我们有更高的 variance. 其他的 RL 算法通常都有来自于 value function 的 bias, 而 policy 则有很大的 variance 而没有 bias. 这意味着我们需要大量的 samples 来进行训练, 同样我们需要考虑的超参数有 learning rate, batch size, baseline design.
-
-### Model-based RL
-
-这一类算法表面上看这会是一个稳定的选择, 因为 model 学习的过程是 supervised learning. 然而, 这一类方法中 model 在训练中不断改变, 这里的问题是, model 变得准确不能直接使得 policy 更好:
-
-虽然如果我们的 model 是 perfect 的, 此时可以得到 optimal policy, 但是 model 变好并不一样. 有可能 model 以一种特定的方式改善, 例如可能在某一些地方准确性略微下降, 而这给 policy 带来灾难性的后果, 或者说, model 的不同 error 虽然在训练 model 的监督学习意义下是一样的, 但是对 policy 影响并不一致.
-
-在 model-based policy learning 一节中我们介绍了使用 backpropagate through time 的方法来更新 policy, 但这种方法效果并不好, 因此我们通常还是会使用 model-free 的算法, 将 model 作为一种加速的方式.
-
-model based methods 还有一些其他的问题, 例如 policy 可能会利用 model 的一些错误, 在这个意义上这种方法像是一种对抗性的过程.
+基于模型的方法还存在一些其他问题，例如策略可能会利用模型的一些错误，从这个意义上来说，这种方法类似于一种对抗性过程。
 
 ### 2.2 The challenge with sample complexity
+不同的算法在样本效率上有很大差异
+- 无梯度方法（例如 NES、CMA 等）；
+- 完全在线方法（例如 A3C），这类方法大约需要 $10^8$ 个步骤，实际中大约需要 $15$ 天。
+- 策略梯度方法（例如 TRPO），这类方法通常需要 $10^7$ 个步骤，实际中大约需要 $1.5$ 天。
+- 重放缓冲区值估计方法（Q-learning、DDPG、NAF、SAC 等），这类方法大约需要 $10^6$ 个步骤，对于一些简单任务可能只需几小时。
+- 基于模型的深度强化学习方法（PETS、引导策略搜索）
+- 基于模型的“浅层”强化学习方法（例如 PILCO），但使用的是无法扩展到大规模场景的方法，如高斯过程。
+![](21-2.png)
 
-不同的算法在 sample efficiency 上有很大差异
+直观来说，样本效率自然是越高越好，那么为什么我们还会选择使用那些效率没那么高的算法呢？
 
--   gradient-free methods (例如 NES, CMA 等)  
-    
--   fully online methods (例如 A3C), 这样的方法大约需要 $10^8$ 个 steps, 需要现实中大约 $$$15$$$ 天.  
-    
--   policy gradient methods (例如 TRPO), 这样的算法通常需要 $10^7$ 个 steps, 需要现实中大约 $1.5$ 天.  
-    
--   replay buffer value estimation methods (Q-learning, DDPG, NAF, SAC 等), 这样的方法大约需要 $$$10^6$$$ 个 steps, 对于一些简单的任务可能只需要几小时.  
-    
--   model-based deep RL (PETS, guided policy search)  
-    
--   model-based "shallow" RL (例如 PILCO), 但是使用的是没有办法扩展到大规模的方法, 例如 Gaussian Process.
+很多时候我们可以并行收集数据，例如对于机器人任务，我们可以使用多个机械臂，模拟环境中更是如此。在某些情况下，收集数据的成本可能低于训练模型的成本。但是，在真实世界学习以及一些特定问题（如 AI for Science，AI4S）中，收集数据的成本可能很高，此时算法的样本效率就变得至关重要。
 
-![](https://pic4.zhimg.com/v2-0c6acc09506d7bb68813b776418ab3c3_1440w.jpg)
-
-不同算法在 sample efficiency 上的巨大差异
-
-直观来说, sample efficiency 自然是越高越好, 那么为什么我们还会选择使用那些不那么 efficient 的算法呢?
-
--   很多时候我们可以并行收集数据, 例如对于 robot task, 我们可以使用多个机械臂, 对于模拟环境更是如此. 在一些情况下, 收集数据的成本可能低于训练一个 model 的成本.
-
-但是, 在 real-world learning 以及一些特定的问题 (比如 AI4S) 中, 收集数据的成本可能很高, 此时算法的 sample efficiency 就变得非常重要.
-
-尽管整体来说, 目前各种算法的 sampling efficiency 也在不断改进, 但是当我们尝试广度更大的问题时, 这会成为一个更加严重的问题.
+尽管总体而言，目前各种算法的采样效率也在不断提升，但当我们尝试解决范围更广的问题时，这会成为一个更为严峻的问题。
 
 ### 2.3 Scaling up deep RL & generalization
+我们会发现一个很有意思的现象：
+- 在目前的深度学习中，我们会在大规模的数据上训练，并且通常强调任务的多样性，使用泛化能力作为评估指标；
+- 在强化学习（RL）中，通常我们只会在一个小规模的数据上训练，且我们主要关注单任务上的效果，也只会用性能来评估。
 
-我们会发现一个很有意思的现象:
+为什么我们不能像一般的深度学习那样简单地扩大强化学习的规模呢？这实际上与强化学习本身的工作流程密切相关：
+- 对于监督学习来说，通常只需从真实世界中获取一次数据，之后通过算法 / 模型进行训练即可。如果对结果不满意，无论是调整超参数还是修改模型和算法，只需在数据集上重新训练即可；
+![](21-3.png)
+- 对于典型的强化学习来说，数据来源于与环境的反复交互，通常我们每一次调整算法都需要重复这一漫长的过程，且现实中还有一个外循环是人，如果扩大强化学习的规模则会让整个过程更加不现实。
+![](21-4.png)
 
--   在目前的深度学习中, 我们会在大规模的数据上训练, 并且通常强调任务的 diversity, 使用 generalization 能力作为评估指标.  
-    
--   在 RL 中, 通常我们只会在一个小规模的数据上训练, 且我们主要关注单任务上的效果, 也只会用 performance 来评估.  
-    
+因此，对强化学习的改进不能仅仅局限于具体的方法，还可以从工作流程的角度让整个强化学习更具可行性。本课程介绍了许多相关研究方向：
+- 离线强化学习：如果我们能从预先收集好的数据集中学习，那么整个强化学习的工作流程就会变得和监督学习一样，即便修改了算法，也无需重新收集数据。
+- 元学习：这同样是一种工作流程的改进。如果能得到一个元学习器，我们就可以从过去的经验中更快地学习。另一方面，预训练+微调也可看作元学习的一种方式。
 
-为什么我们不能简单像一般的深度学习那样扩大 RL 的规模呢? 这实际上和 RL 本身的 workflow 有密切的关系:
+刚才我们主要侧重于规模扩大方面，而在泛化层面，我们仍然有很长的路要走。目前，如果训练一个人形机器人在完全平坦的平面上奔跑，换算到真实世界中的时间需要 6 天。但现实世界远比这样的环境复杂，难道对于每一种环境，我们都要专门训练一次吗？
 
--   对于 supervised learning 来说, 通常只需要从真实世界中获取数据一次, 之后就需要通过一个算法/模型训练即可. 如果我们不满意非常简单, 无论是调整超参数还是调整模型和算法, 都只需要重新在数据集上训练就行.
-
-![](https://picx.zhimg.com/v2-b996c12bb182206347f366ba75fcdff7_1440w.jpg)
-
-监督学习的常见 workflow
-
--   对于典型的 RL 来说, 数据来源于与环境的反复交互, 通常我们每一次调整算法都需要重复这一漫长的过程, 且现实中还有一个 outer loop 是人. 如果扩大 RL 的规模则会让整个过程更加不现实.
-
-![](https://picx.zhimg.com/v2-af7a0d9fc72e8d1d0c124ba3e1411ff9_1440w.jpg)
-
-通常情况下 RL 的实际 workflow
-
-因此对于 RL 的改进不能仅仅局限在具体的方法上, 也可也从 workflow 的角度使得整个 RL 更加可行. 本课程中介绍了很多相关的研究方向:
-
--   offline RL: 如果我们能从一个预先收集好的 dataset 中学习, 那么整个 RL 的 workflow 就会变得和 supervised learning 一样, 即使我们修改了算法, 也不需要重新收集数据.  
-    
--   meta-learning: 这同样是一种 workflow 的改进. 如果我们能够得到一个 meta-learner, 那么我们可以从过去的经验中更快的学习. 另一方面, pretraining + finetuning 也可以看作是 meta-learning 的一种方式.  
-    
-
-刚才我们主要侧重在 scaling up 上, 而在 generalization 层面, 我们依然有很长的路要走. 目前如果训练一个 humanoid 在完全平坦的平面上奔跑, 换算在真实世界中的时间需要 6 天. 但现实世界远比这样的环境复杂, 难道对于每一种环境, 我们都要专门训练一次吗?
-
-为了完成多样的任务, 一个可能的思路是我们之前讨论过的 transfer learning 和 meta-learning 的方法. 一个简单的例子是 multi-task learning: 在这样的算法中, 可能会有更严重的 variance 和 sample efficiency 问题, 一方面我们可以考虑直接求解一个 augmented MDP, 也可也考虑专门设计一些算法来处理 multi-task 的问题.
-
-![](https://pic1.zhimg.com/v2-aadb387fd5a15613d2ddb54fe5592bda_1440w.jpg)
-
-通过在多个 MDP 的初始状态分布中采样来选择执行的任务, 以实现 multi-task learning, 这样的做法可能会有更严重的 variance 和 sample efficiency 问题
+为了完成多样的任务，一个可能的思路是我们之前讨论过的迁移学习和元学习方法。一个简单的例子是多任务学习：在这样的算法中，可能会出现更严重的方差和样本效率问题，一方面我们可以考虑直接求解一个增强型马尔可夫决策过程（MDP），也可以考虑专门设计一些算法来处理多任务的问题。
+![](21-5.png)
+通过在多个马尔可夫决策过程（MDP）的初始状态分布中采样来选择执行的任务，以实现多任务学习，这种做法可能会面临更严重的方差和样本效率问题。
 
 ### 2.4 Assumptions: Where does the supervision come from?
+我们都清楚强化学习的建模过程，在强化学习中我们会有一个奖励函数，它是监督信号的来源。但很多时候归根结底，奖励从何而来？是我们设计的。  
 
-我们都清楚 RL 的建模, 在 RL 中我们会有一个 reward function, 这是 supervision 的来源. 但是很多时候归根到底 reward 是哪里来的? 是我们设计的.
+在这种思路下，如果我们要进行多任务学习，就需要为每个任务设计一个奖励。在一些问题中，奖励非常简单，但在更多情况下，奖励作为一种监督信号是很难设计的。例如让机器人倒水，一个稀疏的奖励是幼稚的，问题在于我们的智能体往往从中什么都学不到。  
 
-在这种思路下, 如果我们要进行 multi-task learning, 那么我们就得给每个任务设计一个 reward, 在一些问题中 reward 非常简单, 但是在更多情况下, reward 作为一种 supervision 是很难设计的, 例如让 robot 倒水, 一个稀疏的 reward 是 naive 的, 但问题是我们的 agent 从中往往无法学到任何东西.
+实际上，很多时候奖励并非我们唯一的选择，很多时候还可以有其他监督信号的来源：
+- 演示：参见 Muelling, K et al. (2013). Learning to Select and Generalize Striking Movements in Robot Table Tennis.  
+- 语言：参见 Andreas et al. (2018). Learning with latent language.  
+- 人类偏好：参见 Christiano et al. (2017). Deep reinforcement learning from human preferences  
 
-实际上很多时候 reward 并不是我们唯一的选择, 很多时候可以有其他的 supervision 的来源:
+还有一些可能的方式，例如能否自动生成目标（利用自动技能发现）？
 
--   Demonstration: 参见 Muelling, K et al. (2013). Learning to Select and Generalize Striking Movements in Robot Table Tennis.  
-    
--   Language: 参见 Andreas et al. (2018). Learning with latent language.  
-    
--   Human preference: 参见 Christiano et al. (2017). Deep reinforcement learning from human preferences  
-    
+关于监督的选择，有一些值得思考的问题：我们的监督需要告诉智能体做什么还是怎么做？
+- 对于演示而言，我们的监督不仅回答了 “做什么”，还回答了 “如何做”。例如，我们给出一个机器人倒水的演示，那么机器人不仅知道需要倒水，还知道了如何倒水。
+- 对于奖励函数而言，我们的监督通常仅回答 “做什么”。例如，仅当机器人倒水成功时才给出奖励，但并未告诉机器人如何倒水。不过，如果我们设计出一个良好的奖励函数，也能够部分回答 “如何做” 的问题。
+- 这实际上存在一种权衡：我们希望算法能够找到更好的解决方案，因此不应施加过多细节性的监督。但如果监督过于高层抽象，也可能导致整个学习过程变得极为困难。
 
-还有一些可能的方式, 例如能否自动的生成 objective? (利用 automatic skill discovery)
-
-关于 supervision 的选择, 有一些值得思考的问题: 我们的 supervision 需要告诉 agent what to do 还是 how to do?
-
--   对于 demonstration 来说, 我们的 supervision 不仅回答了 what, 也回答了 how, 例如我们给出了一个 robot 倒水的 demonstration, 那么 robot 不仅知道了我们要倒水, 还知道了怎么倒水.  
-    
--   对于 reward function 来说, 我们的 supervision 通常仅仅回答了 what, 例如仅当 robot 倒水成功时才会给出 reward, 但是并没有告诉 robot 怎么倒水. 但是如果我们给出了一个很好的 reward function, 那么也可以部分地回答了 how 的问题.  
-    
--   这其实有一个 tradeoff, 我们希望我们的算法能够找到更好的 solution, 那么我们不应该有过多细节的 supervision. 但是如果我们的 supervision 过于 high-level, 也可能导致整个 learning 变得非常困难.  
-    
-
-从上述关于 supervision 的讨论中我们其实想要引出一个更加重要的事情: 很多时候我们不要拘泥于 RL 本身已有的很多 formulation, 它们并不是完全不能改变的. 我们需要仔细考虑它们是否真的适合 problem setting, 比如我们可以考虑的是:
-
--   数据是什么?  
-    
--   goal 是什么? (reward/ demonstration, preference)  
-    
--   supervision 是什么? 这可能并不等同于 goal, 有可能我们只是想提供一些 hint, 用一些 demonstration 作为指导而不是 goal, 这是一个研究的 open area.  
-    
+从上述关于监督的讨论中，我们其实想引出一件更为重要的事：很多时候，我们不必局限于强化学习本身已有的诸多公式化表达，这些并非完全不可改变。我们需要仔细考量它们是否真正适合具体的问题场景，例如我们可以思考以下方面：
+- 数据是什么？
+- 目标是什么？（奖励 / 示例 / 偏好）
+- 监督是什么？这可能不等同于目标，我们或许只是想提供一些提示，将某些示例作为指导而非目标，这是一个有待研究的开放领域。
 
 ## 3 Philosophical Perspective on Deep RL
-
-这一部分我们将提供一些 Perspective, 关于 Deep RL 理解的一些 philosophy:
-
+这一部分我们将提供一些视角，关于深度强化学习理解的一些理念。
 ### 3.1 Reinforcement Learning as an Engineering Tool
+我们实际上可以将强化学习视作一种工程工具。  
 
-我们实际上可以将 RL 视作一种 engineering tool.
+通常情况下，对于一个控制系统的工程问题，我们会在纸上写下一系列关于系统的数学方程，然后求解方程组，从期望的结果中反推出控制方式。但这样的反推过程并不容易，例如对于复杂的系统，我们可能会面对一个复杂的方程组。
+![](21-6.png)
+但是虽然反推控制方式非常困难，但是我们可以把这些方程组写进一个模拟器中，通过数值的方式来计算复杂的系统将会如何演化，这就像是我们在强化学习中的模拟器。 
 
-通常情况下, 对于一个控制系统的工程问题来说, 我们会在纸上写下一系列关于系统的数学方程, 然后求解方程组来从想要的结果中反推出控制方式. 但是这样的反推过程并不容易, 例如对于复杂的系统, 我们可能会有一个复杂的方程组.
+当我们在这样的模拟器中运行强化学习算法时，我们实质上就在尝试从这些方程中反推出控制方式，但是我们并不是通过人来求解这个问题，而是通过机器学习的方式来进行。
 
-![](https://pic1.zhimg.com/v2-63c8f1c76fb7633ac9695f9d0db2adf2_1440w.jpg)
+因此强化学习提供了一种强大的工程工具，即一切我们能够模拟的都可以控制：
+- 原先的工程方式是，我们会对问题进行建模，并实施控制。
+- 而强化学习为我们带来了另一种工程方式：我们对问题进行建模并开展模拟，然后运行强化学习算法，得出控制方式。
 
-engineering a control system
-
-但是虽然反推控制方式非常困难, 但是我们可以把这些方程组写进一个 simulator 中, 通过数值的方式来计算复杂的系统将会如何演化, 这就像是我们在 RL 中的 simulator.
-
-当我们在这样的 simulator 中运行 RL 算法时, 我们实质上就在尝试从这些方程中反推出控制方式, 但是我们并不是通过人来求解这个问题, 而是通过 machine learning 的方式来进行.
-
-因此我们的 RL 提供了一种强大的 engineering tool, 也就是一切我们能够 simulate 的都可以 control.
-
--   原先的 engineering 方式是, 我们会建模问题, 并进行 control.  
-    
--   而 RL 给我们带来了另一种 engineering 的方式: 我们建模问题, 并进行 simulation, 然后运行 RL 算法, 得出控制的方式.  
-    
-
-Remark:
-
--   从这一角度理解的启示是, 我们要开发更加高效的 simulator, 并且开发能够更好地利用 simulation 的 RL 算法.  
-    
--   但是存在的问题是我们依然需要 simulate.  
-    
+注意：
+- 从这一角度理解的启示是，我们要开发更加高效的模拟器，并且开发能够更好地利用模拟的强化学习算法。  
+- 但是存在的问题是我们依然需要模拟。
 
 ### 3.2 Reinforcement Learning and the Real World
+在这一部分中，我们想提出的是在真实世界中进行强化学习才是我们的真正目标，具体来说我们先考虑到以下几个例子。
 
-在这一部分中, 我们想提出的是在真实世界中进行 RL 才是我们的真正目标, 具体来说我们先考虑到以下几个例子:
+例如，莫拉韦克悖论（Moravec's paradox）
+研究强化学习（RL）的一个动机源于莫拉维克悖论（Moravec's paradox）：  
+人工智能可以在棋类比赛中击败世界冠军，但实际上并非机器人在下棋，而是由现实中的人类代替人工智能完成实际操作。这是一个非常奇怪的现象 —— 我们的模型 “智能” 足以在棋盘上战胜世界冠军，却无法完成任何一个人类都能做到的实际棋子移动。
+![](21-7.png)
+这看似是一个悖论，但如果从另一角度看，则是完全有道理的：在一个纯粹的智力游戏上胜过人类，可能并没有想象的那么困难。之所以在这方面比不过人工智能，只是因为我们并不擅长它们，与之相比，我们只是远远地擅长移动我们的身体，以至于觉得后者是理所当然的。
 
-Example 1. _Moravec's paradox_
+莫拉维克悖论看似是一个关于人工智能的命题，实则可理解为一个关于物理宇宙的命题，即现实世界是一个“困难模式”的宇宙：
+- 在 “简单模式” 的宇宙（如棋类游戏）中，运动控制和感知问题根本不存在。
+- 而在我们所处的 “困难模式” 宇宙中，运动控制和感知是极具挑战性的。
 
-_一个研究 RL 的 motivation 是这样的 Moravec's paradox:_
+再例如，另一个例子是考虑一个人在荒岛上生存，这个问题中有一系列特点：
+- 极少的外部指导告诉我们应当做什么 ；
+- 大量意料之外的情境需要适应；
+- 必须要自发的找到解决问题的方案；
+- 我们必须要存活足够长的时间来发现它们，与 Atari 游戏不同的是，在现实中我们只有一条命。
 
-_AI 可以在棋类比赛上胜过世界冠军, 但是并不是真的 robot 在下棋, 而是由现实中的人代替 AI 进行实际操作. 这是一个非常怪异的现象, 我们的 model 的"智能"足够在棋盘上赢过世界冠军, 却不能够完成任何一个人类都可以做到的实际的棋子移动._
+从这个角度出发，现实世界这个复杂的领域的另一个困难在于，现实世界中充满了可变性和意想不到的东西，在训练数据中 “永远不可能” 出现的那些东西在现实中随时有可能发生。
 
-![](https://pic3.zhimg.com/v2-0997205abc8394d88b469ed9421477d4_1440w.jpg)
+换句话说，在简单的宇宙中：
+- 成功=高回报（最优控制）；
+- 封闭世界，规则已知；
+- 大量模拟；
+- 核心问题：强化学习算法能否真正实现良好优化。
 
-Moravec&#39;s paradox
+在困难的环境中：
+- 成功 = 生存（足够好的控制能力）；
+- 开放世界，一切必须来自数据；
+- 无模拟（规则未知）；
+- 核心问题：强化学习能否实现泛化与适应。
 
-_这看似是一个悖论, 但如果从另一角度看, 则是完全 make sense 的: 在一个纯粹的智力游戏上胜过人类, 可能并没有我们想象的那么困难. 之所以我们在这方面比不过 AI 只是因为我们并不擅长它们, 与之相比我们只是远远地擅长移动我们的身体, 以至于我们觉得后者是理所当然的._
+上述的几个例子直观展现了现实世界这个“困难宇宙”中的问题与我们通常强化学习研究中的“简单宇宙”中的问题的不同。很显然，我们的最终目标应当是让强化学习能够在现实世界这样的“困难宇宙”中取得好的效果。但是在目前的强化学习研究中，我们通常只考虑“简单宇宙”中的任务，我们需要更多地尝试解决这些“困难宇宙”中的问题。
 
-_Moravec's paradox 看起来是关于 AI 的 statement, 实际上可以理解为是关于 physical universe 的 statement, 也就是现实世界是一个 "hard" universe:_
+但是如果要解决现实世界中的问题，我们需要考虑一些问题：
+- 如何告诉强化学习智能体需要做什么？现实中没有分数。如果我们的目标是存活，那么这样的反馈过于滞后。
+- 如何在持续的环境中完全自主地学习？现实中我们不可能重置世界从头再来。
+- 在环境改变时，我们如何保持模型的鲁棒性？
+- 利用过去经验和数据进行泛化的正确方式是什么？
+- 利用先验经验进行自举探索的正确方式是什么？
 
--   _在 easy universe 例如棋类游戏中, motor control 和 perception 问题是不存在的._  
-    
--   _在我们所在的 hard universe 中, motor control 和 perception 是非常困难的._  
-    
+接下来我们从几个机器人任务的例子来给出一些解决上述问题的启发：
 
-Example 2. _另一个例子是考虑一个人在荒岛上生存, 这个问题中有一系列特点:_
+例如，传达目标的其他方式：
+除了奖励函数之外，有没有其他方式来传达目标呢？实际上，一个可行的做法是从偏好中学习。这里我们没有固定的奖励函数，而是像基于人类反馈的强化学习（RLHF）那样，让人类评价哪个行为更符合指令。
+![](21-8.png)
 
--   _极少的外部 supervision 告诉我们应当做什么_  
-    
--   _大量意料之外的情境需要 adaptions_  
-    
--   _必须要自发的找到解决问题的方案_  
-    
--   _我们必须要存活足够长的时间来发现它们, 与 Atari games 不同的是, 在现实中我们只有一条命._  
-    
+参见: Paul Christiano, Jan Leike, Tom B. Brown, Miljan Martic, Shane Legg, Dario Amodei. Deep reinforcement learning from human preferences. 2017.
 
-_从这个角度出发, 现实世界这个 hard universe 的另一个困难在于, 现实世界中充满了 variability 和 unexpected 的东西, 在训练数据中"永远不可能"出现的那些东西在现实中随时有可能发生._
+再例如，完全自主学习：
+在现实中，如果我们部署一个机器人操作任务，那么需要构建一整套系统（或进行人为复位），以使机械臂能够复位并不断尝试。这相当繁琐，而且从本质上来说不利于策略的泛化性。  
 
-_换言之, 在 easy universe 中:_
+一个可行的思路是考虑多任务，具体的处理方式是让任务之间相互转化。这里以倒咖啡为例：
 
--   _success = high reward (optimal control)_  
-    
--   _closed world, rules are Known_  
-    
--   _lots of simulation_  
-    
--   _Main question: can RL algorithms optimize really well_  
-    
+任务 1 很显然是"倒咖啡"。
+但是如果失败了呢？通常需要一个人将杯子复位后再试一次，但我们可以设定任务 2 为 “捡起杯子”。
+要是成功了呢？可以让任务 3 为 “把杯子放到一边，换一个杯子”，在此过程中若失败，就会产生任务 4 “清理洒出的咖啡”，依此类推。如果我们同时学习多个任务，那么每一次失败都会为我们提供学习全新任务的机会。
 
-_在 hard universes 中:_
+这里的例子是我们设计了一个多阶段且可以相互转化的任务，使得每一阶段如果智能体失败了，它都马上有一个新的任务可以练习，就不需要人为复位。
 
--   _success = survival (good enough control)_  
-    
--   _open world, everything must come from data_  
-    
--   _no simulation (rules are unknown)_  
-    
--   _Main question: can RL generalize and adapt._  
-    
+参见:
+- Nagabandi, Konolige, Levine, Kumar. Deep Dynamics Models for Learning Dexterous Manipulation. CoRL 2019
+![](21-9.png)
+- Gupta, Yu, Zhao, Kumar, Rovinsky, Xu, Devlin, Levine. Reset-Free Reinforcement Learning via Multi-Task Learning: Learning Dexterous Manipulation Behaviors without Human Intervention. 2021.
+![](21-10.png)
 
-上述的几个例子直观展现了现实世界这个 hard universe 中的问题与我们通常 RL 研究中的 easy universe 中的问题的不同. 很显然, 我们的最终目标应当是 RL 能够在现实世界这样的 hard universe 中取得好的效果. 但是在目前的 RL 研究中, 我们通常只考虑 easy universe 中的任务, 我们需要更多地尝试解决这些 hard universe 中的问题.
+再例如，如何从经验中引导探索？
+一个角度是，在现实中并非所有行为都可以探索，例如某些行为可能会给智能体本身带来极其严重的伤害。而如何避免这些行为就需要一些先验知识。
+另一个角度是，如果我们想要训练一个机械臂进行抓取操作，那么如果使用完全随机的行为作为初始化，机械臂只会随机乱动，很难进行有效的探索。但如果它已经具备完成一系列其他任务的经验，那么我们可以利用这些任务的数据构建一个行为先验，具体来说，可以从这几个任务的策略中进行随机采样。尽管机械臂执行的动作并不完全是我们想要的，但这是一种明显更高效的探索方式。
+![](21-11.png)
 
-但是如果要解决现实世界中的问题, 我们需要考虑一些问题:
+参见: Singh\*, Hui\*, Zhou, Yu, Rhinehart, Levine. Parrot: Data-driven behavioral priors for reinforcement learning. 2020
 
--   如何告诉 RL agent 需要做什么呢? 现实中没有 scores. 如果我们的目标是存活, 那么这样的 feedback 过于 delayed 了  
-    
--   如何在持续的环境中完全自主的学习? 在现实中我们不可能 reset world 从头再来.  
-    
--   在环境改变时我们如何保持 robust?  
-    
--   使用过去经验和数据 generalize 的正确方式是什么?  
-    
--   什么是利用 prior experience 进行 bootstrap exploration 的正确方式?  
-    
-
-接下来我们从几个 robotic task 的例子来给出一些解决上述问题的启发:
-
-Example 3. _Other ways to communicate objective_
-
-_除了 reward function 之外, 有没有其他方式来传达目标呢? 实际上, 一个可行的做法是 learning from preference. 这里我们没有固定的 reward function, 而是像 RLHF 那样让人类评价哪个 action 更符合指令._
-
-![](https://pic2.zhimg.com/v2-b1745e407c4c32df90f17aa5f76eb1e3_1440w.jpg)
-
-Deep reinforcement learning from human preferences
-
-_参见: Paul Christiano, Jan Leike, Tom B. Brown, Miljan Martic, Shane Legg, Dario Amodei. Deep reinforcement learning from human preferences. 2017._
-
-Example 4. _Learn fully autonomously_
-
-_在现实中如果我们部署一个 robot manipulation task, 那么我们需要构建一整套系统 (或者人为复位), 使得我们的机械臂可以复位然后不断尝试, 这是相当繁琐的, 并且实质上并不利于 policy 的泛化性._
-
-_一个可行的思路是考虑 multi-task, 特别的处理方式是让任务之间相互转化, 这里以倒咖啡为例:_
-
-_Task 1 很显然是"倒咖啡"._
-
-_但是如果失败了呢? 那么通常情况下需要一个人把杯子复位然后再试一遍, 但是我们可以让 Task 2 是"捡起杯子"._
-
-_而如果成功了呢? 可以让 Task 3 是"把杯子放到一边, 换一个杯子", 这个过程中如果失败了, 那么有得到 Task 4 "把洒了的咖啡清理掉". 以此类推. 如果我们同时学习多个任务, 那么我们的每一次失败就给了我们一个学习全新任务的机会._
-
-_这里的例子是我们设计了一个多阶段且可以相互转化的任务, 使得每一阶段如果 agent 失败了, 他都马上有一个新的任务可以练习, 就不需要人为复位._
-
-_参见:_
-
--   _Nagabandi, Konolige, Levine, Kumar. Deep Dynamics Models for Learning Dexterous Manipulation. CoRL 2019_
-
-![](https://picx.zhimg.com/v2-d72c86a54a95d40e31a3b4c4645cd517_1440w.jpg)
-
-Deep Dynamics Models for Learning Dexterous Manipulation
-
--   _Gupta, Yu, Zhao, Kumar, Rovinsky, Xu, Devlin, Levine. Reset-Free Reinforcement Learning via Multi-Task Learning: Learning Dexterous Manipulation Behaviors without Human Intervention. 2021._
-
-![](https://picx.zhimg.com/v2-4b01bcf4840ec500cf17c224d6b938ed_1440w.jpg)
-
-Reset-Free Reinforcement Learning via Multi-Task Learning: Learning Dexterous Manipulation Behaviors without Human Intervention
-
-Example 5. _How bootsrap exploration from experience?_
-
-_一个角度是, 在现实中并不是什么 action 都可以 explore 的, 例如一些行为可能会给 agent 本身带来极为严重的伤害. 而如何避免这些 action 就需要一些 prior knowledge._
-
-_另一个角度是, 如果我们想要训练一个机械臂进行 grasping, 那么如果我们使用完全随机的 actions 作为初始化, 它仅仅只是随机地乱动, 很难有效地 exploration. 但是如果其已经有了完成一系列任务其他的 experience, 那么我们可以用这些任务的数据构造一个 behavioral prior, 具体来说, 可以是从这几个任务的 policy 中进行随机采样. 尽管其做的事情并不完全是我们想要的, 但是这是一种明显更加高效的 exploration 方式._
-
-![](https://pic3.zhimg.com/v2-83d9d9bbbb24bff7ea8ebb17394deea8_1440w.jpg)
-
-Parrot: Data-driven behavioral priors for reinforcement learning
-
-_参见: Singh\*, Hui\*, Zhou, Yu, Rhinehart, Levine. Parrot: Data-driven behavioral priors for reinforcement learning. 2020_
-
-自然现在我们清楚了在现实世界中进行 RL 是一件非常有挑战的事情, 并且也需要考虑到很多问题. 但是这是值得的:
-
-如果我们想要看到有趣的 emergent behavior, 那么我们需要设计一个足够复杂的 world, 使得其中能够容纳这些 novel solutions. 现实世界的 RL 可能很困难, 但是值得的, 因为我们能够期望那些可能的 emergent behavior.
+现在我们清楚，在现实世界中进行强化学习是一件极具挑战性的事情，需要考虑诸多问题。但这是值得的：如果我们想看到有趣的涌现行为，就需要设计一个足够复杂的环境，以容纳这些新颖的解决方案。现实世界中的强化学习或许困难重重，但因其可能产生的涌现行为，依然值得我们去探索。
 
 ### 3.3 Reinforcement Learning as "Universal" Learning
+在这一视角中，我们将强化学习（RL）视为一种 “通用” 的学习方式。  
 
-在这一个视角中, 我们将 RL 视作一种 "universal" learning 的方式.
+当前大型语言模型（LLM）的成功基于大量无标注的预训练数据与少量标注数据，其背后的知识很大程度上来自我们通过自监督学习习得的分布 $p_\theta(\boldsymbol{x})$ 。这种训练方式之所以取得巨大成功，很大程度上是因为我们能够从大量低成本数据中学习知识。当然，这里面临的一个挑战是这些数据不能全是无用信息，即我们不能学习低质量的数据分布。
 
-目前 LLM 的成功是基于大量的无标注预训练数据 + 少量标注的数据, 其背后的 knowledge 很大程度来自于我们通过自监督学习学到的分布 $p_\theta(\boldsymbol{x})$ . 目前这样的训练方式取得很大成功, 很大程度上因为我们能够从大量廉价的数据中学习到知识. 当然一个挑战是这些数据不能都是垃圾, 也就是我们不能学习一个 low quality 的数据分布. 实际上, 一个更好的做法是使用 RL:
+事实上，更好的做法是使用强化学习：  
+机器学习的目标可以理解为生成具有适应性和复杂性的决策。（这一点可能并不明显，以图像分类为例，其背后的决策是预测标签后发生的事情，例如识别到险情时，决定是否报警。）  
 
-machine learning 的目的可以理解是为了产生 adaptable 和 complex 的 decisions. (这可能不那么显然, 对于 image classification 来说, 其背后的 decision 是预测 label 后发生的事情, 例如识别到了险情, decision 是否报警.)
+实际上，强化学习是一种更好地利用低质量数据的方式。当我们获取大量低质量数据时，对其密度分布进行建模可能并非最佳选择。我们需要从中学习的不是在世界中 “如何去做”，而是在世界中 “能够做到什么”，换句话说，是学习 “世界如何运作”（动态）的信息。之后，我们再通过奖励函数等学习与任务相关的信息，并从关于世界的知识中找出那些 “最佳可能” 的决策。
+![](21-12.png)
 
-实际上 RL 是一种更好地利用 low quality data 的方式, 当我们获取到大量的 low quality data 时, 建模其密度分布可能并不是很好的选择, 我们从中需要学习到的不是在 world 中如何做, 而是在 world 中能够做到什么, 换言之在学习 how the world works (dynamic) 的信息. 而之后我们再通过 reward function 等学习到关于 task 的信息, 并从关于 world 的知识中找出那些 best possible 的 decision.
+具体来说，我们可以得到如下的学习方式：
+- 利用大规模数据进行离线强化学习，通过人为定义技能、目标条件强化学习、自监督技能发现等方式进行预训练。在这种方式中，我们学习关于（动态）世界的知识。
+- 之后，我们在特定的下游任务上进行微调。在这种方式中，我们学习关于任务的知识（奖励函数）。
+![](21-13.png)
 
-![](https://pic4.zhimg.com/v2-88fb18c53a14651f47575ce92a2c6b01_1440w.jpg)
+一个将离线强化学习当作方法的例子如下：
 
-RL as universal learning
+例如，使用离线强化学习训练大语言模型：
+通常情况下我们使用基于人类反馈的强化学习（RLHF）等方式来对齐大型语言模型（LLM），尽管这种方式可以让模型的回答更加符合人类偏好，但这种单步建模的方式并不擅长完成整个对话目标。
 
-具体来说, 我们可以得到如下的学习方式:
+或许我们可以通过离线强化学习来进行改进，首先通过大型语言模型获取一系列合成的对话轨迹，然后在这些数据上进行离线强化学习，借助基于模型的强化学习等方式更好地理解人类需求（例如构建部分可观测马尔可夫决策过程模型（POMDP）），通过更简短的多轮对话来更贴合用户要求。
+![](21-14.png)
 
--   利用大规模数据进行 offline RL, 通过 human-defined skills, goal-conditioned RL, self-supervised skill discovery 等等方式进行预训练. 这一方式中我们学习关于 world (dynamic) 的知识.  
-    
--   之后我们在特定的 downstream tasks 上进行微调. 这一方式中我们学习关于 task 的知识 (reward function).
-
-![](https://pic3.zhimg.com/v2-5047f83401ca38e61ad1068ea5c201d4_1440w.jpg)
-
-收集大规模数据 + offline RL + downstream finetune
-
-一个利用 offline RL 作为 recipe 的例子如下:
-
-Example 6. _Use offline RL train large language models_
-
-_通常情况下我们使用 RLHF 等方式来对齐 LLM, 尽管其可以让回答更加符合人类偏好, 但是这样一种 single-step 的建模并不擅长于完成整个对话目标._
-
-_也许我们可以用 offline RL 进行改进, 首先通过 LLM 获取一系列合成的对话轨迹, 然后再这些数据上进行 offline RL, 通过 model-based RL 等方式更好理解人的需求 (例如建模一个 POMDP), 通过更短的多个对话来更加符合用户要求._
-
-![](https://pic3.zhimg.com/v2-9960dcbe591fa81d0325d88c2bc4cb32_1440w.jpg)
-
-Zero-Shot Goal-Directed Dialogue via RL on Imagined Conversations
-
-_参见: Hong, Levine, Dragan. Zero-Shot Goal-Directed Dialogue via RL on Imagined Conversations. 2023._
+参见: Hong, Levine, Dragan. Zero-Shot Goal-Directed Dialogue via RL on Imagined Conversations. 2023.
 
 ## 4 Back to the Bigger Picture
-
 ### 4.1 Why we need Deep RL?
-
-回到这门课程介绍的部分中我们引出 deep RL 的原因:
-
--   Learning 是智能的基础  
-    
--   RL 是 reason about decision making 的方式  
-    
--   deep models 允许 RL 算法学习到复杂的映射, 通过端到端的方式解决复杂的问题.  
-    
+回到这门课程介绍的部分中我们引出深度强化学习的原因：
+- 学习是智能的基础；
+- 强化学习是对决策进行推理的方式；
+- 深度模型允许强化学习算法学习到复杂的映射，通过端到端的方式解决复杂的问题。
 
 ### 4.2 What's missing for an intelligent system?
-
-我们目前为止还没办法实现一个真正的 intelligent system, 其真正重要的是什么呢?
-
--   从 Yann LeCun's cake 的角度, 通过不同的 learning 方法, 我们能够获得的 supervision 的量有很大差异, 因此重要的是  
-    
-
--   Unsupervised or self-supervised learning  
-    
--   Learn a world model (predict the future)  
-    
--   Generative modeling of the world  
-    
--   Lots to do even before you accomplish your goal!
-
-![](https://picx.zhimg.com/v2-ede02afeb557cf76c75b846234725bb9_1440w.jpg)
-
-Yann LeCun&#39;s cake
-
--   supervision 还可以来自于其他的地方, 例如 imitation 以及理解其他 agents.  
-    
--   也许 RL 本身已经足够了, 虽然说 reward 本身可能很稀疏, 但是叠加上复杂 dynamic 后得到的 value function backup 已经携带了足够的信息.  
-    
--   或许以上都是需要的.  
-    
+我们目前还无法实现一个真正的智能系统，其真正重要的是什么呢？
+从杨立昆（Yann LeCun）的 “蛋糕理论” 角度来看，通过不同的学习方法，我们能够获得的监督量有很大差异，因此重要的是：
+- 无监督学习或自监督学习；
+- 学习一个世界模型（预测未来）；
+- 对世界进行生成式建模。
+![](21-15.png)
+在实现目标之前，还有很多事情要做：
+- 监督还可以来自其他方面，例如模仿以及对其他智能体的理解；
+- 也许强化学习本身已足够，尽管奖励可能非常稀疏，但叠加复杂动态后得到的值函数备份已携带足够信息；
+- 或许以上都是需要的。
 
 ### 4.3 How should we answer these questions?
-
-这一部分是 Levine 对 RL 科研的思考, 也可以理解为是 Levine 对 RL 科研的一些建议:
-
--   选择正确的问题: 问一问这有机会解决一个重要的问题吗? 保持对不确定性的乐观态度是一个很好地 exploration 策略.  
-    
--   不要害怕改变问题的 statement: 仅仅是冲击 benchmark 并不会遇见很多这些有意义的挑战.  
-    
--   Application matters: 很多时候将方法应用到挑战性的 real-world 中可以告诉我们缺失了哪些重要的东西. RL 的历史上有很长一段时间忽略了这件事情.  
-    
--   Think big and start small!
+这一部分是莱文（Levine）对强化学习科研的思考，也可以理解为莱文对强化学习科研的一些建议：
+- 选择正确的问题：问问自己，这有机会解决一个重要问题吗？保持对不确定性的乐观态度是一种很好的探索策略。
+- 不要害怕改变问题的表述：仅仅冲击基准测试（benchmark）并不会遇到很多有意义的挑战。
+- 应用很重要：很多时候，将方法应用于具有挑战性的现实场景中，能让我们发现缺失的重要内容。强化学习的历史上，曾有很长一段时间忽视了这一点。
+- 大胆设想，小处着手（Think big and start small）！
