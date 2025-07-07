@@ -109,15 +109,13 @@ $$
 - $\mathbf{P}_\pi \in \mathbb{R}^{n \times n}$ 是状态转移矩阵，$[\mathbf{P}_\pi]_{ij} = p_\pi(s_j|s_i) = \sum_a \pi(a|s_i) p(s_j|s_i, a)$
 
 ## 2.6 求解状态价值
-
 贝尔曼方程的矩阵向量形式是：
 $$ \mathbf{v}_\pi = \mathbf{r}_\pi + \gamma \mathbf{P}_\pi \mathbf{v}_\pi $$
-
-闭式解 (The closed-form solution) 是：
+闭式解是：
 $$ \mathbf{v}_\pi = (\mathbf{I} - \gamma \mathbf{P}_\pi)^{-1} \mathbf{r}_\pi $$
 在实践中，我们仍然需要使用数值工具来计算矩阵的逆。
 
-通过迭代算法可以避免矩阵求逆运算，一个迭代解 (An iterative solution) 是：
+通过迭代算法可以避免矩阵求逆运算，一个迭代解是：
 $$ \mathbf{v}_{k+1} = \mathbf{r}_\pi + \gamma \mathbf{P}_\pi \mathbf{v}_k $$
 这个算法产生一个序列 $\{\mathbf{v}_0, \mathbf{v}_1, \mathbf{v}_2, \dots\}$。可以证明：
 $$ \mathbf{v}_k \rightarrow (\mathbf{I} - \gamma \mathbf{P}_\pi)^{-1} \mathbf{r}_\pi, \quad k \rightarrow \infty $$
@@ -210,17 +208,17 @@ $$
 这里的 $\max_{\boldsymbol{\pi}}$ 是**按元素**取最大值。
 
 对于贝尔曼最优方程：
-* **算法 (Algorithm):** 如何求解这个方程？
-* **存在性 (Existence):** 这个方程是否有解？
-* **唯一性 (Uniqueness):** 这个方程的解是唯一的吗？
-* **最优性 (Optimality):** 它与最优策略是如何相关的？
+* 算法：如何求解这个方程？
+* 存在性：这个方程是否有解？
+* 唯一性：这个方程的解是唯一的吗？
+* 最优性：它与最优策略是如何相关的？
 
 ## 3.3 贝尔曼最优方程右侧的最大化
-贝尔曼最优方程: 元素形式
+贝尔曼最优方程：元素形式
 $$
 v_*(s) = \max_{a} \sum_{s'} p(s'|s, a) \left( r(s, a, s') + \gamma v_*(s') \right), \quad \forall s \in \mathcal{S}
 $$
-贝尔曼最优方程: 矩阵-向量形式
+贝尔曼最优方程：矩阵-向量形式
 $$
 \mathbf{v}_* = \max_{\boldsymbol{\pi}} (\mathbf{r}_{\boldsymbol{\pi}} + \gamma \mathbf{P}_{\boldsymbol{\pi}} \mathbf{v}_*)
 $$
@@ -247,7 +245,6 @@ $$
 其中 $a^* = \arg \max_a q(s, a)$。
 
 ## 3.4 求解贝尔曼最优性方程
-
 贝尔曼最优性方程是：
 $$
 \mathbf{v}_* = \max_{\boldsymbol{\pi}} (\mathbf{r}_{\boldsymbol{\pi}} + \gamma \mathbf{P}_{\boldsymbol{\pi}} \mathbf{v}_*).
@@ -276,9 +273,9 @@ $$
 
 #### 3.4.1.2 压缩映射定理
 对于任何形式为 $x = f(x)$ 的方程，如果 $f$ 是一个压缩映射，那么：
-* **存在性：** 存在一个不动点 $x^*$ 满足 $f(x^*) = x^*$。
-* **唯一性：** 这个不动点 $x^*$ 是唯一的。
-* **算法：** 考虑一个序列 $\{x_k\}$，其中 $x_{k+1} = f(x_k)$，那么 $x_k \rightarrow x^*$ 当 $k \rightarrow \infty$。此外，收敛速度是指数级的。
+* 存在性：存在一个不动点 $x^*$ 满足 $f(x^*) = x^*$。
+* 唯一性：这个不动点 $x^*$ 是唯一的。
+* 算法：考虑一个序列 $\{x_k\}$，其中 $x_{k+1} = f(x_k)$，那么 $x_k \rightarrow x^*$ 当 $k \rightarrow \infty$。此外，收敛速度是指数级的。
 
 #### 3.1.4.3 压缩映射定理的证明
 **第一部分：我们证明序列 $\{x_k\}_{k=1}^\infty$，其中 $x_k = f(x_{k-1})$ 是收敛的。**
@@ -492,9 +489,9 @@ $$
 v^*(s) = \max_a \sum_{s'} p(s'|s, a) (r(s, a, s') + \gamma v^*(s'))
 $$
 有三个关键因素：
-* **奖励设计 (Reward design):** $r(s, a, s')$
-* **系统模型 (System model):** $p(s'|s, a)$
-* **折扣率 (Discount rate):** $\gamma$
+* 奖励设计：$r(s, a, s')$
+* 系统模型：$p(s'|s, a)$
+* 折扣率：$\gamma$
 需要计算的未知量是：$v^*(s), v^*(s'), \pi^*(a|s)$。
 
 **定理 (最优策略不变性 - Optimal Policy Invariance)**
@@ -2061,7 +2058,7 @@ $$
 
 # 8 价值函数方法
 ## 8.1 曲线拟合
-在本书中，到目前为止，状态值和行动值都是用表格表示的。
+到目前为止，状态值和行动值都是用表格表示的。
 
 例如，动作价值：
 
@@ -2974,12 +2971,10 @@ $$
 * 换句话说，$\theta$ 的不同值可以生成不同的度量值。
 * 因此，我们可以搜索 $\theta$ 的最优值来最大化这些度量。
 * 一个复杂之处在于，度量可以定义在折扣情况（其中 $\gamma \in [0, 1)$）或无折扣情况（其中 $\gamma = 1$）下。
-* 本书中到目前为止我们只考虑了折扣情况。有关无折扣情况的详细信息，请参阅本书。
 * 直观上，$\bar{r}_{\pi}$ 更短视，因为它只考虑即时奖励，而 $\bar{v}_{\pi}$ 考虑所有步骤的总奖励。
 * 然而，这两个度量是相互等价的。在折扣情况下，当 $\gamma < 1$ 时，成立以下关系：$$
 \bar{r}_{\pi} = (1 - \gamma)\bar{v}_{\pi}.
-$$证明请参见书中。
-
+$$
 
 ## 9.3 度量的梯度
 给定上一节中介绍的度量，我们可以使用基于梯度的方法来最大化它们。为此，我们首先需要计算这些度量的梯度。
@@ -2988,7 +2983,7 @@ $$证明请参见书中。
 * 首先，我们需要区分不同的度量 $\bar{v}_{\pi}$, $\bar{r}_{\pi}$, $\bar{v}_{\pi}^0$
 * 其次，我们需要区分折扣和无折扣情况。
 
-#### 9.3.1 总览
+#### 9.3.1 梯度总览
 **定理（策略梯度定理）**
 $J(\theta)$ 的梯度是
 $$
@@ -3040,7 +3035,7 @@ $$
 
 由于对所有 $a$ 都有 $\pi(a|s, \theta) > 0$，因此参数化策略是随机的，因此是探索性的。该策略不直接告诉行动采取什么行动。相反，行动应该根据概率分布生成。
 
-### 9.3.2 折扣情况下的梯度推导
+### 9.3.2 折扣情况下的梯度
 接下来我们推导折扣情况下 $\gamma \in (0, 1)$ 的度量的梯度。折扣情况下的状态值和行动值定义为
 $$
 \begin{aligned}
@@ -3243,8 +3238,8 @@ $$
 $$
 上述等式中的近似要求当 $\gamma \to 1$ 时第一项不趋于无穷。
 
-### 9.3.3 无折扣情况下的梯度推导
-接下来我们展示如何在无折扣情况下计算度量的梯度，即 $\gamma = 1$。读者可能会想，为什么我们突然开始考虑无折扣情况，而本书到目前为止我们只考虑了折扣情况。事实上，平均奖励 $\bar{r}_{\pi}$ 的定义对折扣和无折扣情况都有效。虽然 $\bar{r}_{\pi}$ 在折扣情况下的梯度是近似的，但我们将看到它在无折扣情况下的梯度更优美。
+### 9.3.3 无折扣情况下的梯度
+接下来我们展示如何在无折扣情况下计算度量的梯度，即 $\gamma = 1$。读者可能会想，为什么我们突然开始考虑无折扣情况，到目前为止我们只考虑了折扣情况。事实上，平均奖励 $\bar{r}_{\pi}$ 的定义对折扣和无折扣情况都有效。虽然 $\bar{r}_{\pi}$ 在折扣情况下的梯度是近似的，但我们将看到它在无折扣情况下的梯度更优美。
 
 在无折扣情况下，需要重新定义状态值和行动值。由于无折扣的总和 $\mathbb{E}[R_{t+1} + R_{t+2} + R_{t+3} + \dots | S_t = s]$ 可能会发散，状态值和行动值以一种特殊的方式定义：
 $$
@@ -3520,7 +3515,7 @@ $$
 其中 $q_t(s_t, a_t)$ 是 $q_{\pi}(s_t, a_t)$ 的近似。
 * 如果 $q_{\pi}(s_t, a_t)$ 通过蒙特卡洛估计近似，该算法有一个特定名称，即 **REINFORCE**。
 * REINFORCE 是最早和最简单的策略梯度算法之一。
-* 许多其他策略梯度算法，例如 actor-critic 方法，可以通过扩展 REINFORCE 获得。
+* 许多其他策略梯度算法，例如 演员-评论家 方法，可以通过扩展 REINFORCE 获得。
 
 ### 9.4.3 算法总结 
 **伪代码：蒙特卡洛策略梯度 (REINFORCE)**
@@ -3536,12 +3531,551 @@ $$
 # 10 演员-评论家方法
 
 ## 10.1 最简单的演员-评论家：QAC
+演员-评论家方法仍然是策略梯度方法，强调了结合策略梯度和基于价值的方法的结构。
 
+什么是“演员”和“评论家”？
+* “演员”指的是策略更新。之所以称之为演员，是因为策略将被应用于采取行动。
+* “评论家”指的是策略评估或价值估计。之所以称之为评论家，是因为它通过评估来“批评”策略。
+
+回顾之前中介绍的策略梯度思想。
+1) 一个标量度量 $J(\theta)$，可以是 $\bar{v}_\pi$ 或 $\bar{r}_\pi$。
+2) 最大化 $J(\theta)$ 的梯度上升算法是
+$$
+\begin{aligned}
+\theta_{t+1} &= \theta_t + \alpha \nabla_\theta J(\theta_t) \\
+&= \theta_t + \alpha \mathbb{E}_{S \sim \eta, A \sim \pi} \left[ \nabla_\theta \ln \pi(A|S, \theta_t) q_\pi(S, A) \right]
+\end{aligned}
+$$
+3) 随机梯度上升算法是
+$$
+\theta_{t+1} = \theta_t + \alpha \nabla_\theta \ln \pi(a_t|s_t, \theta_t) q_t(s_t, a_t)
+$$
+我们可以从这个算法中看到“演员”和“评论家”：
+* 这个算法对应于演员。
+* 估计 $q_t(s, a)$ 的算法对应于评论家。
+
+如何获得 $q_t(s_t, a_t)$？
+到目前为止，我们已经研究了两种估计行动价值的方法：
+* 蒙特卡洛学习：如果使用 MC，相应的算法被称为 REINFORCE 或蒙特卡洛策略梯度。我们在上一节中介绍过。
+* 时序差分学习：如果使用 TD，这类算法通常被称为演员-评论家。我们将在本节中介绍。
+
+**最简单的演员-评论家算法（QAC）**
+目标：通过最大化 $J(\theta)$ 搜索最优策略。
+在每个轮次的时间步 $t$，执行以下操作：
+	生成遵循 $\pi(a|s_t, \theta_t)$ 的 $a_t$，观测 $r_{t+1}, s_{t+1}$，然后生成遵循 $\pi(a|s_{t+1}, \theta_t)$ 的 $a_{t+1}$。
+		评论家（价值更新）：
+			$w_{t+1} = w_t + \alpha_w \left[ r_{t+1} + \gamma q(s_{t+1}, a_{t+1}, w_t) - q(s_t, a_t, w_t) \right] \nabla_w q(s_t, a_t, w_t)$
+		演员（策略更新）：
+			$\theta_{t+1} = \theta_t + \alpha_\theta \nabla_\theta \ln \pi(a_t|s_t, \theta_t) q(s_t, a_t, w_{t+1})$
+
+备注：
+* 评论家 对应于“Sarsa+价值函数近似”。
+* 演员 对应于策略更新算法。
+* 该算法是 on-policy，由于策略是随机的，无需使用像 $\varepsilon$-greedy 这样的技术。
+* 这种特定的演员-评论家算法有时被称为 Q 演员-评论家（QAC）。
+* 尽管简单，但该算法揭示了演员-评论家方法的核心思想。它可以通过扩展生成许多其他算法，如后面所示。
 
 ## 10.2 优势演员-评论家：A2C
+### 10.2.1 基线
+性质：策略梯度对附加基线是不变的：
+$$
+\begin{aligned}
+\nabla_\theta J(\theta) &= \mathbb{E}_{S \sim \eta, A \sim \pi} \left[ \nabla_\theta \ln \pi(A|S, \theta_t) q_\pi(S, A) \right] \\
+&= \mathbb{E}_{S \sim \eta, A \sim \pi} \left[ \nabla_\theta \ln \pi(A|S, \theta_t) (q_\pi(S, A) - b(S)) \right]
+\end{aligned}
+$$
+这里，附加基线 $b(S)$ 是 $S$ 的标量函数。
 
+接下来，我们回答两个问题：
+* 为什么它是有效的？
+* 为什么它是有用的？
+
+首先，为什么它是有效的？
+
+那是因为
+$$
+\mathbb{E}_{S \sim \eta, A \sim \pi} \left[ \nabla_\theta \ln \pi(A|S, \theta_t) b(S) \right] = 0
+$$
+详情：
+$$
+\begin{aligned}
+\mathbb{E}_{S \sim \eta, A \sim \pi} \left[ \nabla_\theta \ln \pi(A|S, \theta_t) b(S) \right] &= \sum_{s \in \mathcal{S}} \eta(s) \sum_{a \in \mathcal{A}} \pi(a|s, \theta_t) \nabla_\theta \ln \pi(a|s, \theta_t) b(s) \\
+&= \sum_{s \in \mathcal{S}} \eta(s) \sum_{a \in \mathcal{A}} \nabla_\theta \pi(a|s, \theta_t) b(s) \\
+&= \sum_{s \in \mathcal{S}} \eta(s) b(s) \sum_{a \in \mathcal{A}} \nabla_\theta \pi(a|s, \theta_t) \\
+&= \sum_{s \in \mathcal{S}} \eta(s) b(s) \nabla_\theta \sum_{a \in \mathcal{A}} \pi(a|s, \theta_t) \\
+&= \sum_{s \in \mathcal{S}} \eta(s) b(s) \nabla_\theta 1 = 0
+\end{aligned}
+$$
+第二，为什么基线有用？
+梯度是 $\nabla_\theta J(\theta) = \mathbb{E}[X]$，其中
+$$
+X(S, A) \doteq \nabla_\theta \ln \pi(A|S, \theta_t) [q(S, A) - b(S)] \quad (a)
+$$
+我们有
+* $\mathbb{E}[X]$ 对 $b(S)$ 是不变的。
+* $\text{var}(X)$ 对 $b(S)$ 不是不变的。
+    * 为什么？因为 $\text{tr}[\text{var}(X)] = \mathbb{E}[X^T X] - \bar{x}^T \bar{x}$ 并且$$
+    \begin{aligned}
+    \mathbb{E}[X^T X] &= \mathbb{E} \left[ (\nabla_\theta \ln \pi)^T (\nabla_\theta \ln \pi) (q(S, A) - b(S))^2 \right] \\
+    &= \mathbb{E} \left[ \|\nabla_\theta \ln \pi\|^2 (q(S, A) - b(S))^2 \right]
+    \end{aligned}
+    $$想象 $b$ 很大（例如，1 百万）
+
+我们的目标：选择一个最优基线 $b$ 来最小化 $\text{var}(X)$
+好处：当我们使用随机样本来近似 $\mathbb{E}[X]$ 时，估计方差也会很小。
+在 REINFORCE 和 QAC 算法中，没有基线。或者，我们可以说 $b=0$，这不能保证是一个好的基线。
+
+能够最小化 $\text{var}(X)$ 的最优基线，对于任何 $s \in \mathcal{S}$，是
+$$
+b^*(s) = \frac{\mathbb{E}_{A \sim \pi} \left[ \|\nabla_\theta \ln \pi(A|s, \theta_t)\|^2 q(s, A) \right]}{\mathbb{E}_{A \sim \pi} \left[ \|\nabla_\theta \ln \pi(A|s, \theta_t)\|^2 \right]}
+$$
+证明：
+令 $\bar{x} \doteq \mathbb{E}[X]$，这对于任何 $b(s)$ 都是不变的。如果 $X$ 是一个向量，它的方差是一个矩阵。通常选择 $\text{var}(X)$ 的迹作为优化的标量目标函数：
+$$
+\begin{aligned}
+\text{tr}[\text{var}(X)] &= \text{tr}[\mathbb{E}[(X - \bar{x})(X - \bar{x})^T]] \\
+&= \text{tr}[\mathbb{E}[X X^T - \bar{x} X^T - X \bar{x}^T + \bar{x} \bar{x}^T]] \\
+&= \mathbb{E}[X^T X] - \bar{x}^T \bar{x} - \bar{x}^T \bar{x} + \bar{x}^T \bar{x} \\
+&= \mathbb{E}[X^T X] - \bar{x}^T \bar{x} \quad (b)
+\end{aligned}
+$$
+在推导上述方程时，我们使用了矩阵迹的性质 $\text{tr}(AB) = \text{tr}(BA)$，适用于任何具有适当维度的方阵 $A, B$。由于 $\bar{x}$ 是不变的，方程 (b) 表明我们只需要最小化 $\mathbb{E}[X^T X]$。对于定义在 (a) 中的 $X$，我们有
+$$
+\begin{aligned}
+\mathbb{E}[X^T X] &= \mathbb{E} \left[ (\nabla_\theta \ln \pi)^T (\nabla_\theta \ln \pi) (q_\pi(S, A) - b(S))^2 \right] \\
+&= \mathbb{E} \left[ \|\nabla_\theta \ln \pi\|^2 (q_\pi(S, A) - b(S))^2 \right]
+\end{aligned}
+$$
+其中 $\pi(A|S, \theta)$ 简写为 $\pi$。由于 $S \sim \eta$ 且 $A \sim \pi$，上述方程可以改写为
+$$
+\mathbb{E}[X^T X] = \sum_{s \in \mathcal{S}} \eta(s) \mathbb{E}_{A \sim \pi} \left[ \|\nabla_\theta \ln \pi\|^2 (q_\pi(s, A) - b(s))^2 \right].
+$$
+为了确保 $\nabla_b \mathbb{E}[X^T X] = 0$，对于任何 $s \in \mathcal{S}$，$b(s)$ 应满足
+$$
+\mathbb{E}_{A \sim \pi} \left[ \|\nabla_\theta \ln \pi\|^2 (b(s) - q_\pi(s, A)) \right] = 0, \quad s \in \mathcal{S}.
+$$
+上述方程可以很容易地解出最优基线：
+$$
+b^*(s) = \frac{\mathbb{E}_{A \sim \pi} \left[ \|\nabla_\theta \ln \pi\|^2 q_\pi(s, A) \right]}{\mathbb{E}_{A \sim \pi} \left[ \|\nabla_\theta \ln \pi\|^2 \right]}, \quad s \in \mathcal{S}.
+$$
+
+
+尽管这个基线是最优的，但它很复杂。我们可以去除权重 $\|\nabla_\theta \ln \pi(A|s, \theta_t)\|^2$ 并选择次优基线：
+$$
+b(s) = \mathbb{E}_{A \sim \pi} [q(s, A)] = v_\pi(s)
+$$
+这是状态 $s$ 的状态价值。
+
+### 10.2.2 优势函数
+当 $b(s) = v_\pi(s)$ 时，
+梯度上升算法是
+$$
+\begin{aligned}
+\theta_{t+1} &= \theta_t + \alpha \mathbb{E} \left[ \nabla_\theta \ln \pi(A|S, \theta_t) [q_\pi(S, A) - v_\pi(S)] \right] \\
+&\doteq \theta_t + \alpha \mathbb{E} \left[ \nabla_\theta \ln \pi(A|S, \theta_t) \delta_\pi(S, A) \right]
+\end{aligned}
+$$
+其中
+$$
+\delta_\pi(S, A) \doteq q_\pi(S, A) - v_\pi(S)
+$$
+被称为优势函数。
+
+该算法的随机版本是
+$$
+\begin{aligned}
+\theta_{t+1} &= \theta_t + \alpha \nabla_\theta \ln \pi(a_t|s_t, \theta_t) [q_t(s_t, a_t) - v_t(s_t)] \\
+&= \theta_t + \alpha \nabla_\theta \ln \pi(a_t|s_t, \theta_t) \delta_t(s_t, a_t)
+\end{aligned}
+$$
+此外，该算法可以重新表达为
+$$
+\begin{aligned}
+\theta_{t+1} &= \theta_t + \alpha \nabla_\theta \ln \pi(a_t|s_t, \theta_t) \delta_t(s_t, a_t) \\
+&= \theta_t + \alpha \frac{\nabla_\theta \pi(a_t|s_t, \theta_t)}{\pi(a_t|s_t, \theta_t)} \delta_t(s_t, a_t) \\
+&= \theta_t + \alpha \underbrace{\left( \frac{\delta_t(s_t, a_t)}{\pi(a_t|s_t, \theta_t)} \right)}_{\text{step size}} \nabla_\theta \pi(a_t|s_t, \theta_t)
+\end{aligned}
+$$
+步长与相对值 $\delta_t$ 成比例，而不是绝对值 $q_t$，这更合理。它仍然可以很好地平衡探索和利用。
+
+此外，优势函数通过 TD 误差进行近似：
+$$
+\delta_t = q_t(s_t, a_t) - v_t(s_t) \rightarrow r_{t+1} + \gamma v_t(s_{t+1}) - v_t(s_t)
+$$
+这个近似是合理的，因为
+$$
+\mathbb{E}[q_\pi(S, A) - v_\pi(S)|S = s_t, A = a_t] = \mathbb{E}[R + \gamma v_\pi(S') - v_\pi(S)|S = s_t, A = a_t]
+$$
+好处：只需要一个网络来近似 $v_\pi(s)$，而不是需要两个网络来近似 $q_\pi(s, a)$ 和 $v_\pi(s)$。
+
+**优势 演员-评论家 (A2C) 或 TD 演员-评论家**
+目标：通过最大化 $J(\theta)$ 搜索最优策略。
+在每个轮次的时间步 $t$，执行以下操作：
+	生成遵循 $\pi(a|s_t, \theta_t)$ 的 $a_t$，然后观测 $r_{t+1}, s_{t+1}$。
+		TD 误差（优势函数）：$\delta_t = r_{t+1} + \gamma v(s_{t+1}, w_t) - v(s_t, w_t)$
+		评论家（价值更新）：$w_{t+1} = w_t + \alpha_w \delta_t \nabla_w v(s_t, w_t)$
+		演员（策略更新）：$\theta_{t+1} = \theta_t + \alpha_\theta \delta_t \nabla_\theta \ln \pi(a_t|s_t, \theta_t)$
+
+它是 on-policy 的。由于策略 $\pi(\theta_t)$ 是随机的，无需使用像 $\varepsilon$-greedy 这样的技术。
 
 ## 10.3 Off-policy 的演员-评论家
+### 10.3.1 重要性采样
+策略梯度是 on-policy 的。为什么？因为梯度是 $\nabla_\theta J(\theta) = \mathbb{E}_{S \sim \eta, A \sim \pi} [*]$
+我们可以将其转换为 off-policy 吗？
+* 是的，通过重要性采样。
+* 重要性采样技术不仅限于演员-评论家，也适用于任何旨在估计期望的算法。
 
+注意
+$$
+\mathbb{E}_{X \sim p_0} [X] = \sum_x p_0(x) x = \sum_x p_1(x) \frac{p_0(x)}{p_1(x)} x = \mathbb{E}_{X \sim p_1} [f(X)]
+$$
+因此，我们可以估计 $\mathbb{E}_{X \sim p_1} [f(X)]$ 来估计 $\mathbb{E}_{X \sim p_0} [X]$。
+如何估计 $\mathbb{E}_{X \sim p_1} [f(X)]$？很简单。设
+$$
+\bar{f} \doteq \frac{1}{n} \sum_{i=1}^n f(x_i), \quad \text{其中 } x_i \sim p_1
+$$
+那么，
+$$
+\mathbb{E}_{X \sim p_1} [\bar{f}] = \mathbb{E}_{X \sim p_1} [f(X)]
+$$
+$$
+\text{var}_{X \sim p_1} [\bar{f}] = \frac{1}{n} \text{var}_{X \sim p_1} [f(X)]
+$$
+因此，$\bar{f}$ 是 $\mathbb{E}_{X \sim p_1} [f(X)] = \mathbb{E}_{X \sim p_0} [X]$ 的一个良好近似
+$$
+\mathbb{E}_{X \sim p_0} [X] \approx \bar{f} = \frac{1}{n} \sum_{i=1}^n f(x_i) = \frac{1}{n} \sum_{i=1}^n \frac{p_0(x_i)}{p_1(x_i)} x_i
+$$
+
+$\frac{p_0(x_i)}{p_1(x_i)}$ 称为重要性权重。如果 $p_1(x_i) = p_0(x_i)$，重要性权重为1，$\bar{f}$ 变为 $\bar{x}$。如果 $p_0(x_i) \ge p_1(x_i)$，则 $x_i$ 可以被 $p_0$ 比 $p_1$ 更频繁地采样。重要性权重 (> $1$) 可以强调这个样本的重要性。
+
+虽然 $\bar{f} = \frac{1}{n} \sum_{i=1}^n \frac{p_0(x_i)}{p_1(x_i)} x_i$ 需要 $p_0(x)$，如果我知道 $p_0(x)$，为什么不直接计算期望呢？
+答案：它适用于已知 $x$ 时容易计算 $p_0(x)$，但难以计算期望的情况。例如，连续情况， $p_0$ 的复杂表达式，或没有 $p_0$ 的表达式（例如，$p_0$ 由神经网络表示）。
+
+总结：如果 $\{x_i\} \sim p_1$，
+$$
+\bar{x} = \frac{1}{n} \sum_{i=1}^n x_i \rightarrow \mathbb{E}_{X \sim p_1} [X]
+$$
+$$
+\bar{f} = \frac{1}{n} \sum_{i=1}^n \frac{p_0(x_i)}{p_1(x_i)} x_i \rightarrow \mathbb{E}_{X \sim p_0} [X]
+$$
+
+### 10.3.2 Off-policy 下的策略梯度
+像之前的 on-policy 情况一样，我们需要在 off-policy 情况下推导策略梯度。
+* 假设 $\beta$ 是生成经验样本的行为策略。
+* 我们的目标是使用这些样本来更新目标策略 $\pi$，从而最小化度量
+$$
+J(\theta) = \sum_{s \in \mathcal{S}} d_\beta(s) v_\pi(s) = \mathbb{E}_{S \sim d_\beta} [v_\pi(S)]
+$$
+其中 $d_\beta$ 是策略 $\beta$ 下的平稳分布。
+
+**定理（Off-policy策略梯度定理）**
+在折扣因子 $\gamma \in (0, 1)$ 的情况下，$J(\theta)$ 的梯度是
+$$
+\nabla_\theta J(\theta) = \mathbb{E}_{S \sim \rho, A \sim \beta} \left[ \underbrace{\frac{\pi(A|S, \theta)}{\beta(A|S)}}_{\text{importance weight}} \nabla_\theta \ln \pi(A|S, \theta) q_\pi(S, A) \right],
+$$
+其中 $\beta$ 是行为策略，$\rho$ 是状态分布。状态分布 $\rho$ 是 $$ \rho(s) \doteq \sum_{s' \in \mathcal{S}} d_\beta(s') \text{Pr}_\pi(s|s'), \quad s \in \mathcal{S}, $$ 其中 $\text{Pr}_\pi(s|s') = \sum_{k=0}^\infty \gamma^k [P_\pi^k]_{s's}$ 是在策略 $\pi$ 下从 $s'$ 到 $s$ 的折扣总转移概率。
+
+**证明**
+由于 $d_\beta$ 独立于 $\theta$，所以 $J(\theta)$ 的梯度满足
+$$
+\nabla_\theta J(\theta) = \nabla_\theta \sum_{s \in \mathcal{S}} d_\beta(s) v_\pi(s) = \sum_{s \in \mathcal{S}} d_\beta(s) \nabla_\theta v_\pi(s). \quad (c)
+$$
+根据引理 9.2，$\nabla_\theta v_\pi(s)$ 的表达式是
+$$
+\nabla_\theta v_\pi(s) = \sum_{s' \in \mathcal{S}} \text{Pr}_\pi(s'|s) \sum_{a \in \mathcal{A}} \nabla_\theta \pi(a|s', \theta) q_\pi(s', a), \quad (d)
+$$
+其中 $\text{Pr}_\pi(s'|s) \doteq \sum_{k=0}^\infty \gamma^k [P_\pi^k]_{ss'}$。将 (d) 代入 (c) 得到
+$$
+\begin{aligned}
+\nabla_\theta J(\theta) &= \sum_{s \in \mathcal{S}} d_\beta(s) \nabla_\theta v_\pi(s) \\
+&= \sum_{s \in \mathcal{S}} d_\beta(s) \sum_{s' \in \mathcal{S}} \text{Pr}_\pi(s'|s) \sum_{a \in \mathcal{A}} \nabla_\theta \pi(a|s', \theta) q_\pi(s', a) \\
+&= \sum_{s' \in \mathcal{S}} \left( \sum_{s \in \mathcal{S}} d_\beta(s) \text{Pr}_\pi(s'|s) \right) \sum_{a \in \mathcal{A}} \nabla_\theta \pi(a|s', \theta) q_\pi(s', a) \\
+&\doteq \sum_{s' \in \mathcal{S}} \rho(s') \sum_{a \in \mathcal{A}} \nabla_\theta \pi(a|s', \theta) q_\pi(s', a) \\
+&= \sum_{s \in \mathcal{S}} \rho(s) \sum_{a \in \mathcal{A}} \nabla_\theta \pi(a|s, \theta) q_\pi(s, a) \quad (\text{change } s' \text{ to } s) \\
+&= \mathbb{E}_{S \sim \rho} \left[ \sum_{A \in \mathcal{A}} \nabla_\theta \pi(A|S, \theta) q_\pi(S, A) \right].
+\end{aligned}
+$$
+通过使用重要性采样技术，上述方程可以进一步改写为
+$$
+\begin{aligned}
+\mathbb{E}_{S \sim \rho} \left[ \sum_{A \in \mathcal{A}} \nabla_\theta \pi(A|S, \theta) q_\pi(S, A) \right] &= \mathbb{E}_{S \sim \rho} \left[ \sum_{A \in \mathcal{A}} \frac{\beta(A|S)}{\beta(A|S)} \frac{\nabla_\theta \pi(A|S, \theta)}{\pi(A|S, \theta)} \pi(A|S, \theta) q_\pi(S, A) \right] \\
+&= \mathbb{E}_{S \sim \rho} \left[ \sum_{A \in \mathcal{A}} \beta(A|S) \frac{\pi(A|S, \theta)}{\beta(A|S)} \nabla_\theta \ln \pi(A|S, \theta) q_\pi(S, A) \right] \\
+&= \mathbb{E}_{S \sim \rho, A \sim \beta} \left[ \frac{\pi(A|S, \theta)}{\beta(A|S)} \nabla_\theta \ln \pi(A|S, \theta) q_\pi(S, A) \right].
+\end{aligned}
+$$
+证明完成。
+
+
+off-policy 策略梯度对于基线 $b(s)$ 也是不变的。
+特别地，我们有
+$$
+\nabla_\theta J(\theta) = \mathbb{E}_{S \sim \rho, A \sim \beta} \left[ \frac{\pi(A|S, \theta)}{\beta(A|S)} \nabla_\theta \ln \pi(A|S, \theta) (q_\pi(S, A) - b(S)) \right]
+$$
+为了减少估计方差，我们可以选择基线为 $b(S) = v_\pi(S)$，并得到
+$$
+\nabla_\theta J(\theta) = \mathbb{E} \left[ \frac{\pi(A|S, \theta)}{\beta(A|S)} \nabla_\theta \ln \pi(A|S, \theta) (q_\pi(S, A) - v_\pi(S)) \right]
+$$
+相应的随机梯度上升算法是
+$$
+\theta_{t+1} = \theta_t + \alpha_\theta \frac{\pi(a_t|s_t, \theta_t)}{\beta(a_t|s_t)} \nabla_\theta \ln \pi(a_t|s_t, \theta_t) (q_t(s_t, a_t) - v_t(s_t))
+$$
+类似于 on-policy 情况，
+$$
+q_t(s_t, a_t) - v_t(s_t) \approx r_{t+1} + \gamma v_t(s_{t+1}) - v_t(s_t) \doteq \delta_t(s_t, a_t)
+$$
+然后，算法变为
+$$
+\theta_{t+1} = \theta_t + \alpha_\theta \frac{\pi(a_t|s_t, \theta_t)}{\beta(a_t|s_t)} \nabla_\theta \ln \pi(a_t|s_t, \theta_t) \delta_t(s_t, a_t)
+$$
+因此
+$$
+\theta_{t+1} = \theta_t + \alpha_\theta \left( \frac{\delta_t(s_t, a_t)}{\beta(a_t|s_t)} \right) \nabla_\theta \pi(a_t|s_t, \theta_t)
+$$
+
+**基于重要性采样的 off-policy 演员-评论家**
+初始化：给定行为策略 $\beta(a|s)$。目标策略 $\pi(a|s, \theta_0)$，其中 $\theta_0$ 是初始参数向量。价值函数 $v(s, w_0)$，其中 $w_0$ 是初始参数向量。
+目标：通过最大化 $J(\theta)$ 搜索最优策略。
+在每个轮次的时间步 $t$，执行以下操作：
+	生成遵循 $\beta(s_t)$ 的 $a_t$，然后观测 $r_{t+1}, s_{t+1}$。
+		TD 误差（优势函数）：
+			$\delta_t = r_{t+1} + \gamma v(s_{t+1}, w_t) - v(s_t, w_t)$
+		评论家（价值更新）：
+			$w_{t+1} = w_t + \alpha_w \frac{\pi(a_t|s_t, \theta_t)}{\beta(a_t|s_t)} \delta_t \nabla_w v(s_t, w_t)$
+		演员（策略更新）：
+			$\theta_{t+1} = \theta_t + \alpha_\theta \frac{\pi(a_t|s_t, \theta_t)}{\beta(a_t|s_t)} \delta_t \nabla_\theta \ln \pi(a_t|s_t, \theta_t)$
 
 ## 10.4 确定性演员-评论家：DPG
+### 10.4.1 梯度总览
+到目前为止，策略梯度方法中使用的策略都是随机的，因为对于每个 $(s, a)$，$\pi(a|s, \theta) > 0$。
+我们可以在策略梯度方法中使用确定性策略吗？好处：它可以处理连续动作。
+
+表示策略的方式：
+到目前为止，一般的策略被表示为 $\pi(a|s, \theta) \in [0, 1]$，它可以是随机的或确定性的。
+现在，确定性策略具体表示为
+$$
+a = \mu(s, \theta) \doteq \mu(s)
+$$
+$\mu$ 是从 $\mathcal{S}$ 到 $\mathcal{A}$ 的映射。例如，$\mu$ 可以由一个神经网络表示，其输入为 $s$，输出为 $a$，参数为 $\theta$。我们可以将 $\mu(s, \theta)$ 简写为 $\mu(s)$。
+
+之前介绍的策略梯度定理仅对随机策略有效。如果策略必须是确定性的，我们必须推导一个新的策略梯度定理。思路和步骤是相似的。
+
+**定理（确定性策略梯度定理）**
+$J(\theta)$ 的梯度是
+$$
+\begin{aligned}
+\nabla_\theta J(\theta) &= \sum_{s \in \mathcal{S}} \eta(s) \nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)} \\
+&= \mathbb{E}_{S \sim \eta} \left[ \nabla_\theta \mu(S) (\nabla_a q_\mu(S, a))|_{a=\mu(S)} \right], \quad (e)
+\end{aligned}
+$$
+其中 $\eta$ 是状态的分布。
+
+定理（确定性策略梯度定理）是定理（折扣情况下的确定性策略梯度定理）和定理（非折扣情况下的确定性策略梯度定理）中结果的总结，因为这两个定理中的梯度具有相似的表达式。$J(\theta)$ 和 $\eta$ 的具体表达式可以在定理（折扣情况下的确定性策略梯度定理）和定理（非折扣情况下的确定性策略梯度定理）中找到。
+
+与随机情况不同，确定性情况下的梯度在 (e) 中不涉及随机动作变量 $A$。因此，当我们使用样本来近似真实梯度时，不需要采样动作。因此，确定性策略梯度方法是 off-policy 的。此外，为什么 $(\nabla_a q_\mu(s, a))|_{a=\mu(s)}$ 不能写成 $\nabla_a q_\mu(s, \mu(S))$，这似乎更简洁。原因是我们这样做的话，就意味着 $q_\mu(s, \mu(S))$ 是 $a$ 的函数。一个简洁但较少混淆的表达式可能是 $\nabla_a q(s, a = \mu(S))$。
+
+### 10.4.2 折扣情况下的梯度
+考虑折扣情况下的平均状态价值度量：
+$$
+J(\theta) = \mathbb{E}[v_\mu(s)] = \sum_{s \in \mathcal{S}} d_0(s) v_\mu(s) \quad (f)
+$$
+其中 $d_0(s)$ 是满足 $\sum_{s \in \mathcal{S}} d_0(s) = 1$ 的概率分布。$d_0$ 被选择为独立于 $\mu$。在这种情况下，梯度更容易计算。
+选择 $d_0$ 有两种特殊但重要的情况。
+- 第一种特殊情况是 $d_0(s_0) = 1$ 且 $d_0(s \ne s_0) = 0$，其中 $s_0$ 是一个特定的起始状态。
+- 第二种特殊情况是 $d_0$ 是一个与 $\mu$ 不同的行为策略的平稳分布。
+
+**引理（梯度 $v_\mu(s)$）**
+在折扣情况下，对于任何 $s \in \mathcal{S}$，以下成立：
+$$
+\nabla_\theta v_\mu(s) = \sum_{s' \in \mathcal{S}} \text{Pr}_\mu(s'|s) \nabla_\theta \mu(s') (\nabla_a q_\mu(s', a))|_{a=\mu(s')}, \quad (g)
+$$
+其中
+$$
+\text{Pr}_\mu(s'|s) \doteq \sum_{k=0}^\infty \gamma^k [P_\mu^k]_{ss'} = [(I - \gamma P_\mu)^{-1}]_{ss'}
+$$
+是在策略 $\mu$ 下从 $s$ 到 $s'$ 的折扣总转移概率。这里，$[\cdot]_{ss'}$ 表示矩阵的第 $s$ 行第 $s'$ 列的元素。
+
+**引理（梯度 $v_\mu(s)$）证明**
+由于策略是确定性的，我们有
+$$
+v_\mu(s) = q_\mu(s, \mu(s)).
+$$
+由于 $q_\mu$ 和 $\mu$ 都是 $\theta$ 的函数，我们有
+$$
+\nabla_\theta v_\mu(s) = \nabla_\theta q_\mu(s, \mu(s)) = (\nabla_\theta q_\mu(s, a))|_{a=\mu(s)} + \nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)}. \quad (h)
+$$
+根据动作价值的定义，对于任何给定的 $(s, a)$，我们有
+$$
+q_\mu(s, a) = r(s, a) + \gamma \sum_{s' \in \mathcal{S}} p(s'|s, a)v_\mu(s'),
+$$
+其中 $r(s, a) = \sum_r rp(r|s, a)$。由于 $r(s, a)$ 独立于 $\mu$，我们有
+$$
+\nabla_\theta q_\mu(s, a) = 0 + \gamma \sum_{s' \in \mathcal{S}} p(s'|s, a) \nabla_\theta v_\mu(s').
+$$
+将上述方程代入 (h) 得到
+$$
+\nabla_\theta v_\mu(s) = \gamma \sum_{s' \in \mathcal{S}} p(s'|s, \mu(s)) \nabla_\theta v_\mu(s') + \underbrace{\nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)}}_{u(s)}, \quad s \in \mathcal{S}.
+$$
+由于上述方程对所有 $s \in \mathcal{S}$ 都有效，我们可以将这些方程组合以获得矩阵-向量形式：
+$$
+\underbrace{\begin{bmatrix} \vdots \\ \nabla_\theta v_\mu(s) \\ \vdots \end{bmatrix}}_{\nabla_\theta v_\mu \in \mathbb{R}^{mn}} = \underbrace{\begin{bmatrix} \vdots \\ u(s) \\ \vdots \end{bmatrix}}_{u \in \mathbb{R}^{mn}} + \gamma(P_\mu \otimes I_m) \underbrace{\begin{bmatrix} \vdots \\ \nabla_\theta v_\mu(s') \\ \vdots \end{bmatrix}}_{\nabla_\theta v_\mu \in \mathbb{R}^{mn}},
+$$
+其中 $|S|=n$, $m$ 是 $\theta$ 的维度，$P_\mu$ 是状态转移矩阵，其元素 $[P_\mu]_{ss'} = p(s'|s, \mu(s))$，$\otimes$ 是 Kronecker 积。上述矩阵-向量形式可以简洁地写成
+$$
+\nabla_\theta v_\mu = u + \gamma (P_\mu \otimes I_m) \nabla_\theta v_\mu,
+$$
+这是一个线性方程。然后，$\nabla_\theta v_\mu$ 可以解为
+$$
+\begin{aligned}
+\nabla_\theta v_\mu &= (I_{nm} - \gamma P_\mu \otimes I_m)^{-1} u \\
+&= (I_n \otimes I_m - \gamma P_\mu \otimes I_m)^{-1} u \\
+&= [(I_n - \gamma P_\mu)^{-1} \otimes I_m] u. \quad (i)
+\end{aligned}
+$$
+(i) 的分元素形式是
+$$
+\begin{aligned}
+\nabla_\theta v_\mu(s) &= \sum_{s' \in \mathcal{S}} [(I - \gamma P_\mu)^{-1}]_{ss'} u(s') \\
+&= \sum_{s' \in \mathcal{S}} [(I - \gamma P_\mu)^{-1}]_{ss'} [\nabla_\theta \mu(s') (\nabla_a q_\mu(s', a))|_{a=\mu(s')}]. \quad (j)
+\end{aligned}
+$$
+数量 $[(I - \gamma P_\mu)^{-1}]_{ss'}$ 有明确的概率解释。由于 $(I - \gamma P_\mu)^{-1} = I + \gamma P_\mu + \gamma^2 P_\mu^2 + \dots$，我们有
+$$
+[(I - \gamma P_\mu)^{-1}]_{ss'} = [I]_{ss'} + \gamma [P_\mu]_{ss'} + \gamma^2 [P_\mu^2]_{ss'} + \dots = \sum_{k=0}^\infty \gamma^k [P_\mu^k]_{ss'}.
+$$
+请注意，$[P_\mu^k]_{ss'}$ 是在策略 $\mu$ 下使用恰好 $k$ 步从 $s$ 转移到 $s'$ 的概率。因此，$[(I - \gamma P_\mu)^{-1}]_{ss'}$ 是在策略 $\mu$ 下从 $s$ 转移到 $s'$ 的折扣总概率。通过将 $[(I - \gamma P_\mu)^{-1}]_{ss'}$ 记作 $\text{Pr}_\mu(s'|s)$，方程 (j) 导致 (g)。
+
+**定理（折扣情况下的确定性策略梯度定理）**
+在折扣因子 $\gamma \in (0, 1)$ 的情况下，J($\theta$) 在 (f) 中的梯度是
+$$
+\begin{aligned}
+\nabla_\theta J(\theta) &= \sum_{s \in \mathcal{S}} \rho_\mu(s) \nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)} \\
+&= \mathbb{E}_{S \sim \rho_\mu} \left[ \nabla_\theta \mu(S) (\nabla_a q_\mu(S, a))|_{a=\mu(S)} \right],
+\end{aligned}
+$$
+其中状态分布 $\rho_\mu$ 是
+$$
+\rho_\mu(s) = \sum_{s' \in \mathcal{S}} d_0(s') \text{Pr}_\mu(s|s'), \quad s \in \mathcal{S}.
+$$
+这里，$\text{Pr}_\mu(s|s') = \sum_{k=0}^\infty \gamma^k [P_\mu^k]_{s's} = [(I - \gamma P_\mu)^{-1}]_{s's}$ 是在策略 $\mu$ 下从 $s'$ 到 $s$ 的折扣总转移概率。
+
+**定理（折扣情况下的确定性策略梯度定理）证明**
+由于 $d_0$ 独立于 $\mu$，我们有
+$$
+\nabla_\theta J(\theta) = \sum_{s \in \mathcal{S}} d_0(s) \nabla_\theta v_\mu(s).
+$$
+将引理给出的 $\nabla_\theta v_\mu(s)$ 表达式代入上述方程得到
+$$
+\begin{aligned}
+\nabla_\theta J(\theta) &= \sum_{s \in \mathcal{S}} d_0(s) \nabla_\theta v_\mu(s) \\
+&= \sum_{s \in \mathcal{S}} d_0(s) \sum_{s' \in \mathcal{S}} \text{Pr}_\mu(s'|s) \nabla_\theta \mu(s') (\nabla_a q_\mu(s', a))|_{a=\mu(s')} \\
+&= \sum_{s' \in \mathcal{S}} \left( \sum_{s \in \mathcal{S}} d_0(s) \text{Pr}_\mu(s'|s) \right) \nabla_\theta \mu(s') (\nabla_a q_\mu(s', a))|_{a=\mu(s')} \\
+&\doteq \sum_{s' \in \mathcal{S}} \rho_\mu(s') \nabla_\theta \mu(s') (\nabla_a q_\mu(s', a))|_{a=\mu(s')} \\
+&= \sum_{s \in \mathcal{S}} \rho_\mu(s) \nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)} \quad (\text{change } s' \text{ to } s) \\
+&= \mathbb{E}_{S \sim \rho_\mu} \left[ \nabla_\theta \mu(S) (\nabla_a q_\mu(S, a))|_{a=\mu(S)} \right].
+\end{aligned}
+$$
+证明完成。
+
+### 10.4.3 非折扣情况下的梯度
+我们接下来推导平均奖励的梯度：
+$$
+\begin{aligned}
+J(\theta) &= \bar{r}_\mu = \sum_{s \in \mathcal{S}} d_\mu(s) r_\mu(s) \\
+&= \mathbb{E}_{S \sim d_\mu} [r_\mu(S)], \quad (k)
+\end{aligned}
+$$
+其中
+$$
+r_\mu(s) = \mathbb{E}[R|s, A = \mu(s)] = \sum_r rp(r|s, A=\mu(s))
+$$
+是即时奖励的期望。
+
+$J(\theta)$ 的梯度由以下定理给出。
+**定理（非折扣情况下的确定性策略梯度定理）**
+在非折扣情况下，J($\theta$) 在 (k) 中的梯度是
+$$
+\begin{aligned}
+\nabla_\theta J(\theta) &= \sum_{s \in \mathcal{S}} d_\mu(s) \nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)} \\
+&= \mathbb{E}_{S \sim d_\mu} \left[ \nabla_\theta \mu(S) (\nabla_a q_\mu(S, a))|_{a=\mu(S)} \right],
+\end{aligned}
+$$
+其中 $d_\mu$ 是策略 $\mu$ 下状态的平稳分布。
+
+**定理（非折扣情况下的确定性策略梯度定理）证明**
+由于策略是确定性的，我们有
+$$
+v_\mu(s) = q_\mu(s, \mu(s)).
+$$
+由于 $q_\mu$ 和 $\mu$ 都是 $\theta$ 的函数，我们有
+$$
+\nabla_\theta v_\mu(s) = \nabla_\theta q_\mu(s, \mu(s)) = (\nabla_\theta q_\mu(s, a))|_{a=\mu(s)} + \nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)}. \quad (l)
+$$
+在非折扣情况下，根据动作价值的定义，有
+$$
+\begin{aligned}
+q_\mu(s, a) &= \mathbb{E}[R_{t+1} - \bar{r}_\mu + v_\mu(S_{t+1})|s, a] \\
+&= \sum_r p(r|s, a)(r - \bar{r}_\mu) + \sum_{s'} p(s'|s, a)v_\mu(s') \\
+&= r(s, a) - \bar{r}_\mu + \sum_{s'} p(s'|s, a)v_\mu(s').
+\end{aligned}
+$$
+由于 $r(s, a) = \sum_r rp(r|s, a)$ 独立于 $\theta$，我们有
+$$
+\nabla_\theta q_\mu(s, a) = 0 - \nabla_\theta \bar{r}_\mu + \sum_{s'} p(s'|s, a) \nabla_\theta v_\mu(s').
+$$
+将上述方程代入 (l) 得到
+$$
+\nabla_\theta v_\mu(s) = -\nabla_\theta \bar{r}_\mu + \sum_{s'} p(s'|s, \mu(s)) \nabla_\theta v_\mu(s') + \underbrace{\nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)}}_{u(s)}, \quad s \in \mathcal{S}.
+$$
+由于上述方程对所有 $s \in \mathcal{S}$ 都有效，我们可以将这些方程组合以获得矩阵-向量形式：
+$$
+\underbrace{\begin{bmatrix} \vdots \\ \nabla_\theta v_\mu(s) \\ \vdots \end{bmatrix}}_{\nabla_\theta v_\mu \in \mathbb{R}^{mn}} = - \mathbf{1}_n \otimes \nabla_\theta \bar{r}_\mu + (P_\mu \otimes I_m) \underbrace{\begin{bmatrix} \vdots \\ \nabla_\theta v_\mu(s') \\ \vdots \end{bmatrix}}_{\nabla_\theta v_\mu \in \mathbb{R}^{mn}} + \underbrace{\begin{bmatrix} \vdots \\ u(s) \\ \vdots \end{bmatrix}}_{u \in \mathbb{R}^{mn}},
+$$
+其中 $n = |S|$, $m$ 是 $\theta$ 的维度，$P_\mu$ 是状态转移矩阵，其元素 $[P_\mu]_{ss'} = p(s'|s, \mu(s))$，$\otimes$ 是 Kronecker 积。上述矩阵-向量形式可以简洁地写成
+$$
+\nabla_\theta v_\mu = u - \mathbf{1}_n \otimes \nabla_\theta \bar{r}_\mu + (P_\mu \otimes I_m) \nabla_\theta v_\mu,
+$$
+因此
+$$
+\mathbf{1}_n \otimes \nabla_\theta \bar{r}_\mu = u + (P_\mu \otimes I_m) \nabla_\theta v_\mu - \nabla_\theta v_\mu. \quad (m)
+$$
+由于 $d_\mu$ 是平稳分布，我们有 $d_\mu^T P_\mu = d_\mu^T$。在 (m) 的两边乘以 $d_\mu^T \otimes I_m$ 得到
+$$
+\begin{aligned}
+(d_\mu^T \otimes I_m) (\mathbf{1}_n \otimes \nabla_\theta \bar{r}_\mu) &= (d_\mu^T \otimes I_m) u + (d_\mu^T \otimes I_m)(P_\mu \otimes I_m)\nabla_\theta v_\mu - (d_\mu^T \otimes I_m)\nabla_\theta v_\mu \\
+&= d_\mu^T \otimes I_m u + (d_\mu^T P_\mu \otimes I_m)\nabla_\theta v_\mu - (d_\mu^T \otimes I_m)\nabla_\theta v_\mu \\
+&= d_\mu^T \otimes I_m u.
+\end{aligned}
+$$
+由于 $d_\mu^T \mathbf{1}_n = 1$，上述方程变为
+$$
+\begin{aligned}
+\nabla_\theta \bar{r}_\mu &= d_\mu^T \otimes I_m u \\
+&= \sum_{s \in \mathcal{S}} d_\mu(s) u(s) \\
+&= \sum_{s \in \mathcal{S}} d_\mu(s) \nabla_\theta \mu(s) (\nabla_a q_\mu(s, a))|_{a=\mu(s)} \\
+&= \mathbb{E}_{S \sim d_\mu} \left[ \nabla_\theta \mu(S) (\nabla_a q_\mu(S, a))|_{a=\mu(S)} \right].
+\end{aligned}
+$$
+证明完成。
+
+### 10.4.4 算法陈述
+基于策略梯度，最大化 $J(\theta)$ 的梯度上升算法是：
+$$
+\theta_{t+1} = \theta_t + \alpha_\theta \mathbb{E}_{S \sim \rho_\mu} \left[ \nabla_\theta \mu(S) (\nabla_a q_\mu(S, a))|_{a=\mu(S)} \right]
+$$
+相应的随机梯度上升算法是
+$$
+\theta_{t+1} = \theta_t + \alpha_\theta \nabla_\theta \mu(s_t) (\nabla_a q_\mu(s_t, a))|_{a=\mu(s_t)}
+$$
+
+**确定性演员-评论家算法**
+初始化：给定行为策略 $\beta(a|s)$。一个确定性目标策略 $\mu(s, \theta_0)$，其中 $\theta_0$ 是初始参数向量。一个价值函数 $v(s, w_0)$，其中 $w_0$ 是初始参数向量。
+目标：通过最大化 $J(\theta)$ 搜索最优策略。
+在每个轮次的时间步 $t$，执行以下操作：
+	生成遵循 $\beta$ 的 $a_t$，然后观测 $r_{t+1}, s_{t+1}$。
+		TD 误差：
+			$\delta_t = r_{t+1} + \gamma q(s_{t+1}, \mu(s_{t+1}, \theta_t), w_t) - q(s_t, a_t, w_t)$
+		评论家（价值更新）：
+			$w_{t+1} = w_t + \alpha_w \delta_t \nabla_w q(s_t, a_t, w_t)$
+		演员（策略更新）：
+			$\theta_{t+1} = \theta_t + \alpha_\theta \nabla_\theta \mu(s_t, \theta_t) (\nabla_a q(s_t, a, w_{t+1}))|_{a=\mu(s_t)}$
+
