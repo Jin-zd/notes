@@ -76,7 +76,6 @@ $$
 ![](4-2.png)
 
 # 3 Actor-Critic Algorithm
-
 在上述讨论中, 我们有一个策略，被称为演员（actor），用于生成动作，一个价值函数，被称为评论家（critic），用于评估状态的价值。这种结合策略梯度和价值函数的方法被称为演员-评论家算法（Actor-Critic Algorithms）。我们可以得到一个简单的演员-评论家算法，即批量演员-评论家算法：
 1. 从策略 $\pi_\theta$ 采样一系列轨迹；
 2. 拟合 $\hat{V}^\pi(\boldsymbol{s})$；
