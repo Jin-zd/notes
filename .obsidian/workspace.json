@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "RAEDME.md",
+                "file": "README.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "RAEDME"
+              "title": "README"
             }
           }
         ],
@@ -169,13 +169,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "RAEDME.md",
+                "file": "README.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "RAEDME 的大纲"
+              "title": "README 的大纲"
             }
           }
         ],
@@ -196,9 +196,9 @@
       "markdown-importer:打开 Markdown 格式转换器": false
     }
   },
-  "active": "06411a8c4fa57ef1",
+  "active": "3e0024d86134c7ad",
   "lastOpenFiles": [
-    "RAEDME.md",
+    "README.md",
     "RL/CS285/Lecture 9 Model-Based Reinforcement Learning.md",
     "RL/CS285/Lecture 21 Challenges and Open Problems.md",
     "RL/CS285/Lecture 1 Imitation Learning.md",
