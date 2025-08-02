@@ -1,0 +1,1 @@
+使用  [Obsidian]([Obsidian - Sharpen your thinking](https://obsidian.md/)) 打开获得最佳的浏览效果。
